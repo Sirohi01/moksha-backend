@@ -56,7 +56,7 @@ router.put('/reset-password/:resettoken', resetPasswordValidation, resetPassword
 router.post('/refresh-token', refreshToken);
 
 // Protected routes
-router.post('/register', protect, authorize('super_admin', 'manager'), registerValidation, register);
+router.post('/register', registerValidation, register);
 router.post('/logout', protect, logout);
 router.get('/me', protect, getMe);
 router.put('/profile', protect, updateProfile);
