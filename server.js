@@ -1,0 +1,173 @@
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const compression = require('compression');
+const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+require('dotenv').config();
+
+const connectDB = require('./config/database');
+const errorHandler = require('./middleware/errorHandler');
+const notificationService = require('./services/notificationService');
+const sitemapService = require('./services/sitemapService');
+const { specs, swaggerUi } = require('./swagger');
+
+// Import Routes
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const reportRoutes = require('./routes/reportRoutes');
+const feedbackRoutes = require('./routes/feedbackRoutes');
+const volunteerRoutes = require('./routes/volunteerRoutes');
+const contactRoutes = require('./routes/contactRoutes');
+const donationRoutes = require('./routes/donationRoutes');
+const boardRoutes = require('./routes/boardRoutes');
+const legacyRoutes = require('./routes/legacyRoutes');
+const schemeRoutes = require('./routes/schemeRoutes');
+const expansionRoutes = require('./routes/expansionRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const activityRoutes = require('./routes/activityRoutes');
+const galleryRoutes = require('./routes/galleryRoutes');
+const contentRoutes = require('./routes/contentRoutes');
+const pressRoutes = require('./routes/pressRoutes');
+const documentaryRoutes = require('./routes/documentaryRoutes');
+const seoRoutes = require('./routes/seoRoutes');
+const settingsRoutes = require('./routes/settingsRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
+const mediaRoutes = require('./routes/mediaRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+
+const app = express();
+
+// Connect to Database
+connectDB();
+
+// Security Middleware
+app.use(helmet());
+app.use(compression());
+
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.'
+});
+app.use('/api/', limiter);
+
+// CORS Configuration
+app.use(cors({
+  origin: [
+    process.env.FRONTEND_URL || 'http://localhost:3000',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
+
+// Body Parser Middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Logging
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
+// API Documentation
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Moksha Seva API Documentation'
+}));
+
+// Sitemap and SEO routes
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const sitemap = await sitemapService.generateDynamicSitemap();
+    res.set('Content-Type', 'text/xml');
+    res.send(sitemap);
+  } catch (error) {
+    res.status(500).send('Error generating sitemap');
+  }
+});
+
+app.get('/robots.txt', (req, res) => {
+  const robots = sitemapService.generateRobotsTxt();
+  res.set('Content-Type', 'text/plain');
+  res.send(robots);
+});
+
+// Health Check Route
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Moksha Seva API is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV
+  });
+});
+
+// Handle preflight requests
+app.options('*', cors());
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/admin/users', userRoutes);
+app.use('/api/admin/activities', activityRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/feedback', feedbackRoutes);
+app.use('/api/volunteers', volunteerRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/donations', donationRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/board', boardRoutes);
+app.use('/api/legacy', legacyRoutes);
+app.use('/api/schemes', schemeRoutes);
+app.use('/api/expansion', expansionRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/gallery', galleryRoutes);
+app.use('/api/media', mediaRoutes);
+app.use('/api/content', contentRoutes);
+app.use('/api/press', pressRoutes);
+app.use('/api/documentaries', documentaryRoutes);
+app.use('/api/seo', seoRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/analytics', analyticsRoutes);
+
+// 404 Handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
+});
+
+// Error Handler Middleware
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 5000;
+
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Moksha Seva API Server running on port ${PORT}`);
+  console.log(`📊 Environment: ${process.env.NODE_ENV}`);
+  console.log(`🔗 Health Check: http://localhost:${PORT}/api/health`);
+  console.log(`📚 API Documentation: http://localhost:${PORT}/api/docs`);
+  console.log(`🗺️ Sitemap: http://localhost:${PORT}/sitemap.xml`);
+});
+
+// Initialize WebSocket for real-time notifications
+notificationService.initializeWebSocket(server);
+
+// Generate sitemap and robots.txt on startup
+sitemapService.saveSitemap().catch(console.error);
+sitemapService.saveRobotsTxt().catch(console.error);
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err, promise) => {
+  console.log(`Error: ${err.message}`);
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+module.exports = app;
