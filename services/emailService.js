@@ -2,15 +2,29 @@ const nodemailer = require('nodemailer');
 
 // Create transporter
 const createTransporter = () => {
-  return nodemailer.createTransport({
+  console.log(`📧 Creating email transporter...`);
+  
+  const config = {
     host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: false,
+    port: parseInt(process.env.SMTP_PORT) || 587,
+    secure: process.env.SMTP_PORT === '465', // true for 465, false for other ports
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS
+    },
+    tls: {
+      rejectUnauthorized: false // Allow self-signed certificates
     }
+  };
+
+  console.log(`📧 Transporter config:`, {
+    host: config.host,
+    port: config.port,
+    secure: config.secure,
+    user: config.auth.user ? 'Set' : 'Missing'
   });
+
+  return nodemailer.createTransport(config);
 };
 
 // Complete Email Templates for ALL Forms
@@ -526,7 +540,262 @@ const emailTemplates = {
     `
   }),
 
-  // Board Application Templates
+  // Task Management Templates
+  taskAssignment: (data) => ({
+    subject: `🎯 New Task Assignment - ${data.taskId} - Moksha Seva`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
+          <h1 style="margin: 0; font-size: 28px;">🎯 Task Assignment</h1>
+          <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 16px;">Moksha Seva - Volunteer Task</p>
+        </div>
+        
+        <div style="padding: 0 10px;">
+          <h2 style="color: #1d4ed8; margin-bottom: 20px;">Hello ${data.volunteerName}!</h2>
+          <p style="color: #374151; line-height: 1.6;">You have been assigned a new task. Please review the details below and respond accordingly.</p>
+          
+          <div style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 2px solid #93c5fd; border-radius: 12px; padding: 25px; margin: 25px 0;">
+            <h3 style="color: #1e40af; margin-top: 0; font-size: 20px;">📋 Task Details</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr style="border-bottom: 1px solid #93c5fd;">
+                <td style="padding: 12px 0; font-weight: bold; color: #1e40af;">Task ID:</td>
+                <td style="padding: 12px 0; font-family: monospace;">${data.taskId}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #93c5fd;">
+                <td style="padding: 12px 0; font-weight: bold; color: #1e40af;">Title:</td>
+                <td style="padding: 12px 0; font-weight: bold;">${data.taskTitle}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #93c5fd;">
+                <td style="padding: 12px 0; font-weight: bold; color: #1e40af;">Category:</td>
+                <td style="padding: 12px 0;">${data.category}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #93c5fd;">
+                <td style="padding: 12px 0; font-weight: bold; color: #1e40af;">Priority:</td>
+                <td style="padding: 12px 0;">
+                  <span style="background: ${data.priority === 'URGENT' ? '#fecaca' : data.priority === 'HIGH' ? '#fed7aa' : data.priority === 'MEDIUM' ? '#fef3c7' : '#d1fae5'}; color: ${data.priority === 'URGENT' ? '#dc2626' : data.priority === 'HIGH' ? '#ea580c' : data.priority === 'MEDIUM' ? '#d97706' : '#059669'}; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">
+                    ${data.priority}
+                  </span>
+                </td>
+              </tr>
+              <tr style="border-bottom: 1px solid #93c5fd;">
+                <td style="padding: 12px 0; font-weight: bold; color: #1e40af;">Due Date:</td>
+                <td style="padding: 12px 0; color: #dc2626; font-weight: bold;">${data.dueDate}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #93c5fd;">
+                <td style="padding: 12px 0; font-weight: bold; color: #1e40af;">Duration:</td>
+                <td style="padding: 12px 0;">${data.estimatedDuration} hour(s)</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #93c5fd;">
+                <td style="padding: 12px 0; font-weight: bold; color: #1e40af;">Location:</td>
+                <td style="padding: 12px 0;">${data.location}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #93c5fd;">
+                <td style="padding: 12px 0; font-weight: bold; color: #1e40af;">Contact:</td>
+                <td style="padding: 12px 0;">${data.contactPerson}</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 0; font-weight: bold; color: #1e40af;">Requirements:</td>
+                <td style="padding: 12px 0;">${data.requirements}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0;">
+            <h4 style="color: #374151; margin-top: 0;">📝 Task Description:</h4>
+            <p style="color: #6b7280; line-height: 1.6; margin: 0;">${data.taskDescription}</p>
+          </div>
+          
+          <div style="background: #fef7ff; border-radius: 12px; padding: 20px; margin: 25px 0; border-left: 4px solid #a855f7;">
+            <h4 style="color: #7c3aed; margin-top: 0;">⚠️ Important Notes:</h4>
+            <ul style="color: #7c3aed; margin: 10px 0; padding-left: 20px;">
+              <li style="margin: 8px 0;">Please respond within 2 hours of receiving this email</li>
+              <li style="margin: 8px 0;">If you accept, you commit to completing the task by the due date</li>
+              <li style="margin: 8px 0;">Contact the admin immediately if you have any questions</li>
+              <li style="margin: 8px 0;">Your response helps us serve families in need efficiently</li>
+            </ul>
+          </div>
+          
+          <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
+            <h4 style="color: #374151; margin: 0; font-size: 18px;">🙏 Moksha Seva Foundation</h4>
+            <p style="color: #6b7280; margin: 5px 0; font-style: italic;">Liberation Through Service</p>
+            <div style="color: #6b7280; font-size: 14px; margin-top: 15px;">
+              <p>📧 Email: volunteer@moksha-seva.org | 📞 Phone: [Support Number]</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  }),
+
+  taskAccepted: (data) => ({
+    subject: `✅ Task Accepted - ${data.taskId} - Thank You!`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
+          <h1 style="margin: 0; font-size: 28px;">✅ Task Accepted</h1>
+          <p style="margin: 5px 0 0 0; opacity: 0.9;">Thank you for your commitment!</p>
+        </div>
+        
+        <div style="padding: 0 10px;">
+          <h2 style="color: #059669;">Dear ${data.volunteerName},</h2>
+          <p style="color: #374151; line-height: 1.6;">Thank you for accepting the task assignment. Your commitment to serving others is truly appreciated.</p>
+          
+          <div style="background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;">
+            <h3 style="color: #166534; margin-top: 0;">📋 Accepted Task</h3>
+            <p style="font-size: 18px; font-weight: bold; color: #374151; margin: 10px 0;">${data.taskTitle}</p>
+            <p style="color: #6b7280;">Task ID: ${data.taskId}</p>
+            <p style="color: #6b7280;">Accepted on: ${data.acceptedAt}</p>
+          </div>
+          
+          <div style="background: #eff6ff; border-radius: 8px; padding: 20px; margin: 20px 0;">
+            <h4 style="color: #1e40af; margin-top: 0;">📞 Next Steps:</h4>
+            <ul style="color: #1e40af; margin: 10px 0; padding-left: 20px;">
+              <li style="margin: 8px 0;">You will receive detailed instructions shortly</li>
+              <li style="margin: 8px 0;">Contact information will be provided if needed</li>
+              <li style="margin: 8px 0;">Please arrive on time and prepared</li>
+              <li style="margin: 8px 0;">Update us on task completion</li>
+            </ul>
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <p style="color: #6b7280; font-style: italic;">"Your service brings comfort to families in their time of need."</p>
+          </div>
+          
+          <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
+            <h4 style="color: #374151; margin: 0;">🙏 Moksha Seva Team</h4>
+            <p style="color: #6b7280; margin: 5px 0;">Liberation Through Service</p>
+          </div>
+        </div>
+      </div>
+    `
+  }),
+
+  taskRejected: (data) => ({
+    subject: `❌ Task Declined - ${data.taskId} - Thank You for Responding`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
+          <h1 style="margin: 0; font-size: 28px;">📝 Task Response Received</h1>
+          <p style="margin: 5px 0 0 0; opacity: 0.9;">Thank you for your prompt response</p>
+        </div>
+        
+        <div style="padding: 0 10px;">
+          <h2 style="color: #d97706;">Dear ${data.volunteerName},</h2>
+          <p style="color: #374151; line-height: 1.6;">Thank you for responding to the task assignment. We understand that you cannot take on this task at this time.</p>
+          
+          <div style="background: #fef3c7; border: 2px solid #fbbf24; border-radius: 12px; padding: 25px; margin: 25px 0;">
+            <h3 style="color: #92400e; margin-top: 0;">📋 Declined Task</h3>
+            <p style="font-weight: bold; color: #374151; margin: 10px 0;">${data.taskTitle}</p>
+            <p style="color: #6b7280;">Task ID: ${data.taskId}</p>
+            <p style="color: #6b7280;">Reason: ${data.rejectionReason}</p>
+          </div>
+          
+          <div style="background: #eff6ff; border-radius: 8px; padding: 20px; margin: 20px 0;">
+            <h4 style="color: #1e40af; margin-top: 0;">💙 No Worries!</h4>
+            <p style="color: #1e40af; margin: 0;">We appreciate your honesty and prompt response. There will be other opportunities to serve, and we look forward to working with you in the future.</p>
+          </div>
+          
+          <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
+            <h4 style="color: #374151; margin: 0;">🙏 Moksha Seva Team</h4>
+            <p style="color: #6b7280; margin: 5px 0;">Liberation Through Service</p>
+          </div>
+        </div>
+      </div>
+    `
+  }),
+
+  taskCompleted: (data) => ({
+    subject: `🎉 Task Completed - ${data.taskId} - Excellent Work!`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
+          <h1 style="margin: 0; font-size: 28px;">🎉 Task Completed!</h1>
+          <p style="margin: 5px 0 0 0; opacity: 0.9;">Excellent work, volunteer!</p>
+        </div>
+        
+        <div style="padding: 0 10px;">
+          <h2 style="color: #7c3aed;">Dear ${data.volunteerName},</h2>
+          <p style="color: #374151; line-height: 1.6;">Congratulations on successfully completing your assigned task! Your dedication and service make a real difference in people's lives.</p>
+          
+          <div style="background: #faf5ff; border: 2px solid #c4b5fd; border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;">
+            <h3 style="color: #6d28d9; margin-top: 0;">✅ Completed Task</h3>
+            <p style="font-size: 18px; font-weight: bold; color: #374151; margin: 10px 0;">${data.taskTitle}</p>
+            <p style="color: #6b7280;">Task ID: ${data.taskId}</p>
+            <p style="color: #6b7280;">Completed on: ${data.completedAt}</p>
+          </div>
+          
+          <div style="background: #f0fdf4; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+            <h4 style="color: #166534; margin-top: 0;">🙏 Thank You!</h4>
+            <p style="color: #166534; margin: 0; font-style: italic;">"Your compassionate service brings dignity and comfort to families during their most difficult moments. You are truly making a difference."</p>
+          </div>
+          
+          <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
+            <h4 style="color: #374151; margin: 0;">🙏 Moksha Seva Team</h4>
+            <p style="color: #6b7280; margin: 5px 0;">Liberation Through Service</p>
+            <p style="color: #6b7280; font-size: 12px; margin-top: 15px;">Your service record has been updated. Thank you for being part of our mission.</p>
+          </div>
+        </div>
+      </div>
+    `
+  }),
+
+  // Admin Notification Templates
+  taskAcceptedAdmin: (data) => ({
+    subject: `✅ Task Accepted by Volunteer - ${data.taskId}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #10b981;">✅ Task Accepted</h2>
+        <p>Dear ${data.adminName},</p>
+        <p>Good news! A volunteer has accepted the task assignment.</p>
+        <div style="background: #f0fdf4; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <p><strong>Volunteer:</strong> ${data.volunteerName}</p>
+          <p><strong>Task:</strong> ${data.taskTitle}</p>
+          <p><strong>Task ID:</strong> ${data.taskId}</p>
+        </div>
+        <p>The volunteer is now committed to completing this task. You can track progress in the admin dashboard.</p>
+        <p><strong>Moksha Seva Admin Team</strong></p>
+      </div>
+    `
+  }),
+
+  taskRejectedAdmin: (data) => ({
+    subject: `❌ Task Rejected by Volunteer - ${data.taskId}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #ef4444;">❌ Task Rejected</h2>
+        <p>Dear ${data.adminName},</p>
+        <p>A volunteer has declined the task assignment.</p>
+        <div style="background: #fef2f2; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <p><strong>Volunteer:</strong> ${data.volunteerName}</p>
+          <p><strong>Task:</strong> ${data.taskTitle}</p>
+          <p><strong>Task ID:</strong> ${data.taskId}</p>
+          <p><strong>Reason:</strong> ${data.rejectionReason}</p>
+        </div>
+        <p>You may need to assign this task to another volunteer or handle it differently.</p>
+        <p><strong>Moksha Seva Admin Team</strong></p>
+      </div>
+    `
+  }),
+
+  taskCompletedAdmin: (data) => ({
+    subject: `🎉 Task Completed by Volunteer - ${data.taskId}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #8b5cf6;">🎉 Task Completed</h2>
+        <p>Dear ${data.adminName},</p>
+        <p>Excellent news! A volunteer has successfully completed their assigned task.</p>
+        <div style="background: #faf5ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <p><strong>Volunteer:</strong> ${data.volunteerName}</p>
+          <p><strong>Task:</strong> ${data.taskTitle}</p>
+          <p><strong>Task ID:</strong> ${data.taskId}</p>
+          ${data.completionNotes ? `<p><strong>Notes:</strong> ${data.completionNotes}</p>` : ''}
+          ${data.rating ? `<p><strong>Rating:</strong> ${data.rating}/5 stars</p>` : ''}
+        </div>
+        <p>The task has been marked as completed. You can review the details in the admin dashboard.</p>
+        <p><strong>Moksha Seva Admin Team</strong></p>
+      </div>
+    `
+  }),
   boardApplicationConfirmation: (data) => ({
     subject: `Board Application Received - ${data.applicationId}`,
     html: `
@@ -1055,27 +1324,194 @@ const emailTemplates = {
         <small>Liberation Through Service</small></p>
       </div>
     `
+  }),
+
+  // Assignment Approval Templates
+  assignmentApproved: (data) => ({
+    subject: `✅ Assignment Approved - ${data.taskId} - Moksha Seva`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
+          <h1 style="margin: 0; font-size: 28px;">✅ Assignment Approved</h1>
+          <p style="margin: 5px 0 0 0; opacity: 0.9;">Your task assignment has been approved!</p>
+        </div>
+        
+        <div style="padding: 0 10px;">
+          <h2 style="color: #059669;">Dear ${data.volunteerName},</h2>
+          <p style="color: #374151; line-height: 1.6;">Great news! Your assignment for the following task has been approved by our admin team.</p>
+          
+          <div style="background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;">
+            <h3 style="color: #166534; margin-top: 0;">📋 Approved Task</h3>
+            <p style="font-size: 18px; font-weight: bold; color: #374151; margin: 10px 0;">${data.taskTitle}</p>
+            <p style="color: #6b7280;">Task ID: ${data.taskId}</p>
+            <p style="color: #6b7280;">Approved on: ${data.approvedAt}</p>
+          </div>
+          
+          <div style="background: #eff6ff; border-radius: 8px; padding: 20px; margin: 20px 0;">
+            <h4 style="color: #1e40af; margin-top: 0;">📞 Next Steps:</h4>
+            <ul style="color: #1e40af; margin: 10px 0; padding-left: 20px;">
+              <li style="margin: 8px 0;">You can now proceed with the task as planned</li>
+              <li style="margin: 8px 0;">Contact the provided contact person for coordination</li>
+              <li style="margin: 8px 0;">Update your progress through the volunteer portal</li>
+              <li style="margin: 8px 0;">Mark the task as completed once finished</li>
+            </ul>
+          </div>
+          
+          <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
+            <h4 style="color: #374151; margin: 0; font-size: 18px;">🙏 Moksha Seva Foundation</h4>
+            <p style="color: #6b7280; margin: 5px 0; font-style: italic;">Liberation Through Service</p>
+          </div>
+        </div>
+      </div>
+    `
+  }),
+
+  assignmentRejected: (data) => ({
+    subject: `❌ Assignment Update - ${data.taskId} - Moksha Seva`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #ef4444, #dc2626); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
+          <h1 style="margin: 0; font-size: 28px;">📋 Assignment Update</h1>
+          <p style="margin: 5px 0 0 0; opacity: 0.9;">Regarding your task assignment</p>
+        </div>
+        
+        <div style="padding: 0 10px;">
+          <h2 style="color: #374151;">Dear ${data.volunteerName},</h2>
+          <p style="color: #374151; line-height: 1.6;">Thank you for your willingness to serve. Unfortunately, your assignment for the following task could not be approved at this time.</p>
+          
+          <div style="background: #fef2f2; border: 2px solid #fca5a5; border-radius: 12px; padding: 25px; margin: 25px 0;">
+            <h3 style="color: #dc2626; margin-top: 0;">📋 Task Details</h3>
+            <p style="font-size: 18px; font-weight: bold; color: #374151; margin: 10px 0;">${data.taskTitle}</p>
+            <p style="color: #6b7280;">Task ID: ${data.taskId}</p>
+            <p style="color: #6b7280;">Decision Date: ${data.rejectedAt}</p>
+            ${data.rejectionReason ? `<p style="color: #dc2626; margin-top: 15px;"><strong>Reason:</strong> ${data.rejectionReason}</p>` : ''}
+          </div>
+          
+          <div style="background: #fffbeb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+            <h4 style="color: #d97706; margin-top: 0;">💡 What's Next:</h4>
+            <ul style="color: #92400e; margin: 10px 0; padding-left: 20px;">
+              <li style="margin: 8px 0;">This doesn't affect your volunteer status</li>
+              <li style="margin: 8px 0;">You'll be considered for future suitable tasks</li>
+              <li style="margin: 8px 0;">Feel free to contact us if you have questions</li>
+              <li style="margin: 8px 0;">Thank you for your continued support</li>
+            </ul>
+          </div>
+          
+          <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
+            <h4 style="color: #374151; margin: 0; font-size: 18px;">🙏 Moksha Seva Foundation</h4>
+            <p style="color: #6b7280; margin: 5px 0; font-style: italic;">Liberation Through Service</p>
+          </div>
+        </div>
+      </div>
+    `
+  }),
+
+  // Completion Certificate Template
+  completionCertificate: (data) => ({
+    subject: `🏆 Certificate of Appreciation - ${data.taskId} - Moksha Seva`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
+          <h1 style="margin: 0; font-size: 28px;">🏆 Certificate of Appreciation</h1>
+          <p style="margin: 5px 0 0 0; opacity: 0.9;">Your service has been recognized!</p>
+        </div>
+        
+        <div style="padding: 0 10px;">
+          <h2 style="color: #7c3aed;">Dear ${data.volunteerName},</h2>
+          <p style="color: #374151; line-height: 1.6;">Congratulations! You have successfully completed your volunteer service. As a token of our appreciation, we have generated a certificate recognizing your valuable contribution.</p>
+          
+          <div style="background: linear-gradient(135deg, #faf5ff, #f3e8ff); border: 2px solid #c4b5fd; border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;">
+            <h3 style="color: #6d28d9; margin-top: 0;">🎖️ Service Completed</h3>
+            <p style="font-size: 18px; font-weight: bold; color: #374151; margin: 10px 0;">${data.taskTitle}</p>
+            <p style="color: #6b7280;">Task ID: ${data.taskId}</p>
+            <p style="color: #6b7280;">Completed on: ${data.completedDate}</p>
+          </div>
+          
+          <div style="background: #f0f9ff; border-radius: 8px; padding: 20px; margin: 20px 0;">
+            <h4 style="color: #0369a1; margin-top: 0;">📎 Certificate Attached</h4>
+            <p style="color: #0369a1; margin: 10px 0;">Your personalized Certificate of Appreciation is attached to this email as a PDF document. You can:</p>
+            <ul style="color: #0369a1; margin: 10px 0; padding-left: 20px;">
+              <li style="margin: 8px 0;">Download and save it for your records</li>
+              <li style="margin: 8px 0;">Print it for display</li>
+              <li style="margin: 8px 0;">Share it on social media to inspire others</li>
+              <li style="margin: 8px 0;">Add it to your volunteer portfolio</li>
+            </ul>
+          </div>
+          
+          <div style="background: #ecfdf5; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+            <h4 style="color: #059669; margin-top: 0;">🌟 Thank You for Your Service</h4>
+            <p style="color: #065f46; line-height: 1.6; margin: 0;">
+              Your compassionate service has made a real difference in someone's life. 
+              Through your dedication, you have helped families during their most difficult times 
+              and embodied the true spirit of humanity. We are honored to have you as part of 
+              the Moksha Seva family.
+            </p>
+          </div>
+          
+          <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
+            <h4 style="color: #374151; margin: 0; font-size: 18px;">🙏 Moksha Seva Foundation</h4>
+            <p style="color: #6b7280; margin: 5px 0; font-style: italic;">Liberation Through Service</p>
+            <p style="color: #9ca3af; font-size: 12px; margin-top: 15px;">
+              Continue making a difference. Check our volunteer portal for more opportunities to serve.
+            </p>
+          </div>
+        </div>
+      </div>
+    `
   })
 };
 
 // Send email function
 const sendEmail = async (to, template, data, attachment = null) => {
   try {
+    console.log(`📧 Starting email send process...`);
+    console.log(`📧 To: ${to}`);
+    console.log(`📧 Template: ${template}`);
+    console.log(`📧 Environment check - NODE_ENV: ${process.env.NODE_ENV}`);
+    
     // Skip email sending in test environment
     if (process.env.NODE_ENV === 'test') {
       console.log(`📧 Email skipped in test: ${template} to ${to}`);
       return { success: true, messageId: 'test-message-id' };
     }
 
+    // Check if email template exists
+    if (!emailTemplates[template]) {
+      console.error(`❌ Email template '${template}' not found`);
+      return { success: false, error: `Template '${template}' not found` };
+    }
+
+    // Check SMTP configuration
+    console.log(`📧 SMTP Config check:`);
+    console.log(`📧 SMTP_HOST: ${process.env.SMTP_HOST ? 'Set' : 'Missing'}`);
+    console.log(`📧 SMTP_PORT: ${process.env.SMTP_PORT ? 'Set' : 'Missing'}`);
+    console.log(`📧 SMTP_USER: ${process.env.SMTP_USER ? 'Set' : 'Missing'}`);
+    console.log(`📧 SMTP_PASS: ${process.env.SMTP_PASS ? 'Set' : 'Missing'}`);
+    console.log(`📧 FROM_NAME: ${process.env.FROM_NAME ? 'Set' : 'Missing'}`);
+    console.log(`📧 FROM_EMAIL: ${process.env.FROM_EMAIL ? 'Set' : 'Missing'}`);
+
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.error(`❌ Missing SMTP configuration`);
+      return { success: false, error: 'SMTP configuration incomplete' };
+    }
+
     const transporter = createTransporter();
+    console.log(`📧 Transporter created`);
+    
     const emailContent = emailTemplates[template](data);
+    console.log(`📧 Email content generated for template: ${template}`);
+    console.log(`📧 Subject: ${emailContent.subject}`);
     
     const mailOptions = {
-      from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
+      from: `${process.env.FROM_NAME || 'Moksha Seva'} <${process.env.FROM_EMAIL || process.env.SMTP_USER}>`,
       to,
       subject: emailContent.subject,
       html: emailContent.html
     };
+
+    console.log(`📧 Mail options prepared`);
+    console.log(`📧 From: ${mailOptions.from}`);
+    console.log(`📧 To: ${mailOptions.to}`);
 
     // Add attachment if provided
     if (attachment) {
@@ -1084,15 +1520,57 @@ const sendEmail = async (to, template, data, attachment = null) => {
         content: attachment.content,
         contentType: attachment.contentType
       }];
+      console.log(`📧 Attachment added: ${attachment.filename}`);
     }
 
+    console.log(`📧 Attempting to send email...`);
     const result = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', result.messageId);
+    console.log('✅ Email sent successfully:', result.messageId);
     return { success: true, messageId: result.messageId };
   } catch (error) {
-    console.error('Email sending failed:', error);
+    console.error('❌ Email sending failed:', error);
+    console.error('❌ Error details:', {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode
+    });
     return { success: false, error: error.message };
   }
 };
 
-module.exports = { sendEmail, emailTemplates };
+// Test email function for debugging
+const testEmail = async () => {
+  try {
+    console.log(`📧 Testing email configuration...`);
+    
+    const transporter = createTransporter();
+    
+    // Verify connection
+    const verified = await transporter.verify();
+    console.log(`📧 SMTP connection verified:`, verified);
+    
+    // Send test email
+    const testResult = await sendEmail(
+      process.env.SMTP_USER, // Send to self for testing
+      'reportConfirmation', // Use existing template
+      {
+        reporterName: 'Test User',
+        caseNumber: 'TEST-001',
+        exactLocation: 'Test Location',
+        area: 'Test Area',
+        city: 'Test City'
+      }
+    );
+    
+    console.log(`📧 Test email result:`, testResult);
+    return testResult;
+    
+  } catch (error) {
+    console.error(`❌ Email test failed:`, error);
+    return { success: false, error: error.message };
+  }
+};
+
+module.exports = { sendEmail, emailTemplates, testEmail };

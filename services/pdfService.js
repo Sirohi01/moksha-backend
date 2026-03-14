@@ -1,6 +1,33 @@
 const htmlPdf = require('html-pdf-node');
 
 // Generate PDF from HTML content
+const generatePDF = async (htmlContent, options = {}) => {
+  try {
+    const defaultOptions = {
+      format: 'A4',
+      border: {
+        top: '0.5in',
+        right: '0.5in',
+        bottom: '0.5in',
+        left: '0.5in'
+      },
+      printBackground: true,
+      preferCSSPageSize: true,
+      ...options
+    };
+
+    const file = { content: htmlContent };
+    const pdfBuffer = await htmlPdf.generatePdf(file, defaultOptions);
+    
+    return pdfBuffer;
+
+  } catch (error) {
+    console.error('❌ PDF generation failed:', error);
+    throw new Error('Failed to generate PDF');
+  }
+};
+
+// Generate PDF from HTML content
 const generateReceiptPDF = async (donation) => {
   try {
     const formatDate = (dateString) => {
@@ -525,5 +552,6 @@ const generateReceiptPDF = async (donation) => {
 };
 
 module.exports = {
-  generateReceiptPDF
+  generateReceiptPDF,
+  generatePDF
 };

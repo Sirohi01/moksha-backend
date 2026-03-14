@@ -34,7 +34,7 @@ const seoRoutes = require('./routes/seoRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const mediaRoutes = require('./routes/mediaRoutes');
-const paymentRoutes = require('./routes/paymentRoutes');
+const taskRoutes = require('./routes/taskRoutes');
 
 const app = express();
 if (process.env.NODE_ENV === 'production') {
@@ -143,7 +143,7 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/volunteers', volunteerRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/donations', donationRoutes);
-app.use('/api/payments', paymentRoutes);
+app.use('/api/tasks', taskRoutes);
 app.use('/api/board', boardRoutes);
 app.use('/api/legacy', legacyRoutes);
 app.use('/api/schemes', schemeRoutes);
