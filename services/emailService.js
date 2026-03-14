@@ -376,7 +376,7 @@ const emailTemplates = {
 
   // Donation Form Templates
   donationConfirmation: (data) => ({
-    subject: `Donation Receipt - ${data.donationId}`,
+    subject: `🙏 Thank You for Your Donation - ${data.donationId} - Moksha Seva`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
         <div style="background: linear-gradient(135deg, #059669, #0d9488); padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
@@ -393,14 +393,105 @@ const emailTemplates = {
           <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
         </div>
         <div style="background: #fef7ff; padding: 15px; border-radius: 5px; border: 1px solid #d8b4fe;">
-          <p style="margin: 0;"><strong>📄 Tax Benefits:</strong></p>
-          <p style="margin: 5px 0;">• This donation is eligible for 80G tax exemption</p>
-          <p style="margin: 5px 0;">• Official receipt will be sent separately</p>
-          <p style="margin: 5px 0;">• Keep this email for your records</p>
+          <p style="margin: 0;"><strong>📄 What's Next:</strong></p>
+          <p style="margin: 5px 0;">• Your donation is being processed</p>
+          <p style="margin: 5px 0;">• You will receive a detailed receipt via email once payment is confirmed</p>
+          <p style="margin: 5px 0;">• Thank you for supporting our mission</p>
         </div>
         <p style="margin-top: 20px;">Your kindness makes a real difference in someone's final journey.</p>
         <p><strong>Moksha Seva Team</strong><br>
         <small>Liberation Through Service</small></p>
+      </div>
+    `
+  }),
+
+  donationReceiptWithPDF: (data) => ({
+    subject: `🙏 Donation Receipt - ${data.receiptNumber} - Moksha Seva`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #f59e0b, #f97316); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
+          <h1 style="margin: 0; font-size: 28px;">🙏 Moksha Seva</h1>
+          <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 16px;">Dignity in Departure</p>
+        </div>
+        
+        <div style="padding: 0 10px;">
+          <h2 style="color: #ea580c; margin-bottom: 20px; text-align: center;">Thank You for Your Donation!</h2>
+          <p style="font-size: 16px; color: #374151;">Dear ${data.name},</p>
+          <p style="color: #6b7280; line-height: 1.6;">Thank you for your generous donation to Moksha Seva. Your contribution helps us provide dignified services to those in need during their final journey.</p>
+          
+          <div style="background: linear-gradient(135deg, #fff7ed, #fef3c7); border: 2px solid #fed7aa; border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;">
+            <h3 style="color: #ea580c; margin-top: 0; font-size: 20px;">📄 Receipt Attached</h3>
+            <p style="color: #92400e; margin: 15px 0; font-size: 16px;">Your official donation receipt is attached as a PDF file to this email.</p>
+            
+            <div style="background: white; border-radius: 8px; padding: 20px; margin: 20px 0; border: 2px solid #f59e0b;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 1px solid #fed7aa;">
+                  <td style="padding: 8px 0; font-weight: bold; color: #92400e;">Receipt Number:</td>
+                  <td style="padding: 8px 0; color: #ea580c; font-weight: bold;">${data.receiptNumber}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #fed7aa;">
+                  <td style="padding: 8px 0; font-weight: bold; color: #92400e;">Donation ID:</td>
+                  <td style="padding: 8px 0; font-family: monospace;">${data.donationId}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #fed7aa;">
+                  <td style="padding: 8px 0; font-weight: bold; color: #92400e;">Amount:</td>
+                  <td style="padding: 8px 0; font-size: 18px; font-weight: bold; color: #059669;">₹${data.amount}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #fed7aa;">
+                  <td style="padding: 8px 0; font-weight: bold; color: #92400e;">Date:</td>
+                  <td style="padding: 8px 0;">${data.createdAt}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; color: #92400e;">Status:</td>
+                  <td style="padding: 8px 0;">
+                    <span style="background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">
+                      ${data.paymentStatus.toUpperCase()}
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+          
+          <div style="background: #eff6ff; border-radius: 12px; padding: 20px; margin: 25px 0; border-left: 4px solid #3b82f6;">
+            <h4 style="color: #1e40af; margin-top: 0; font-size: 16px;">📄 Tax Exemption Information</h4>
+            <ul style="margin: 10px 0; padding-left: 20px; color: #1e40af;">
+              <li style="margin: 8px 0;">This donation is eligible for tax deduction under Section 80G of the Income Tax Act, 1961.</li>
+              <li style="margin: 8px 0;">Please save the attached PDF receipt for your tax filing purposes.</li>
+              <li style="margin: 8px 0;">For tax exemption queries, contact our accounts department.</li>
+            </ul>
+          </div>
+          
+          <div style="background: #fef7ff; border-radius: 12px; padding: 20px; margin: 25px 0; text-align: center; border: 2px solid #e879f9;">
+            <h4 style="color: #a21caf; margin-top: 0;">💾 How to Save Your Receipt</h4>
+            <div style="color: #86198f; font-size: 14px; line-height: 1.6;">
+              <p style="margin: 8px 0;">📎 <strong>Desktop:</strong> Right-click the PDF attachment and select "Save As"</p>
+              <p style="margin: 8px 0;">📱 <strong>Mobile:</strong> Tap the PDF attachment and choose "Download" or "Save to Files"</p>
+              <p style="margin: 8px 0;">☁️ <strong>Cloud Storage:</strong> Save to Google Drive, iCloud, or Dropbox for easy access</p>
+            </div>
+          </div>
+          
+          <div style="background: #f9fafb; border-radius: 8px; padding: 20px; margin: 25px 0; text-align: center;">
+            <p style="margin: 0; color: #6b7280; font-size: 14px;">Your support enables us to continue our mission of providing dignified cremation services and supporting families in their time of need.</p>
+          </div>
+          
+          <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
+            <div style="margin-bottom: 15px;">
+              <h4 style="color: #374151; margin: 0; font-size: 18px;">🙏 Moksha Seva Foundation</h4>
+              <p style="color: #6b7280; margin: 5px 0; font-style: italic;">Liberation Through Service</p>
+            </div>
+            
+            <div style="color: #6b7280; font-size: 14px; line-height: 1.6;">
+              <p style="margin: 5px 0;">📧 Email: info@moksha-seva.org</p>
+              <p style="margin: 5px 0;">🌐 Website: www.moksha-seva.org</p>
+              <p style="margin: 5px 0;">📞 Phone: [Your Phone Number]</p>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+              <p style="color: #9ca3af; font-size: 12px; margin: 0;">This email contains your official donation receipt as a PDF attachment. Generated on ${new Date().toLocaleString('en-IN')}</p>
+            </div>
+          </div>
+        </div>
       </div>
     `
   }),
@@ -968,7 +1059,7 @@ const emailTemplates = {
 };
 
 // Send email function
-const sendEmail = async (to, template, data) => {
+const sendEmail = async (to, template, data, attachment = null) => {
   try {
     // Skip email sending in test environment
     if (process.env.NODE_ENV === 'test') {
@@ -985,6 +1076,15 @@ const sendEmail = async (to, template, data) => {
       subject: emailContent.subject,
       html: emailContent.html
     };
+
+    // Add attachment if provided
+    if (attachment) {
+      mailOptions.attachments = [{
+        filename: attachment.filename,
+        content: attachment.content,
+        contentType: attachment.contentType
+      }];
+    }
 
     const result = await transporter.sendMail(mailOptions);
     console.log('Email sent successfully:', result.messageId);
