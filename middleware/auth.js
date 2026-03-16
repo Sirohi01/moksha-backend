@@ -3,10 +3,16 @@ const Admin = require('../models/Admin');
 const protect = async (req, res, next) => {
   try {
     let token;
+    
+    console.log(`🔍 Protect middleware - Headers:`, req.headers.authorization ? 'Present' : 'Missing');
+    
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
+      console.log(`🔍 Token extracted:`, token ? 'Present' : 'Missing');
     }
+    
     if (!token) {
+      console.log(`❌ No token provided in protect middleware`);
       return res.status(401).json({
         success: false,
         message: 'Not authorized to access this route'
@@ -14,10 +20,15 @@ const protect = async (req, res, next) => {
     }
 
     try {
+      console.log(`🔍 Verifying JWT token...`);
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log(`🔍 Token decoded for admin ID:`, decoded.id);
+      
       const admin = await Admin.findById(decoded.id).select('-password');
+      console.log(`🔍 Admin found:`, admin ? admin.email : 'Not found');
 
       if (!admin) {
+        console.log(`❌ No admin found with ID: ${decoded.id}`);
         return res.status(401).json({
           success: false,
           message: 'No admin found with this token'
@@ -39,8 +50,10 @@ const protect = async (req, res, next) => {
       console.log(`🔍 Auth middleware - IP: ${clientIP}, Allowed IPs:`, admin.allowedIPs);
 
       req.admin = admin;
+      console.log(`✅ Admin authenticated: ${admin.email}, Role: ${admin.role}, Permissions:`, admin.permissions);
       next();
     } catch (error) {
+      console.log(`❌ JWT verification failed:`, error.message);
       return res.status(401).json({
         success: false,
         message: 'Not authorized to access this route'
@@ -55,22 +68,35 @@ const protect = async (req, res, next) => {
 };
 const authorize = (...roles) => {
   return (req, res, next) => {
+    console.log(`🔍 Authorization check - Admin:`, req.admin ? req.admin.email : 'None');
+    console.log(`🔍 Required roles:`, roles);
+    console.log(`🔍 Admin role:`, req.admin ? req.admin.role : 'None');
+    console.log(`🔍 Admin permissions:`, req.admin ? req.admin.permissions : 'None');
+    
     if (!req.admin) {
+      console.log(`❌ No admin found in request`);
       return res.status(401).json({
         success: false,
         message: 'Not authorized to access this route'
       });
     }
+    
+    // Super admin has access to everything
     if (req.admin.hasPermission('super_admin')) {
+      console.log(`✅ Super admin access granted for ${req.admin.email}`);
       return next();
     }
+    
+    // Check if user has required role
     if (!roles.includes(req.admin.role)) {
+      console.log(`❌ Role ${req.admin.role} not in allowed roles:`, roles);
       return res.status(403).json({
         success: false,
         message: `Role ${req.admin.role} is not authorized to access this route`
       });
     }
 
+    console.log(`✅ Role-based access granted for ${req.admin.role}`);
     next();
   };
 };

@@ -52,9 +52,97 @@ const getSEOData = async (req, res) => {
   }
 };
 
-// @desc    Get single SEO page
-// @route   GET /api/seo/:id
+// @desc    Get single SEO page by page name
+// @route   GET /api/seo/page/:pageName
 // @access  Private/SEO Team
+const getSEOPageByName = async (req, res) => {
+  try {
+    const { pageName } = req.params;
+    
+    // Try to find SEO page by page name or URL
+    const seoPage = await SEOPage.findOne({
+      $or: [
+        { pageName: pageName },
+        { url: `/${pageName}` },
+        { url: pageName }
+      ]
+    });
+
+    if (!seoPage) {
+      return res.status(404).json({
+        success: false,
+        message: `SEO data for page '${pageName}' not found`
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: seoPage
+    });
+
+  } catch (error) {
+    console.error('❌ Get SEO page by name failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch SEO page'
+    });
+  }
+};
+
+// @desc    Update SEO page by page name
+// @route   PUT /api/seo/page/:pageName
+// @access  Private/SEO Team
+const updateSEOPageByName = async (req, res) => {
+  try {
+    const { pageName } = req.params;
+    
+    // Try to find existing SEO page
+    let seoPage = await SEOPage.findOne({
+      $or: [
+        { pageName: pageName },
+        { url: `/${pageName}` },
+        { url: pageName }
+      ]
+    });
+
+    if (seoPage) {
+      // Update existing page
+      Object.assign(seoPage, {
+        ...req.body,
+        lastOptimized: new Date()
+      });
+    } else {
+      // Create new SEO page
+      seoPage = new SEOPage({
+        ...req.body,
+        pageName: pageName,
+        url: `/${pageName}`,
+        assignedTo: req.admin?.id,
+        lastOptimized: new Date()
+      });
+    }
+
+    // Calculate SEO score
+    if (seoPage.calculateSEOScore) {
+      seoPage.calculateSEOScore();
+    }
+    
+    await seoPage.save();
+
+    res.status(200).json({
+      success: true,
+      message: `SEO page for '${pageName}' ${seoPage.isNew ? 'created' : 'updated'} successfully`,
+      data: seoPage
+    });
+
+  } catch (error) {
+    console.error('❌ Update SEO page by name failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update SEO page'
+    });
+  }
+};
 const getSEOPage = async (req, res) => {
   try {
     const seoPage = await SEOPage.findById(req.params.id);
@@ -385,8 +473,10 @@ const bulkUpdateMetaTags = async (req, res) => {
 module.exports = {
   getSEOData,
   getSEOPage,
+  getSEOPageByName,
   createSEOPage,
   updateSEOPage,
+  updateSEOPageByName,
   deleteSEOPage,
   runSEOAudit,
   getSEOStats,

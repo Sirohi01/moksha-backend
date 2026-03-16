@@ -2,8 +2,10 @@ const express = require('express');
 const {
   getSEOData,
   getSEOPage,
+  getSEOPageByName,
   createSEOPage,
   updateSEOPage,
+  updateSEOPageByName,
   deleteSEOPage,
   runSEOAudit,
   getSEOStats,
@@ -25,7 +27,9 @@ router.get('/', getSEOData);
 router.post('/', createSEOPage);
 router.get('/stats', getSEOStats);
 router.get('/report', getSEOReport);
+router.get('/page/:pageName', getSEOPageByName);
 router.get('/:id', getSEOPage);
+router.put('/page/:pageName', updateSEOPageByName);
 router.put('/:id', updateSEOPage);
 router.delete('/:id', deleteSEOPage);
 
