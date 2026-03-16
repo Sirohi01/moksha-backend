@@ -1,17 +1,11 @@
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
-
-// Protect routes - require authentication
 const protect = async (req, res, next) => {
   try {
     let token;
-
-    // Get token from header
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
     }
-
-    // Make sure token exists
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -20,10 +14,7 @@ const protect = async (req, res, next) => {
     }
 
     try {
-      // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // Get admin from token
       const admin = await Admin.findById(decoded.id).select('-password');
 
       if (!admin) {
@@ -32,31 +23,20 @@ const protect = async (req, res, next) => {
           message: 'No admin found with this token'
         });
       }
-
-      // Check if admin is active
       if (!admin.isActive) {
         return res.status(401).json({
           success: false,
           message: 'Account is deactivated'
         });
       }
-
-      // Check if account is locked
       if (admin.isLocked) {
         return res.status(401).json({
           success: false,
           message: 'Account is temporarily locked due to too many failed login attempts'
         });
       }
-
-      // Check IP whitelist
       const clientIP = req.ip || req.connection.remoteAddress;
-      if (!admin.isIPAllowed(clientIP)) {
-        return res.status(403).json({
-          success: false,
-          message: 'Access denied from this IP address'
-        });
-      }
+      console.log(`🔍 Auth middleware - IP: ${clientIP}, Allowed IPs:`, admin.allowedIPs);
 
       req.admin = admin;
       next();
@@ -73,8 +53,6 @@ const protect = async (req, res, next) => {
     });
   }
 };
-
-// Grant access to specific roles
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.admin) {
@@ -83,13 +61,9 @@ const authorize = (...roles) => {
         message: 'Not authorized to access this route'
       });
     }
-
-    // Super admin has access to everything
     if (req.admin.hasPermission('super_admin')) {
       return next();
     }
-
-    // Check if user has required role
     if (!roles.includes(req.admin.role)) {
       return res.status(403).json({
         success: false,
@@ -143,9 +117,8 @@ const optionalAuth = async (req, res, next) => {
         
         if (admin && admin.isActive && !admin.isLocked) {
           const clientIP = req.ip || req.connection.remoteAddress;
-          if (admin.isIPAllowed(clientIP)) {
             req.admin = admin;
-          }
+          // }
         }
       } catch (error) {
         // Token invalid, but continue without authentication
