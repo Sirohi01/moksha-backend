@@ -1,28 +1,49 @@
 const nodemailer = require('nodemailer');
-
-// Create transporter with SendGrid support and timeout
 const createTransporter = () => {
   console.log(`📧 Creating email transporter...`);
   
-  // Primary: SendGrid configuration
-  const config = {
-    host: process.env.SMTP_HOST || 'smtp.sendgrid.net',
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_PORT === '465', // true for 465, false for other ports
-    auth: {
-      user: process.env.SMTP_USER || 'apikey',
-      pass: process.env.SMTP_PASS
-    },
-    tls: {
-      rejectUnauthorized: false // Allow self-signed certificates
-    },
-    // Add timeout settings for production
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 5000,     // 5 seconds  
-    socketTimeout: 15000       // 15 seconds
-  };
+  // Detect production environment
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER;
+  
+  let config;
+  
+  if (isProduction) {
+    // Production: Use SendGrid
+    config = {
+      host: 'smtp.sendgrid.net',
+      port: 587,
+      secure: false,
+      auth: {
+        user: 'apikey',
+        pass: process.env.SENDGRID_API_KEY || process.env.SMTP_PASS
+      },
+      tls: {
+        rejectUnauthorized: false
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 5000,
+      socketTimeout: 15000
+    };
+  } else {
+    config = {
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: parseInt(process.env.SMTP_PORT) || 587,
+      secure: process.env.SMTP_PORT === '465',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      },
+      tls: {
+        rejectUnauthorized: false
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 5000,
+      socketTimeout: 15000
+    };
+  }
 
   console.log(`📧 Transporter config:`, {
+    environment: isProduction ? 'PRODUCTION' : 'DEVELOPMENT',
     host: config.host,
     port: config.port,
     secure: config.secure,
