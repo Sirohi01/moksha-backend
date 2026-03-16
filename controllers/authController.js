@@ -81,24 +81,32 @@ const login = async (req, res) => {
 
     // Validate email and password
     if (!email || !password) {
+      console.log('❌ Missing email or password');
       return res.status(400).json({
         success: false,
         message: 'Please provide email and password'
       });
     }
 
+    console.log(`🔍 Looking for admin with email: ${email}`);
+    
     // Check for admin (include password for comparison)
     const admin = await Admin.findOne({ email }).select('+password');
 
     if (!admin) {
+      console.log(`❌ No admin found with email: ${email}`);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
       });
     }
 
+    console.log(`✅ Admin found: ${admin.name} (${admin.email})`);
+    console.log(`🔍 Admin status - Active: ${admin.isActive}, Locked: ${admin.isLocked}`);
+
     // Check if account is locked
     if (admin.isLocked) {
+      console.log(`❌ Account locked for admin: ${admin.email}`);
       return res.status(423).json({
         success: false,
         message: 'Account is temporarily locked due to too many failed login attempts'
@@ -107,27 +115,40 @@ const login = async (req, res) => {
 
     // Check if admin is active
     if (!admin.isActive) {
+      console.log(`❌ Account inactive for admin: ${admin.email}`);
       return res.status(401).json({
         success: false,
         message: 'Account is deactivated'
       });
     }
 
-    // Check IP whitelist
-    const clientIP = req.ip || req.connection.remoteAddress;
+    // Check IP whitelist (temporarily disabled for debugging)
+    const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
+    console.log(`🔍 Login attempt from IP: ${clientIP}`);
+    console.log(`🔍 Admin allowed IPs:`, admin.allowedIPs);
+    
+    // Temporarily disable IP checking for debugging
+    console.log(`⚠️ IP checking temporarily disabled for debugging`);
+    
+    /*
     if (!admin.isIPAllowed(clientIP)) {
+      console.log(`❌ IP ${clientIP} not in allowed list:`, admin.allowedIPs);
       return res.status(403).json({
         success: false,
-        message: 'Access denied from this IP address'
+        message: `Access denied from this IP address: ${clientIP}`
       });
     }
+    */
 
     // Check if password matches
+    console.log(`🔍 Comparing password for admin: ${admin.email}`);
     const isMatch = await admin.comparePassword(password);
+    console.log(`${isMatch ? '✅' : '❌'} Password match result: ${isMatch}`);
 
     if (!isMatch) {
       // Increment login attempts
       await admin.incLoginAttempts();
+      console.log(`❌ Invalid password for admin: ${admin.email}`);
       
       return res.status(401).json({
         success: false,

@@ -22,7 +22,7 @@ const testAPI = async () => {
     let authToken = '';
     try {
       const loginResponse = await axios.post(`${API_BASE}/auth/login`, {
-        email: 'admin@mokshaseva.org',
+        email: 'officialmanishsirohi.01@gmail.com',
         password: 'admin@123'
       });
       
@@ -151,7 +151,7 @@ const testAPI = async () => {
     console.log('\n💡 Next Steps:');
     console.log('   1. Start the backend server: npm start (in backend folder)');
     console.log('   2. Start the frontend server: npm run dev (in frontend folder)');
-    console.log('   3. Login with: admin@mokshaseva.org / admin@123');
+    console.log('   3. Login with: officialmanishsirohi.01@gmail.com / admin@123');
     console.log('   4. Test the admin panel functionality');
 
   } catch (error) {

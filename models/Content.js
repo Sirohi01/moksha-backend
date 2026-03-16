@@ -30,12 +30,12 @@ const contentSchema = new mongoose.Schema({
   type: {
     type: String,
     required: [true, 'Content type is required'],
-    enum: ['page', 'blog', 'news', 'service', 'about', 'faq', 'testimonial', 'case_study'],
+    enum: ['page', 'blog', 'news', 'service', 'about', 'faq', 'testimonial', 'case_study', 'page_config'],
     default: 'page'
   },
   category: {
     type: String,
-    enum: ['general', 'services', 'about', 'news', 'resources', 'help'],
+    enum: ['general', 'services', 'about', 'news', 'resources', 'help', 'configuration'],
     default: 'general'
   },
   

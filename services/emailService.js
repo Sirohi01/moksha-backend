@@ -1,15 +1,16 @@
 const nodemailer = require('nodemailer');
 
-// Create transporter
+// Create transporter with SendGrid support
 const createTransporter = () => {
   console.log(`📧 Creating email transporter...`);
   
+  // Primary: SendGrid configuration
   const config = {
-    host: process.env.SMTP_HOST,
+    host: process.env.SMTP_HOST || 'smtp.sendgrid.net',
     port: parseInt(process.env.SMTP_PORT) || 587,
     secure: process.env.SMTP_PORT === '465', // true for 465, false for other ports
     auth: {
-      user: process.env.SMTP_USER,
+      user: process.env.SMTP_USER || 'apikey',
       pass: process.env.SMTP_PASS
     },
     tls: {
@@ -21,7 +22,8 @@ const createTransporter = () => {
     host: config.host,
     port: config.port,
     secure: config.secure,
-    user: config.auth.user ? 'Set' : 'Missing'
+    user: config.auth.user,
+    provider: config.host.includes('sendgrid') ? 'SendGrid' : 'Gmail'
   });
 
   return nodemailer.createTransport(config);

@@ -103,7 +103,7 @@ SMTP_PASS=your-app-password
 FROM_NAME=Moksha Seva
 FROM_EMAIL=noreply@mokshaseva.org
 FRONTEND_URL=http://localhost:3000
-ADMIN_EMAIL=admin@mokshaseva.org
+ADMIN_EMAIL=officialmanishsirohi.01@gmail.com
 ```
 
 ### **4. Start Server**

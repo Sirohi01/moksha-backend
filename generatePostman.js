@@ -38,7 +38,7 @@ const postmanCollection = {
             "header": [{"key": "Content-Type", "value": "application/json"}],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@mokshaseva.org\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"email\": \"officialmanishsirohi.01@gmail.com\",\n  \"password\": \"password123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",

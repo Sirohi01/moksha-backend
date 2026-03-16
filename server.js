@@ -35,6 +35,7 @@ const settingsRoutes = require('./routes/settingsRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const mediaRoutes = require('./routes/mediaRoutes');
 const taskRoutes = require('./routes/taskRoutes');
+const pageConfigRoutes = require('./routes/pageConfigRoutes');
 
 const app = express();
 if (process.env.NODE_ENV === 'production') {
@@ -157,6 +158,7 @@ app.use('/api/documentaries', documentaryRoutes);
 app.use('/api/seo', seoRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/page-config', pageConfigRoutes);
 
 // 404 Handler
 app.use('*', (req, res) => {

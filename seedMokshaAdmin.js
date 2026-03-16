@@ -9,11 +9,11 @@ const seedMokshaAdmin = async () => {
     console.log('📦 Connected to MongoDB');
 
     // Check if admin already exists
-    const existingAdmin = await Admin.findOne({ email: 'admin@mokshaseva.org' });
+    const existingAdmin = await Admin.findOne({ email: 'officialmanishsirohi.01@gmail.com' });
     
     if (existingAdmin) {
       console.log('✅ Moksha admin user already exists');
-      console.log('📧 Email: admin@mokshaseva.org');
+      console.log('📧 Email: officialmanishsirohi.01@gmail.com');
       console.log('🔑 Password: admin@123');
       process.exit(0);
     }
@@ -21,7 +21,7 @@ const seedMokshaAdmin = async () => {
     // Create moksha admin user
     const admin = await Admin.create({
       name: 'Moksha Admin',
-      email: 'admin@mokshaseva.org',
+      email: 'officialmanishsirohi.01@gmail.com',
       phone: '+919773992516',
       password: 'admin@123',
       role: 'super_admin',
@@ -29,7 +29,7 @@ const seedMokshaAdmin = async () => {
     });
 
     console.log('🎉 Moksha Admin created successfully!');
-    console.log('📧 Email: admin@mokshaseva.org');
+    console.log('📧 Email: officialmanishsirohi.01@gmail.com');
     console.log('🔑 Password: admin@123');
     console.log('👤 Role: super_admin');
     

@@ -18,7 +18,7 @@ const router = express.Router();
 
 // All SEO routes require authentication and SEO team permission
 router.use(protect);
-router.use(authorize('super_admin', 'manager', 'seo_team'));
+router.use(authorize('super_admin', 'admin', 'manager', 'seo_team'));
 
 // SEO Pages Management
 router.get('/', getSEOData);

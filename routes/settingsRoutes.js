@@ -14,7 +14,7 @@ const {
 // @route   GET /api/settings
 // @desc    Get system settings
 // @access  Private
-router.get('/', protect, authorize(['super_admin', 'manager']), getSettings);
+router.get('/', protect, authorize(['super_admin', 'admin', 'manager']), getSettings);
 
 // @route   PUT /api/settings
 // @desc    Update system settings
@@ -24,7 +24,7 @@ router.put('/', protect, authorize(['super_admin']), updateSettings);
 // @route   GET /api/settings/:section
 // @desc    Get specific settings section
 // @access  Private
-router.get('/:section', protect, authorize(['super_admin', 'manager']), getSettingsSection);
+router.get('/:section', protect, authorize(['super_admin', 'admin', 'manager']), getSettingsSection);
 
 // @route   PUT /api/settings/:section
 // @desc    Update specific settings section
@@ -44,6 +44,6 @@ router.post('/backup', protect, authorize(['super_admin']), backupSettings);
 // @route   POST /api/settings/test-email
 // @desc    Test email configuration
 // @access  Private
-router.post('/test-email', protect, authorize(['super_admin', 'manager']), testEmailConfig);
+router.post('/test-email', protect, authorize(['super_admin', 'admin', 'manager']), testEmailConfig);
 
 module.exports = router;
