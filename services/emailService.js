@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-// Create transporter with SendGrid support
+// Create transporter with SendGrid support and timeout
 const createTransporter = () => {
   console.log(`📧 Creating email transporter...`);
   
@@ -15,7 +15,11 @@ const createTransporter = () => {
     },
     tls: {
       rejectUnauthorized: false // Allow self-signed certificates
-    }
+    },
+    // Add timeout settings for production
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 5000,     // 5 seconds  
+    socketTimeout: 15000       // 15 seconds
   };
 
   console.log(`📧 Transporter config:`, {
@@ -23,7 +27,12 @@ const createTransporter = () => {
     port: config.port,
     secure: config.secure,
     user: config.auth.user,
-    provider: config.host.includes('sendgrid') ? 'SendGrid' : 'Gmail'
+    provider: config.host.includes('sendgrid') ? 'SendGrid' : 'Gmail',
+    timeouts: {
+      connection: config.connectionTimeout,
+      greeting: config.greetingTimeout,
+      socket: config.socketTimeout
+    }
   });
 
   return nodemailer.createTransport(config);
@@ -1526,7 +1535,18 @@ const sendEmail = async (to, template, data, attachment = null) => {
     }
 
     console.log(`📧 Attempting to send email...`);
-    const result = await transporter.sendMail(mailOptions);
+    
+    // Add timeout wrapper for production
+    const sendWithTimeout = (transporter, mailOptions, timeout = 30000) => {
+      return Promise.race([
+        transporter.sendMail(mailOptions),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Email send timeout after 30 seconds')), timeout)
+        )
+      ]);
+    };
+    
+    const result = await sendWithTimeout(transporter, mailOptions);
     console.log('✅ Email sent successfully:', result.messageId);
     return { success: true, messageId: result.messageId };
   } catch (error) {
