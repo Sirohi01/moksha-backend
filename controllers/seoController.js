@@ -60,19 +60,37 @@ const getSEOPageByName = async (req, res) => {
     const { pageName } = req.params;
     
     // Try to find SEO page by page name or URL
-    const seoPage = await SEOPage.findOne({
+    let seoPage = await SEOPage.findOne({
       $or: [
-        { pageName: pageName },
+        { slug: pageName },
         { url: `/${pageName}` },
-        { url: pageName }
+        { url: pageName },
+        { title: new RegExp(pageName, 'i') }
       ]
     });
 
+    // If no SEO page found, create a default one
     if (!seoPage) {
-      return res.status(404).json({
-        success: false,
-        message: `SEO data for page '${pageName}' not found`
+      seoPage = new SEOPage({
+        title: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page`,
+        slug: pageName,
+        url: `/${pageName}`,
+        metaTitle: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} | Moksha Seva`,
+        metaDescription: `Learn more about ${pageName} at Moksha Seva - Dignity in Departure`,
+        metaKeywords: `moksha seva, ${pageName}, cremation services, humanitarian`,
+        ogTitle: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} | Moksha Seva`,
+        ogDescription: `Learn more about ${pageName} at Moksha Seva - Dignity in Departure`,
+        ogType: 'website',
+        schemaType: 'WebPage',
+        robots: 'index, follow',
+        status: 'draft',
+        assignedTo: req.admin._id,
+        priority: 'medium'
       });
+
+      // Calculate initial SEO score
+      seoPage.calculateSEOScore();
+      await seoPage.save();
     }
 
     res.status(200).json({
@@ -95,11 +113,12 @@ const getSEOPageByName = async (req, res) => {
 const updateSEOPageByName = async (req, res) => {
   try {
     const { pageName } = req.params;
+    const updateData = req.body;
     
     // Try to find existing SEO page
     let seoPage = await SEOPage.findOne({
       $or: [
-        { pageName: pageName },
+        { slug: pageName },
         { url: `/${pageName}` },
         { url: pageName }
       ]
@@ -108,16 +127,28 @@ const updateSEOPageByName = async (req, res) => {
     if (seoPage) {
       // Update existing page
       Object.assign(seoPage, {
-        ...req.body,
-        lastOptimized: new Date()
+        ...updateData,
+        lastOptimized: new Date(),
+        status: updateData.status || 'published'
       });
     } else {
       // Create new SEO page
       seoPage = new SEOPage({
-        ...req.body,
-        pageName: pageName,
-        url: `/${pageName}`,
-        assignedTo: req.admin?.id,
+        title: updateData.title || `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page`,
+        slug: pageName,
+        url: updateData.url || `/${pageName}`,
+        metaTitle: updateData.metaTitle || `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} | Moksha Seva`,
+        metaDescription: updateData.metaDescription || `Learn more about ${pageName} at Moksha Seva`,
+        metaKeywords: updateData.metaKeywords || updateData.keywords || `moksha seva, ${pageName}`,
+        ogTitle: updateData.ogTitle || updateData.metaTitle,
+        ogDescription: updateData.ogDescription || updateData.metaDescription,
+        ogImage: updateData.ogImage,
+        canonicalUrl: updateData.canonicalUrl,
+        robots: updateData.robots || 'index, follow',
+        schemaType: updateData.schemaType || 'WebPage',
+        status: updateData.status || 'published',
+        assignedTo: req.admin._id,
+        priority: updateData.priority || 'medium',
         lastOptimized: new Date()
       });
     }

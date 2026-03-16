@@ -51,8 +51,8 @@ app.use(compression());
 
 // Rate Limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // limit each IP to 200 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
@@ -183,12 +183,21 @@ const server = app.listen(PORT, async () => {
   // Auto-seed page configurations on startup (production-safe)
   try {
     const seedPageConfigs = require('./seedPageConfigs');
-    const seedResult = await seedPageConfigs();
-    if (seedResult.success) {
-      console.log(`📦 MongoDB Connected: ${process.env.MONGODB_URI ? 'Remote' : 'localhost'}`);
+    const seedSEO = require('./seedSEO');
+    
+    const configResult = await seedPageConfigs();
+    if (configResult.success) {
+      console.log(`📦 Page configs: ${configResult.message}`);
     }
+
+    const seoResult = await seedSEO();
+    if (seoResult.success) {
+      console.log(`🎯 SEO pages: Created ${seoResult.created}, Skipped ${seoResult.skipped}`);
+    }
+    
+    console.log(`📦 MongoDB Connected: ${process.env.MONGODB_URI ? 'Remote' : 'localhost'}`);
   } catch (error) {
-    console.error('⚠️ Page config seeding failed:', error.message);
+    console.error('⚠️ Seeding failed:', error.message);
   }
 });
 

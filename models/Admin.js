@@ -265,22 +265,16 @@ adminSchema.methods.hasPermission = function(permission) {
 adminSchema.methods.isIPAllowed = function(ip) {
   // If no IPs are specified, allow all IPs (this is normal for development)
   if (!this.allowedIPs || this.allowedIPs.length === 0) {
-    console.log(`✅ No IP restrictions for admin: ${this.email} - allowing all IPs`);
     return true;
   }
   
   // If IP is not provided or is unknown, allow it in development
   if (!ip || ip === 'unknown' || ip === '::ffff:127.0.0.1' || ip === '127.0.0.1' || ip === '::1') {
-    console.log(`✅ Development/localhost IP detected: ${ip} - allowing access`);
     return true;
   }
   
-  console.log(`🔍 Checking IP ${ip} against allowed IPs:`, this.allowedIPs);
-  
   // Check if IP is in allowed list
   const isAllowed = this.allowedIPs.includes(ip);
-  console.log(`${isAllowed ? '✅' : '❌'} IP ${ip} ${isAllowed ? 'allowed' : 'denied'}`);
-  
   return isAllowed;
 };
 
