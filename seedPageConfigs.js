@@ -3272,9 +3272,12 @@ const seedPageConfigs = async () => {
     
     console.log('🌱 Seeding page configurations...');
     
-    // Clear existing page configs
-    await Content.deleteMany({ type: 'page_config' });
-    console.log('🗑️  Cleared existing page configurations');
+    // Check if configs already exist (production safety)
+    const existingConfigs = await Content.countDocuments({ type: 'page_config' });
+    if (existingConfigs > 0) {
+      console.log(`✅ Page configurations already exist (${existingConfigs} found). Skipping seed.`);
+      return { success: true, message: 'Configs already exist', count: existingConfigs };
+    }
     
     let seededCount = 0;
     
@@ -3312,16 +3315,20 @@ const seedPageConfigs = async () => {
     console.log(`   Status: All Published`);
     console.log(`   Ready for Frontend Integration: ✅`);
     
-    process.exit(0);
+    return { success: true, message: 'Seeding completed', count: seededCount };
+    
   } catch (error) {
     console.error('❌ Error seeding page configurations:', error);
-    process.exit(1);
+    return { success: false, error: error.message };
   }
 };
 
-// Run seeder
+// Run seeder only if called directly (not when imported)
 if (require.main === module) {
-  seedPageConfigs();
+  seedPageConfigs().then((result) => {
+    console.log('🏁 Seeding result:', result);
+    process.exit(result.success ? 0 : 1);
+  });
 }
 
 module.exports = seedPageConfigs;

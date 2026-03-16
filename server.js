@@ -173,12 +173,23 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, async () => {
   console.log(`🚀 Moksha Seva API Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV}`);
   console.log(`🔗 Health Check: http://localhost:${PORT}/api/health`);
   console.log(`📚 API Documentation: http://localhost:${PORT}/api/docs`);
   console.log(`🗺️ Sitemap: http://localhost:${PORT}/sitemap.xml`);
+  
+  // Auto-seed page configurations on startup (production-safe)
+  try {
+    const seedPageConfigs = require('./seedPageConfigs');
+    const seedResult = await seedPageConfigs();
+    if (seedResult.success) {
+      console.log(`📦 MongoDB Connected: ${process.env.MONGODB_URI ? 'Remote' : 'localhost'}`);
+    }
+  } catch (error) {
+    console.error('⚠️ Page config seeding failed:', error.message);
+  }
 });
 
 // Initialize WebSocket for real-time notifications
