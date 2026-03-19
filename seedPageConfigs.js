@@ -301,8 +301,8 @@ const sampleConfigs = {
       ]
     },
     mediaRecognition: {
-      badge: "IN NATIONAL MEDIA",
-      logos: ["TIMES OF INDIA", "DAINIK BHASKAR", "AAJ TAK", "NDTV", "HINDUSTAN TIMES"]
+      badge: "PARTNERS",
+      logos: ["NAMO GANGA TRUST", "enCodency", "NAMO GANGA WELLNESS", "DESIGN HOUSE"]
     },
     testimonials: {
       badge: "WHISPERED VOICES",
