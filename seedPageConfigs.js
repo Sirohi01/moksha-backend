@@ -1891,8 +1891,8 @@ const sampleConfigs = {
         display: "📞 1800-123-456"
       },
       email: {
-        address: "feedback@mokshaseva.org",
-        display: "✉️ feedback@mokshaseva.org"
+        address: "help@mokshasewa.org",
+        display: "✉️ help@mokshasewa.org"
       }
     }
   },
@@ -2660,7 +2660,7 @@ const sampleConfigs = {
       subtitle: "FOR APPLYING?",
       description: "Dealing with government paperwork can be overwhelming during a crisis. Our trained volunteers will help you navigate the entire process, 100% free.",
       phone: "1800-123-456",
-      email: "schemes@mokshaseva.org",
+      email: "help@mokshasewa.org",
       callLabel: "CALL US",
       emailLabel: "EMAIL SUPPORT"
     },
@@ -2728,9 +2728,9 @@ const sampleConfigs = {
       {
         icon: "Mail",
         title: "Email",
-        info: "help@mokshaseva.org",
+        info: "help@mokshasewa.org",
         sub: "Response within 24 hours",
-        href: "mailto:help@mokshaseva.org"
+        href: "mailto:help@mokshasewa.org"
       },
       {
         icon: "MapPin",
@@ -2929,8 +2929,8 @@ const sampleConfigs = {
         {
           icon: "Mail",
           label: "EMAIL US",
-          value: "media@mokshaseva.org",
-          href: "mailto:media@mokshaseva.org"
+          value: "media@mokshasewa.org",
+          href: "mailto:media@mokshasewa.org"
         },
         {
           icon: "Phone",
@@ -3183,8 +3183,8 @@ const sampleConfigs = {
           display: "1800-123-456"
         },
         email: {
-          address: "mailto:info@mokshaseva.org",
-          display: "info@mokshaseva.org"
+          address: "mailto:info@mokshasewa.org",
+          display: "info@mokshasewa.org"
         }
       },
       links: {
