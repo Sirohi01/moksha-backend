@@ -31,7 +31,18 @@ const createDonation = async (req, res) => {
       donorName: donation.name,
       donationId: donation.donationId,
       amount: donation.amount,
-      paymentMethod: donation.paymentMethod
+      paymentMethod: donation.paymentMethod,
+      phone: donation.phone,
+      email: donation.email,
+      address: donation.address,
+      city: donation.city,
+      state: donation.state,
+      pincode: donation.pincode,
+      panNumber: donation.panNumber,
+      aadharNumber: donation.aadharNumber,
+      purpose: donation.purpose,
+      message: donation.message,
+      needReceipt: donation.needReceipt
     });
 
     res.status(201).json({

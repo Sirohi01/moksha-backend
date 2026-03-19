@@ -422,29 +422,39 @@ const emailTemplates = {
 
   // Donation Form Templates
   donationConfirmation: (data) => ({
-    subject: `🙏 Thank You for Your Donation - ${data.donationId} - Moksha Seva`,
+    subject: `🙏 Donation Request Received - ${data.donationId} - Moksha Seva`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
         <div style="background: linear-gradient(135deg, #059669, #0d9488); padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
-          <h2 style="color: white; margin: 0;">🙏 Thank You for Your Donation!</h2>
+          <h2 style="color: white; margin: 0;">🙏 Thank You! Your Donation Request Received</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>Thank you for your generous donation to Moksha Seva. Your contribution helps us serve those in need with dignity and compassion.</p>
+        <p>Thank you for your donation request to Moksha Seva. Our team will contact you shortly to complete the donation process.</p>
+        
         <div style="background: #f0fdfa; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #059669;">
-          <h3 style="color: #333; margin-top: 0;">Donation Details:</h3>
+          <h3 style="color: #333; margin-top: 0;">Your Donation Details:</h3>
           <p><strong>Donation ID:</strong> ${data.donationId}</p>
           <p><strong>Amount:</strong> ₹${data.amount}</p>
           <p><strong>Payment Method:</strong> ${data.paymentMethod.toUpperCase()}</p>
           <p><strong>Receipt Number:</strong> ${data.receiptNumber}</p>
-          <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+          <p><strong>Date:</strong> ${new Date().toLocaleDateString('en-IN')}</p>
         </div>
+        
         <div style="background: #fef7ff; padding: 15px; border-radius: 5px; border: 1px solid #d8b4fe;">
-          <p style="margin: 0;"><strong>📄 What's Next:</strong></p>
-          <p style="margin: 5px 0;">• Your donation is being processed</p>
-          <p style="margin: 5px 0;">• You will receive a detailed receipt via email once payment is confirmed</p>
-          <p style="margin: 5px 0;">• Thank you for supporting our mission</p>
+          <p style="margin: 0;"><strong>📞 What Happens Next:</strong></p>
+          <p style="margin: 5px 0;">• Our team will call you within 24 hours</p>
+          <p style="margin: 5px 0;">• We will provide complete payment information</p>
+          <p style="margin: 5px 0;">• After payment, you'll receive an 80G tax receipt</p>
+          <p style="margin: 5px 0;">• Feel free to contact us with any questions</p>
         </div>
-        <p style="margin-top: 20px;">Your kindness makes a real difference in someone's final journey.</p>
+        
+        <div style="background: #eff6ff; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #93c5fd;">
+          <p style="margin: 0; color: #1e40af;"><strong>📞 Contact Information:</strong></p>
+          <p style="margin: 5px 0;">Phone: ${process.env.ADMIN_PHONE || '+91-XXXXXXXXXX'}</p>
+          <p style="margin: 5px 0;">Email: ${process.env.ADMIN_EMAIL || 'info@moksha-seva.org'}</p>
+        </div>
+        
+        <p style="margin-top: 20px;">Your kindness will bring dignity to someone's final journey.</p>
         <p><strong>Moksha Seva Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
@@ -1125,15 +1135,123 @@ const emailTemplates = {
   }),
 
   donationAdminNotification: (data) => ({
-    subject: `💰 New Donation Received - ₹${data.amount}`,
+    subject: `💰 New Donation Request - ₹${data.amount} - ${data.donorName} - ACTION REQUIRED`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #059669;">💰 New Donation Received</h2>
-        <p><strong>Donor:</strong> ${data.donorName}</p>
-        <p><strong>Amount:</strong> ₹${data.amount}</p>
-        <p><strong>Donation ID:</strong> ${data.donationId}</p>
-        <p><strong>Payment Method:</strong> ${data.paymentMethod}</p>
-        <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+      <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; background: #fff; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #dc2626, #b91c1c); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
+          <h1 style="margin: 0; font-size: 28px;">💰 New Donation Request</h1>
+          <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 16px;">Moksha Seva - Admin Notification</p>
+        </div>
+        
+        <div style="background: #fef2f2; border: 2px solid #fca5a5; border-radius: 12px; padding: 20px; margin: 20px 0;">
+          <h2 style="color: #dc2626; margin-top: 0; text-align: center;">🚨 IMMEDIATE ACTION REQUIRED</h2>
+          <p style="color: #991b1b; text-align: center; font-size: 16px; font-weight: bold;">
+            Contact the donor below to confirm and process the donation
+          </p>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 2px solid #93c5fd; border-radius: 12px; padding: 25px; margin: 25px 0;">
+          <h3 style="color: #1e40af; margin-top: 0; font-size: 20px;">👤 Donor Information</h3>
+          <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
+            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 15px; font-weight: bold; color: #1e40af; width: 30%;">Name:</td>
+              <td style="padding: 15px; font-size: 18px; font-weight: bold; color: #059669;">${data.donorName}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 15px; font-weight: bold; color: #1e40af;">Phone:</td>
+              <td style="padding: 15px; font-size: 16px; color: #dc2626; font-weight: bold;">
+                <a href="tel:${data.phone}" style="color: #dc2626; text-decoration: none;">📞 ${data.phone}</a>
+              </td>
+            </tr>
+            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 15px; font-weight: bold; color: #1e40af;">Email:</td>
+              <td style="padding: 15px;">
+                <a href="mailto:${data.email}" style="color: #059669; text-decoration: none;">📧 ${data.email}</a>
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 15px; font-weight: bold; color: #1e40af;">Address:</td>
+              <td style="padding: 15px;">${data.address || 'Not provided'}</td>
+            </tr>
+            <tr style="background: #f8fafc;">
+              <td style="padding: 15px; font-weight: bold; color: #1e40af;">City, State:</td>
+              <td style="padding: 15px;">${data.city || ''}, ${data.state || ''} - ${data.pincode || ''}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid #86efac; border-radius: 12px; padding: 25px; margin: 25px 0;">
+          <h3 style="color: #166534; margin-top: 0; font-size: 20px;">💰 Donation Details</h3>
+          <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
+            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 15px; font-weight: bold; color: #166534;">Amount:</td>
+              <td style="padding: 15px; font-size: 24px; font-weight: bold; color: #dc2626;">₹${data.amount}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 15px; font-weight: bold; color: #166534;">Donation ID:</td>
+              <td style="padding: 15px; font-family: monospace; background: #f1f5f9; border-radius: 4px;">${data.donationId}</td>
+            </tr>
+            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 15px; font-weight: bold; color: #166534;">Payment Method:</td>
+              <td style="padding: 15px; text-transform: uppercase; font-weight: bold;">${data.paymentMethod}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 15px; font-weight: bold; color: #166534;">Purpose:</td>
+              <td style="padding: 15px;">${data.purpose || 'General'}</td>
+            </tr>
+            <tr style="background: #f8fafc;">
+              <td style="padding: 15px; font-weight: bold; color: #166534;">Submitted:</td>
+              <td style="padding: 15px;">${new Date().toLocaleString('en-IN')}</td>
+            </tr>
+          </table>
+        </div>
+
+        ${data.panNumber ? `
+        <div style="background: #fefce8; border: 2px solid #fde047; border-radius: 12px; padding: 20px; margin: 20px 0;">
+          <h3 style="color: #a16207; margin-top: 0;">📄 Tax Information</h3>
+          <p style="color: #92400e; margin: 5px 0;"><strong>PAN Number:</strong> ${data.panNumber}</p>
+          ${data.aadharNumber ? `<p style="color: #92400e; margin: 5px 0;"><strong>Aadhar Number:</strong> ${data.aadharNumber}</p>` : ''}
+          <p style="color: #92400e; margin: 5px 0;"><strong>Receipt Required:</strong> ${data.needReceipt ? 'Yes' : 'No'}</p>
+        </div>
+        ` : ''}
+
+        ${data.message ? `
+        <div style="background: #f0f9ff; border: 2px solid #7dd3fc; border-radius: 12px; padding: 20px; margin: 20px 0;">
+          <h3 style="color: #0369a1; margin-top: 0;">💬 Donor's Message</h3>
+          <p style="color: #0c4a6e; font-style: italic; font-size: 16px;">"${data.message}"</p>
+        </div>
+        ` : ''}
+
+        <div style="background: #fef7ff; border: 2px solid #e879f9; border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;">
+          <h3 style="color: #a21caf; margin-top: 0;">⚡ Action Items - Complete Immediately</h3>
+          <div style="text-align: left; color: #86198f;">
+            <p style="margin: 10px 0;">✅ <strong>1. Call the donor:</strong> <a href="tel:${data.phone}" style="color: #dc2626; font-weight: bold;">${data.phone}</a></p>
+            <p style="margin: 10px 0;">✅ <strong>2. Confirm donation</strong> and collect payment details</p>
+            <p style="margin: 10px 0;">✅ <strong>3. Process payment</strong> (UPI/Bank Transfer/Cash)</p>
+            <p style="margin: 10px 0;">✅ <strong>4. Send receipt</strong> (80G receipt if PAN provided)</p>
+            <p style="margin: 10px 0;">✅ <strong>5. Update database</strong> - Mark as "Completed"</p>
+            <p style="margin: 10px 0;">✅ <strong>6. Send thank you message</strong></p>
+          </div>
+        </div>
+
+        <div style="background: #1f2937; color: white; border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;">
+          <h3 style="color: #fbbf24; margin-top: 0;">📞 Call Script Template</h3>
+          <div style="background: #374151; border-radius: 8px; padding: 15px; margin: 15px 0; text-align: left;">
+            <p style="margin: 5px 0; color: #d1d5db;"><strong>Hello ${data.donorName},</strong></p>
+            <p style="margin: 5px 0; color: #d1d5db;">This is [Your Name] from Moksha Seva. Thank you for your donation request of ₹${data.amount} on our website.</p>
+            <p style="margin: 5px 0; color: #d1d5db;">I'm calling to confirm your donation and provide you with payment details. Would you like to proceed?</p>
+            <p style="margin: 5px 0; color: #fbbf24;"><strong>Reference: ${data.donationId}</strong></p>
+          </div>
+        </div>
+
+        <div style="border-top: 2px solid #e5e7eb; padding-top: 20px; margin-top: 30px; text-align: center;">
+          <p style="color: #6b7280; margin: 0; font-size: 14px;">
+            This is an automatic notification. Please update the donation status in admin panel after contacting the donor.
+          </p>
+          <p style="color: #9ca3af; font-size: 12px; margin: 10px 0 0 0;">
+            Generated: ${new Date().toLocaleString('en-IN')} | Moksha Seva Admin System
+          </p>
+        </div>
       </div>
     `
   }),
@@ -1501,10 +1619,16 @@ const sendEmail = async (to, template, data, attachment = null) => {
     console.log(`📧 Template: ${template}`);
     console.log(`📧 Environment check - NODE_ENV: ${process.env.NODE_ENV}`);
     
-    // Skip email sending in test environment
+    // Skip email sending in test environment or if SMTP fails in development
     if (process.env.NODE_ENV === 'test') {
       console.log(`📧 Email skipped in test: ${template} to ${to}`);
       return { success: true, messageId: 'test-message-id' };
+    }
+
+    // Skip emails in development if SMTP not properly configured
+    if (process.env.NODE_ENV === 'development' && !process.env.SMTP_PASS) {
+      console.log(`📧 Email skipped in development (SMTP not configured): ${template} to ${to}`);
+      return { success: true, messageId: 'dev-skip-' + Date.now() };
     }
 
     // Check if email template exists

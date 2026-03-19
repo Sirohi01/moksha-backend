@@ -9,6 +9,18 @@ const createReport = async (req, res) => {
   try {
     const reportData = { ...req.body };
 
+    // Convert string booleans to actual booleans for FormData
+    const booleanFields = ['policeInformed', 'postMortemDone', 'identityDocumentsFound', 'familyContacted', 'agreeToTerms', 'consentToShare'];
+    booleanFields.forEach(field => {
+      if (reportData[field] === 'true') reportData[field] = true;
+      if (reportData[field] === 'false') reportData[field] = false;
+    });
+
+    // Clean up empty string fields that should be undefined for enum validation
+    if (reportData.reporterRelation === '') {
+      delete reportData.reporterRelation; // Remove empty string, let it be undefined
+    }
+
     // Handle file uploads if present
     if (req.files) {
       const fileUploads = {};

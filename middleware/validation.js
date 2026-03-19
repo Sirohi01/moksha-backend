@@ -49,8 +49,9 @@ const reportValidation = [
   body('timeFound').matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).withMessage('Valid time is required'),
   body('gender').isIn(['male', 'female', 'other', 'unknown']).withMessage('Invalid gender'),
   body('bodyCondition').isIn(['recent', 'decomposed', 'advanced', 'skeletal', 'unknown']).withMessage('Invalid body condition'),
-  body('agreeToTerms').isBoolean().custom(value => value === true).withMessage('Terms agreement is required'),
-  body('consentToShare').isBoolean().custom(value => value === true).withMessage('Consent to share is required'),
+  // Handle FormData boolean strings
+  body('agreeToTerms').custom(value => value === true || value === 'true').withMessage('Terms agreement is required'),
+  body('consentToShare').custom(value => value === true || value === 'true').withMessage('Consent to share is required'),
   validate
 ];
 
