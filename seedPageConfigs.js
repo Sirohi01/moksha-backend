@@ -2735,8 +2735,8 @@ const sampleConfigs = {
       {
         icon: "MapPin",
         title: "Head Office",
-        info: "12, Seva Marg, New Delhi",
-        sub: "Delhi 110001",
+        info: "Mohan Nagar, Ghazibabad",
+        sub: "Uttar Pradesh",
         href: "#"
       },
       {
