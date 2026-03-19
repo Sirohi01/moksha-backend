@@ -33,8 +33,8 @@ const testProductionEmail = async () => {
       console.log('\n🔧 Suggested Fixes:');
       console.log('1. Check Gmail App Password is valid');
       console.log('2. Verify 2FA is enabled on Gmail account');
-      console.log('3. Try SendGrid for production reliability');
-      console.log('4. Check firewall/network restrictions');
+      console.log('3. Check firewall/network restrictions');
+      console.log('4. Try increasing timeout values');
     }
     
   } catch (error) {
@@ -43,8 +43,8 @@ const testProductionEmail = async () => {
     if (error.message.includes('timeout')) {
       console.log('\n🚨 TIMEOUT ISSUE DETECTED:');
       console.log('- Gmail SMTP is being blocked or throttled');
-      console.log('- Switch to SendGrid for production');
-      console.log('- Or increase timeout values');
+      console.log('- Try increasing timeout values');
+      console.log('- Check network/firewall settings');
     }
     
     if (error.message.includes('ENOTFOUND') || error.message.includes('ECONNREFUSED')) {

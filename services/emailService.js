@@ -2,53 +2,30 @@ const nodemailer = require('nodemailer');
 const createTransporter = () => {
   console.log(`📧 Creating email transporter...`);
   
-  // Detect production environment
-  const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER;
-  
-  let config;
-  
-  if (isProduction) {
-    // Production: Use SendGrid
-    config = {
-      host: 'smtp.sendgrid.net',
-      port: 587,
-      secure: false,
-      auth: {
-        user: 'apikey',
-        pass: process.env.SENDGRID_API_KEY || process.env.SMTP_PASS
-      },
-      tls: {
-        rejectUnauthorized: false
-      },
-      connectionTimeout: 10000,
-      greetingTimeout: 5000,
-      socketTimeout: 15000
-    };
-  } else {
-    config = {
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT) || 587,
-      secure: process.env.SMTP_PORT === '465',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      },
-      tls: {
-        rejectUnauthorized: false
-      },
-      connectionTimeout: 10000,
-      greetingTimeout: 5000,
-      socketTimeout: 15000
-    };
-  }
+  // Use Gmail SMTP for both development and production
+  const config = {
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT) || 587,
+    secure: process.env.SMTP_PORT === '465',
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS
+    },
+    tls: {
+      rejectUnauthorized: false
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 5000,
+    socketTimeout: 15000
+  };
 
   console.log(`📧 Transporter config:`, {
-    environment: isProduction ? 'PRODUCTION' : 'DEVELOPMENT',
+    environment: process.env.NODE_ENV || 'development',
     host: config.host,
     port: config.port,
     secure: config.secure,
     user: config.auth.user,
-    provider: config.host.includes('sendgrid') ? 'SendGrid' : 'Gmail',
+    provider: 'Gmail SMTP',
     timeouts: {
       connection: config.connectionTimeout,
       greeting: config.greetingTimeout,
@@ -1643,18 +1620,16 @@ const sendEmail = async (to, template, data, attachment = null) => {
     console.log(`📧 SMTP_PORT: ${process.env.SMTP_PORT ? 'Set' : 'Missing'}`);
     console.log(`📧 SMTP_USER: ${process.env.SMTP_USER ? 'Set' : 'Missing'}`);
     console.log(`📧 SMTP_PASS: ${process.env.SMTP_PASS ? 'Set' : 'Missing'}`);
-    console.log(`📧 SENDGRID_API_KEY: ${process.env.SENDGRID_API_KEY ? 'Set' : 'Missing'}`);
     console.log(`📧 FROM_NAME: ${process.env.FROM_NAME ? 'Set' : 'Missing'}`);
     console.log(`📧 FROM_EMAIL: ${process.env.FROM_EMAIL ? 'Set' : 'Missing'}`);
 
-    // Production email bypass if no valid config
-    const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER;
-    if (isProduction && !process.env.SENDGRID_API_KEY && !process.env.SMTP_PASS) {
-      console.log(`⚠️ Production email config missing - returning success to prevent blocking`);
+    // Check if SMTP is configured
+    if (!process.env.SMTP_PASS) {
+      console.log(`⚠️ SMTP config missing - returning success to prevent blocking`);
       return { 
         success: true, 
-        messageId: 'production-bypass-' + Date.now(),
-        note: 'Email bypassed due to missing production config'
+        messageId: 'smtp-bypass-' + Date.now(),
+        note: 'Email bypassed due to missing SMTP config'
       };
     }
 
