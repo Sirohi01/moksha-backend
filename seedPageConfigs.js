@@ -2929,8 +2929,8 @@ const sampleConfigs = {
         {
           icon: "Mail",
           label: "EMAIL US",
-          value: "media@mokshasewa.org",
-          href: "mailto:media@mokshasewa.org"
+          value: "info@mokshasewa.org",
+          href: "mailto:info@mokshasewa.org"
         },
         {
           icon: "Phone",
