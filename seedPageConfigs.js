@@ -3234,31 +3234,31 @@ const sampleConfigs = {
         {
           name: "Facebook",
           icon: "Facebook",
-          url: "https://facebook.com/mokshaseva",
+          url: "https://www.facebook.com/namogangewellness.event",
           color: "hover:bg-blue-600"
         },
         {
           name: "X (Twitter)",
           icon: "Twitter",
-          url: "https://x.com/mokshaseva",
+          url: "https://x.com/namogange_event",
           color: "hover:bg-black"
         },
         {
           name: "Instagram",
           icon: "Instagram",
-          url: "https://instagram.com/mokshaseva",
+          url: "https://www.instagram.com/namogangewellness.event",
           color: "hover:bg-pink-600"
         },
         {
           name: "YouTube",
           icon: "Youtube",
-          url: "https://youtube.com/@mokshaseva",
+          url: "https://www.youtube.com/@Namogangewellness",
           color: "hover:bg-red-600"
         },
         {
           name: "LinkedIn",
           icon: "Linkedin",
-          url: "https://linkedin.com/company/mokshaseva",
+          url: "https://www.linkedin.com/company/namo-gange-wellness-event/",
           color: "hover:bg-blue-700"
         }
       ]
