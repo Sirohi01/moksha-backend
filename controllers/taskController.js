@@ -121,11 +121,19 @@ const sendTaskAssignmentEmail = async (task, volunteer) => {
   }
 };
 
-// @desc    Generate task action token
+// @desc    Generate secure task action token
 const generateTaskToken = (taskId, volunteerId, action) => {
   const crypto = require('crypto');
-  const data = `${taskId}-${volunteerId}-${action}-${Date.now()}`;
+  const secret = process.env.JWT_SECRET || 'moksha-seva-secret-key-2024';
+  const data = `${taskId}-${volunteerId}-${action}-${secret}`;
   return crypto.createHash('sha256').update(data).digest('hex').substring(0, 32);
+};
+
+// @desc    Verify task action token
+const verifyTaskToken = (token, taskId, volunteerId, action) => {
+  if (!token) return false;
+  const expectedToken = generateTaskToken(taskId, volunteerId, action);
+  return token === expectedToken;
 };
 
 // @desc    Get all tasks (Admin)
@@ -288,6 +296,19 @@ const acceptTaskDirect = async (req, res) => {
   try {
     const { token, volunteerId } = req.query;
     
+    // Verify token
+    if (!verifyTaskToken(token, req.params.id, volunteerId, 'accept')) {
+      return res.status(403).send(`
+        <html>
+          <head><title>Invalid Link</title></head>
+          <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+            <h2 style="color: #dc2626;">❌ Invalid or Expired Link</h2>
+            <p>The link you used is invalid or has expired. Please log in to your dashboard to accept the task.</p>
+          </body>
+        </html>
+      `);
+    }
+
     const task = await Task.findById(req.params.id);
     if (!task) {
       return res.status(404).send(`
@@ -386,6 +407,19 @@ const rejectTaskDirect = async (req, res) => {
   try {
     const { token, volunteerId, reason } = req.query;
     
+    // Verify token
+    if (!verifyTaskToken(token, req.params.id, volunteerId, 'reject')) {
+      return res.status(403).send(`
+        <html>
+          <head><title>Invalid Link</title></head>
+          <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+            <h2 style="color: #dc2626;">❌ Invalid or Expired Link</h2>
+            <p>The link you used is invalid or has expired. Please log in to your dashboard to reject the task.</p>
+          </body>
+        </html>
+      `);
+    }
+
     const task = await Task.findById(req.params.id);
     if (!task) {
       return res.status(404).send(`

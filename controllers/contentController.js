@@ -1,48 +1,4 @@
-// In-memory content storage (replace with database in production)
-let contentItems = [
-  {
-    id: '1',
-    title: 'About Moksha Seva - Our Mission',
-    type: 'page',
-    status: 'published',
-    content: 'Moksha Seva is dedicated to providing dignified cremation services...',
-    metaTitle: 'About Moksha Seva - Our Mission and Values',
-    metaDescription: 'Learn about Moksha Seva\'s mission to provide dignified cremation services for unclaimed bodies and underprivileged families across India.',
-    slug: 'about-moksha-seva',
-    lastModified: new Date('2024-01-15'),
-    author: 'SEO Team',
-    views: 1250,
-    featured: true
-  },
-  {
-    id: '2',
-    title: 'How to Report Unclaimed Bodies',
-    type: 'blog',
-    status: 'published',
-    content: 'If you encounter an unclaimed body, here\'s what you should do...',
-    metaTitle: 'How to Report Unclaimed Bodies - Step by Step Guide',
-    metaDescription: 'Complete guide on how to report unclaimed bodies to authorities and Moksha Seva for dignified cremation services.',
-    slug: 'how-to-report-unclaimed-bodies',
-    lastModified: new Date('2024-01-10'),
-    author: 'Content Team',
-    views: 890,
-    featured: false
-  },
-  {
-    id: '3',
-    title: 'Dignity for All Campaign',
-    type: 'campaign',
-    status: 'published',
-    content: 'Our flagship campaign ensuring every person receives dignified final rites...',
-    metaTitle: 'Dignity for All - Moksha Seva Campaign',
-    metaDescription: 'Join our Dignity for All campaign to ensure every person receives respectful and dignified final rites regardless of their background.',
-    slug: 'dignity-for-all-campaign',
-    lastModified: new Date('2024-01-08'),
-    author: 'Marketing Team',
-    views: 2100,
-    featured: true
-  }
-];
+const Content = require('../models/Content');
 
 // @desc    Get all content items
 // @route   GET /api/content
@@ -51,43 +7,31 @@ const getContentItems = async (req, res) => {
   try {
     const { page = 1, limit = 10, type, status, search } = req.query;
     
-    let filteredContent = [...contentItems];
-    
-    // Filter by type
-    if (type && type !== 'all') {
-      filteredContent = filteredContent.filter(item => item.type === type);
-    }
-    
-    // Filter by status
-    if (status && status !== 'all') {
-      filteredContent = filteredContent.filter(item => item.status === status);
-    }
-    
-    // Filter by search term
+    // Build query
+    const query = {};
+    if (type && type !== 'all') query.type = type;
+    if (status && status !== 'all') query.status = status;
     if (search) {
-      const searchTerm = search.toLowerCase();
-      filteredContent = filteredContent.filter(item => 
-        item.title.toLowerCase().includes(searchTerm) ||
-        item.content.toLowerCase().includes(searchTerm) ||
-        item.author.toLowerCase().includes(searchTerm)
-      );
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { content: { $regex: search, $options: 'i' } },
+        { author: { $regex: search, $options: 'i' } }
+      ];
     }
-    
-    // Sort by last modified (newest first)
-    filteredContent.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
-    
-    // Pagination
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + parseInt(limit);
-    const paginatedContent = filteredContent.slice(startIndex, endIndex);
-    
+
+    const total = await Content.countDocuments(query);
+    const content = await Content.find(query)
+      .sort({ updatedAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
     res.status(200).json({
       success: true,
       data: {
-        content: paginatedContent,
-        total: filteredContent.length,
+        content,
+        total,
         page: parseInt(page),
-        pages: Math.ceil(filteredContent.length / limit)
+        pages: Math.ceil(total / limit)
       }
     });
   } catch (error) {
@@ -105,8 +49,7 @@ const getContentItems = async (req, res) => {
 const getContentItem = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const contentItem = contentItems.find(item => item.id === id);
+    const contentItem = await Content.findById(id);
     
     if (!contentItem) {
       return res.status(404).json({
@@ -151,7 +94,7 @@ const createContentItem = async (req, res) => {
       .replace(/-+/g, '-');
 
     // Check if slug already exists
-    const existingItem = contentItems.find(item => item.slug === finalSlug);
+    const existingItem = await Content.findOne({ slug: finalSlug });
     if (existingItem) {
       return res.status(400).json({
         success: false,
@@ -159,22 +102,18 @@ const createContentItem = async (req, res) => {
       });
     }
 
-    const newContentItem = {
-      id: Date.now().toString(),
+    const newContentItem = await Content.create({
       title,
       type,
       status,
       content,
       metaTitle: metaTitle || title,
-      metaDescription: metaDescription || content.substring(0, 160),
+      metaDescription: metaDescription || (typeof content === 'string' ? content.substring(0, 160) : ''),
       slug: finalSlug,
-      lastModified: new Date(),
       author: req.admin.name,
       views: 0,
       featured
-    };
-
-    contentItems.unshift(newContentItem);
+    });
 
     res.status(201).json({
       success: true,
@@ -207,18 +146,17 @@ const updateContentItem = async (req, res) => {
       featured
     } = req.body;
 
-    const itemIndex = contentItems.findIndex(item => item.id === id);
-    
-    if (itemIndex === -1) {
+    const contentItem = await Content.findById(id);
+    if (!contentItem) {
       return res.status(404).json({
         success: false,
         message: 'Content item not found'
       });
     }
 
-    // Check if new slug conflicts with existing items
-    if (slug && slug !== contentItems[itemIndex].slug) {
-      const existingItem = contentItems.find(item => item.slug === slug && item.id !== id);
+    // Check if new slug conflicts
+    if (slug && slug !== contentItem.slug) {
+      const existingItem = await Content.findOne({ slug, _id: { $ne: id } });
       if (existingItem) {
         return res.status(400).json({
           success: false,
@@ -227,24 +165,23 @@ const updateContentItem = async (req, res) => {
       }
     }
 
-    // Update content item
-    contentItems[itemIndex] = {
-      ...contentItems[itemIndex],
-      title: title || contentItems[itemIndex].title,
-      type: type || contentItems[itemIndex].type,
-      content: content || contentItems[itemIndex].content,
-      metaTitle: metaTitle || contentItems[itemIndex].metaTitle,
-      metaDescription: metaDescription || contentItems[itemIndex].metaDescription,
-      slug: slug || contentItems[itemIndex].slug,
-      status: status || contentItems[itemIndex].status,
-      featured: featured !== undefined ? featured : contentItems[itemIndex].featured,
-      lastModified: new Date()
-    };
+    // Update fields
+    contentItem.title = title || contentItem.title;
+    contentItem.type = type || contentItem.type;
+    contentItem.content = content || contentItem.content;
+    contentItem.metaTitle = metaTitle || contentItem.metaTitle;
+    contentItem.metaDescription = metaDescription || contentItem.metaDescription;
+    contentItem.slug = slug || contentItem.slug;
+    contentItem.status = status || contentItem.status;
+    contentItem.featured = featured !== undefined ? featured : contentItem.featured;
+    contentItem.author = req.admin.name;
+
+    await contentItem.save();
 
     res.status(200).json({
       success: true,
       message: 'Content item updated successfully',
-      data: contentItems[itemIndex]
+      data: contentItem
     });
   } catch (error) {
     console.error('❌ Update content item failed:', error);
@@ -261,18 +198,14 @@ const updateContentItem = async (req, res) => {
 const deleteContentItem = async (req, res) => {
   try {
     const { id } = req.params;
-
-    const itemIndex = contentItems.findIndex(item => item.id === id);
+    const contentItem = await Content.findByIdAndDelete(id);
     
-    if (itemIndex === -1) {
+    if (!contentItem) {
       return res.status(404).json({
         success: false,
         message: 'Content item not found'
       });
     }
-
-    // Remove from array
-    contentItems.splice(itemIndex, 1);
 
     res.status(200).json({
       success: true,
@@ -292,26 +225,36 @@ const deleteContentItem = async (req, res) => {
 // @access  Private
 const getContentStats = async (req, res) => {
   try {
-    const stats = {
-      totalContent: contentItems.length,
-      published: contentItems.filter(item => item.status === 'published').length,
-      draft: contentItems.filter(item => item.status === 'draft').length,
-      archived: contentItems.filter(item => item.status === 'archived').length,
-      byType: {
-        page: contentItems.filter(item => item.type === 'page').length,
-        blog: contentItems.filter(item => item.type === 'blog').length,
-        campaign: contentItems.filter(item => item.type === 'campaign').length,
-        press: contentItems.filter(item => item.type === 'press').length
-      },
-      totalViews: contentItems.reduce((sum, item) => sum + item.views, 0),
-      recentContent: contentItems
-        .sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified))
-        .slice(0, 5)
-    };
+    const totalContent = await Content.countDocuments();
+    const published = await Content.countDocuments({ status: 'published' });
+    const draft = await Content.countDocuments({ status: 'draft' });
+    const archived = await Content.countDocuments({ status: 'archived' });
+    
+    const types = ['page', 'blog', 'campaign', 'press'];
+    const byType = {};
+    for (const type of types) {
+      byType[type] = await Content.countDocuments({ type });
+    }
+
+    const viewsResult = await Content.aggregate([
+      { $group: { _id: null, totalViews: { $sum: "$views" } } }
+    ]);
+    
+    const recentContent = await Content.find()
+      .sort({ updatedAt: -1 })
+      .limit(5);
 
     res.status(200).json({
       success: true,
-      data: stats
+      data: {
+        totalContent,
+        published,
+        draft,
+        archived,
+        byType,
+        totalViews: viewsResult.length > 0 ? viewsResult[0].totalViews : 0,
+        recentContent
+      }
     });
   } catch (error) {
     console.error('❌ Get content stats failed:', error);

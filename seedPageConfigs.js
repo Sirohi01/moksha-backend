@@ -17,13 +17,13 @@ const readConfigFile = (filePath) => {
     if (configMatch) {
       let configStr = configMatch[1];
       configStr = configStr
-        .replace(/(\w+):/g, '"$1":') 
+        .replace(/(\w+):/g, '"$1":')
         .replace(/'/g, '"')           // Replace single quotes with double quotes
         .replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
-      
+
       return JSON.parse(configStr);
     }
-    
+
     return null;
   } catch (error) {
     console.error(`Error reading config file ${filePath}:`, error.message);
@@ -349,7 +349,7 @@ const sampleConfigs = {
       ]
     }
   },
-  
+
   about: {
     hero: {
       badge: "✦ Our Story ✦",
@@ -371,7 +371,7 @@ const sampleConfigs = {
         icon: "Target"
       },
       vision: {
-        title: "Our Vision", 
+        title: "Our Vision",
         description: "A society where no person is left without dignified last rites — where technology, compassion, and civic duty unite to ensure that death does not discriminate, and neither does our response to it.",
         icon: "Eye"
       }
@@ -497,7 +497,7 @@ const sampleConfigs = {
       },
       {
         icon: "Shield",
-        step: "Step 2", 
+        step: "Step 2",
         title: "Police Coordination & Verification",
         description: "Our team coordinates with the nearest police station within 2 hours of the report. Police file an FIR, and we register the case in our system.",
         timeline: "2 - 6 hours",
@@ -510,7 +510,7 @@ const sampleConfigs = {
       {
         icon: "Search",
         step: "Step 3",
-        title: "Identification Attempt", 
+        title: "Identification Attempt",
         description: "We make every effort to identify the deceased — using our database, social media outreach, Missing Persons helplines, and hospital records. Family is notified if found.",
         timeline: "24 - 72 hours",
         actions: [
@@ -528,7 +528,7 @@ const sampleConfigs = {
         timeline: "During 72-hour window",
         actions: [
           "Death certificate filed",
-          "Police NOC obtained", 
+          "Police NOC obtained",
           "All documentation digitized",
           "Legal compliance verified"
         ]
@@ -1393,7 +1393,8 @@ const sampleConfigs = {
           type: "Short Film",
           description: "A forgotten watchmaker in Varanasi and the Saathi who became his son for one final hour.",
           image: "https://images.unsplash.com/photo-1533158307587-828f0a76ef46?q=80&w=2000&auto=format&fit=crop",
-          imageAlt: "The Man with the Silver Key story"
+          imageAlt: "The Man with the Silver Key story",
+          youtubeId: "TlSnslCZFcs"
         },
         {
           title: "Night Shift Dignity",
@@ -1401,7 +1402,8 @@ const sampleConfigs = {
           type: "Documentary",
           description: "Follow our Lucknow response unit through a midnight call that changed their lives forever.",
           image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?q=80&w=2000&auto=format&fit=crop",
-          imageAlt: "Night Shift Dignity documentary"
+          imageAlt: "Night Shift Dignity documentary",
+          youtubeId: "Ie9JQW_Cus8"
         },
         {
           title: "Naming the Nameless",
@@ -1409,7 +1411,8 @@ const sampleConfigs = {
           type: "Cinematic Short",
           description: "The deep investigation process we follow to find the identity of those forgotten by society.",
           image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=2000&auto=format&fit=crop",
-          imageAlt: "Naming the Nameless cinematic short"
+          imageAlt: "Naming the Nameless cinematic short",
+          youtubeId: "t0VRWdWN1fs"
         }
       ],
       buttons: {
@@ -1577,19 +1580,22 @@ const sampleConfigs = {
           title: "Family Testimonial 1",
           duration: "2 minutes",
           thumbnail: "/gallery/image1.png",
-          alt: "Video testimonial 1"
+          alt: "Video testimonial 1",
+          youtubeId: "vB3P0p_Y0ks"
         },
         {
           title: "Family Testimonial 2",
           duration: "2 minutes",
           thumbnail: "/gallery/image2.png",
-          alt: "Video testimonial 2"
+          alt: "Video testimonial 2",
+          youtubeId: "Jm_X9J-J9yY"
         },
         {
           title: "Family Testimonial 3",
           duration: "2 minutes",
           thumbnail: "/gallery/image3.png",
-          alt: "Video testimonial 3"
+          alt: "Video testimonial 3",
+          youtubeId: "4RzH8l3gE14"
         }
       ]
     },
@@ -1640,7 +1646,7 @@ const sampleConfigs = {
         }
       },
       backgroundImages: [
-        "/gallery/image1.png", "/gallery/image2.png", "/gallery/image3.png", 
+        "/gallery/image1.png", "/gallery/image2.png", "/gallery/image3.png",
         "/gallery/image4.png", "/gallery/image5.png", "/gallery/image6.png",
         "/gallery/gallery_cremation_ceremony_1772861295131.png",
         "/gallery/gallery_volunteer_service_1772861316550.png",
@@ -2340,7 +2346,7 @@ const sampleConfigs = {
       downloadButton: "Download CSV",
       tableHeaders: [
         "Body ID",
-        "Location Found", 
+        "Location Found",
         "Date Found",
         "Cremation Date",
         "Cremation Ground",
@@ -2595,7 +2601,7 @@ const sampleConfigs = {
     ],
     helpSources: [
       "Panchayat",
-      "Municipal Corporation", 
+      "Municipal Corporation",
       "District Magistrate office",
       "Social Welfare Department"
     ],
@@ -2960,7 +2966,8 @@ const sampleConfigs = {
           type: "Main Feature",
           year: "2024",
           desc: "A cinematic deep-dive into the founding philosophy of Moksha Seva and the people who make it possible.",
-          image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?q=80&w=2000&auto=format&fit=crop"
+          image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?q=80&w=2000&auto=format&fit=crop",
+          youtubeId: "t0VRWdWN1fs"
         },
         {
           title: "The City of Shadows",
@@ -2968,7 +2975,8 @@ const sampleConfigs = {
           type: "City Series",
           year: "2023",
           desc: "Exploring the life and death of those in the busiest hubs of Mumbai, and how our teams respond in the urban chaos.",
-          image: "https://images.unsplash.com/photo-1533158307587-828f0a76ef46?q=80&w=2000&auto=format&fit=crop"
+          image: "https://images.unsplash.com/photo-1533158307587-828f0a76ef46?q=80&w=2000&auto=format&fit=crop",
+          youtubeId: "zaehBJYSy5s"
         },
         {
           title: "Ganga's Quiet Tears",
@@ -2976,7 +2984,8 @@ const sampleConfigs = {
           type: "Regional Story",
           year: "2023",
           desc: "A spiritual exploration of final rites in Varanasi and the transition from identified to unidentified cases.",
-          image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=2000&auto=format&fit=crop"
+          image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=2000&auto=format&fit=crop",
+          youtubeId: "mq3zBVCM9rk"
         },
         {
           title: "Voices from the Field",
@@ -2984,7 +2993,8 @@ const sampleConfigs = {
           type: "Documentary Series",
           year: "2024",
           desc: "Interviews with volunteers, families, and community members sharing their experiences with Moksha Seva's mission.",
-          image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2000&auto=format&fit=crop"
+          image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2000&auto=format&fit=crop",
+          youtubeId: "t0VRWdWN1fs"
         },
         {
           title: "The Silent Heroes",
@@ -2992,7 +3002,8 @@ const sampleConfigs = {
           type: "Profile Series",
           year: "2023",
           desc: "Profiling the dedicated volunteers who work tirelessly to ensure dignity in the final journey of every soul.",
-          image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=2000&auto=format&fit=crop"
+          image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=2000&auto=format&fit=crop",
+          youtubeId: "51aO8_c1bNo"
         },
         {
           title: "Beyond the Call",
@@ -3000,7 +3011,8 @@ const sampleConfigs = {
           type: "Impact Story",
           year: "2024",
           desc: "Following the 24/7 emergency response team and their commitment to serving those forgotten by society.",
-          image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?q=80&w=2000&auto=format&fit=crop"
+          image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?q=80&w=2000&auto=format&fit=crop",
+          youtubeId: "Mq3x1y56ysM"
         }
       ],
       watchButton: "WATCH FILM",
@@ -3254,12 +3266,6 @@ const sampleConfigs = {
           icon: "Youtube",
           url: "https://www.youtube.com/@Namogangewellness",
           color: "hover:bg-red-600"
-        },
-        {
-          name: "LinkedIn",
-          icon: "Linkedin",
-          url: "https://www.linkedin.com/company/namo-gange-wellness-event/",
-          color: "hover:bg-blue-700"
         }
       ]
     }
@@ -3269,18 +3275,18 @@ const sampleConfigs = {
 const seedPageConfigs = async () => {
   try {
     await connectDB();
-    
+
     console.log('🌱 Seeding page configurations...');
-    
-    // Check if configs already exist (production safety)
+
+    // Clear existing configs to ensure latest data (overwrite mode)
     const existingConfigs = await Content.countDocuments({ type: 'page_config' });
     if (existingConfigs > 0) {
-      console.log(`✅ Page configurations already exist (${existingConfigs} found). Skipping seed.`);
-      return { success: true, message: 'Configs already exist', count: existingConfigs };
+      console.log(`♻️  Updating ${existingConfigs} existing page configurations...`);
+      await Content.deleteMany({ type: 'page_config' });
     }
-    
+
     let seededCount = 0;
-    
+
     // Seed each page configuration
     for (const [pageName, config] of Object.entries(sampleConfigs)) {
       try {
@@ -3296,27 +3302,27 @@ const seedPageConfigs = async () => {
           metaDescription: `Configuration data for ${pageName} page`,
           version: 1
         });
-        
+
         await pageConfig.save();
         seededCount++;
         console.log(`✅ Created configuration for: ${pageName}`);
-        
+
       } catch (error) {
         console.error(`❌ Failed to create config for ${pageName}:`, error.message);
       }
     }
-    
+
     console.log(`🎉 Successfully seeded ${seededCount} page configurations!`);
-    
+
     // Display summary
     const totalConfigs = await Content.countDocuments({ type: 'page_config' });
     console.log(`\n📊 Summary:`);
     console.log(`   Total Page Configs: ${totalConfigs}`);
     console.log(`   Status: All Published`);
     console.log(`   Ready for Frontend Integration: ✅`);
-    
+
     return { success: true, message: 'Seeding completed', count: seededCount };
-    
+
   } catch (error) {
     console.error('❌ Error seeding page configurations:', error);
     return { success: false, error: error.message };
