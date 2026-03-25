@@ -76,6 +76,10 @@ const pageConfigs = [
   {
     pageName: 'blog',
     configPath: '../frontend/config/blog.config.ts'
+  },
+  {
+    pageName: 'layout',
+    configPath: '../frontend/config/layout.config.ts'
   }
 ];
 // Sample configurations (since reading TS files is complex, we'll use JSON directly)
@@ -3403,6 +3407,11 @@ const sampleConfigs = {
         "Enables government tracking and safety.",
         "Builds permanent trust with the public."
       ]
+    },
+    layout: {
+      socialFloating: {
+        whatsapp: "919220147229"
+      }
     }
   }
 };
@@ -3421,10 +3430,30 @@ const seedPageConfigs = async () => {
     }
 
     let seededCount = 0;
+    const allPageNames = Array.from(new Set([...Object.keys(sampleConfigs), ...pageConfigs.map(p => p.pageName)]));
 
     // Seed each page configuration
-    for (const [pageName, config] of Object.entries(sampleConfigs)) {
+    for (const pageName of allPageNames) {
       try {
+        let config = sampleConfigs[pageName] || {};
+
+        // Try to read from config file if defined
+        const pageConfigObj = pageConfigs.find(p => p.pageName === pageName);
+        if (pageConfigObj && pageConfigObj.configPath) {
+          const filePath = path.join(__dirname, pageConfigObj.configPath);
+          const fileConfig = readConfigFile(filePath);
+          if (fileConfig) {
+            console.log(`📖 Loaded config from file for: ${pageName}`);
+            config = { ...config, ...fileConfig };
+          }
+        }
+
+        // Ensure WhatsApp is explicitly preserved for layout
+        if (pageName === 'layout') {
+          if (!config.socialFloating) config.socialFloating = {};
+          config.socialFloating.whatsapp = "919220147229";
+        }
+
         const pageConfig = new Content({
           title: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page Configuration`,
           slug: pageName,
