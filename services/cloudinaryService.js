@@ -27,8 +27,12 @@ const fileFilter = (req, file, cb) => {
     'image/gif',
     'image/webp',
     'application/pdf',
-    'application/msword', // .doc
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' // .docx
+    'application/msword', 
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'audio/mpeg',
+    'audio/wav',
+    'audio/webm',
+    'audio/ogg'
   ];
 
   if (allowedTypes.includes(file.mimetype)) {

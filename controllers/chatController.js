@@ -1,10 +1,29 @@
 const SupportChat = require('../models/SupportChat');
 const SupportMessage = require('../models/SupportMessage');
 const asyncHandler = require('express-async-handler');
+const { uploadToCloudinary } = require('../services/cloudinaryService');
+exports.uploadAudio = asyncHandler(async (req, res) => {
+  const { chatId, sender, adminId } = req.body;
 
-// @desc    Initiate or get chat session
-// @route   POST /api/chat/initiate
-// @access  Public
+  if (!req.file) {
+    res.status(400);
+    throw new Error('No audio file provided');
+  }
+  const result = await uploadToCloudinary(req.file, 'chat/audio');
+  const newMessage = await SupportMessage.create({
+    chatId,
+    sender,
+    adminId: sender === 'admin' ? adminId : null,
+    content: result.url,
+    type: 'audio'
+  });
+  await SupportChat.findByIdAndUpdate(chatId, { lastMessageAt: new Date() });
+
+  res.status(200).json({
+    success: true,
+    data: newMessage
+  });
+});
 exports.initiateChat = asyncHandler(async (req, res) => {
   const { name, email, phone } = req.body;
 
@@ -12,9 +31,7 @@ exports.initiateChat = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error('Name, Email and Phone are required');
   }
-
-  // Check if there's an active chat for this email/phone
-  let chat = await SupportChat.findOne({ 
+  let chat = await SupportChat.findOne({
     $or: [{ email }, { phone }],
     status: 'active'
   });
@@ -29,8 +46,6 @@ exports.initiateChat = asyncHandler(async (req, res) => {
         userAgent: req.headers['user-agent']
       }
     });
-
-    // Create system welcome message
     await SupportMessage.create({
       chatId: chat._id,
       sender: 'system',
@@ -43,10 +58,6 @@ exports.initiateChat = asyncHandler(async (req, res) => {
     data: chat
   });
 });
-
-// @desc    Get chat history
-// @route   GET /api/chat/history/:chatId
-// @access  Public (should probably be session-protected in real world)
 exports.getChatHistory = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
 
@@ -58,10 +69,6 @@ exports.getChatHistory = asyncHandler(async (req, res) => {
     data: messages
   });
 });
-
-// @desc    Get all chats (Admin)
-// @route   GET /api/chat/admin/all
-// @access  Private/Admin
 exports.getAllChats = asyncHandler(async (req, res) => {
   const chats = await SupportChat.find()
     .sort({ lastMessageAt: -1 });
@@ -71,10 +78,6 @@ exports.getAllChats = asyncHandler(async (req, res) => {
     data: chats
   });
 });
-
-// @desc    Mark chat as read (Admin)
-// @route   PUT /api/chat/admin/read/:chatId
-// @access  Private/Admin
 exports.markAsRead = asyncHandler(async (req, res) => {
   await SupportChat.findByIdAndUpdate(req.params.chatId, {
     'unreadCount.admin': 0
@@ -88,9 +91,6 @@ exports.markAsRead = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true });
 });
 
-// @desc    Close chat session
-// @route   PUT /api/chat/close/:chatId
-// @access  Public/Admin
 exports.closeChat = asyncHandler(async (req, res) => {
   await SupportChat.findByIdAndUpdate(req.params.chatId, {
     status: 'closed'
