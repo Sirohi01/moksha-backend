@@ -7,6 +7,9 @@ require('dotenv').config();
 const connectDB = require('./config/database');
 const readConfigFile = (filePath) => {
   try {
+    if (!fs.existsSync(filePath)) {
+      return null;
+    }
     const content = fs.readFileSync(filePath, 'utf8');
     let cleanContent = content
       .replace(/import.*from.*['"];?\n/g, '')
