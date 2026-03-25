@@ -35,25 +35,29 @@ const createTransporter = () => {
 
   return nodemailer.createTransport(config);
 };
-
-// Complete Email Templates for ALL Forms
 const emailTemplates = {
-  // Helper for consistent premium admin templates
-  wrapAdminTemplate: (title, subtitle, content, color = '#1e3a8a') => `
-    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8fafc; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-      <div style="background: linear-gradient(135deg, ${color}, ${color}dd); padding: 40px 20px; text-align: center; color: white;">
-        <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; text-transform: uppercase;">${title}</h1>
-        <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px; font-weight: 500;">${subtitle}</p>
+  wrapAdminTemplate: (title, subtitle, content, color = '#000080') => `
+    <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; overflow: hidden; border: 1px solid rgba(0,0,128,0.1); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+      <div style="background: linear-gradient(135deg, #000080 0%, #000050 100%); padding: 50px 30px; text-align: center; color: white; position: relative; border-bottom: 5px solid #f4c430;">
+        <div style="background: rgba(244, 196, 48, 0.1); border: 1px solid rgba(244, 196, 48, 0.3); display: inline-block; padding: 6px 16px; border-radius: 100px; margin-bottom: 20px;">
+           <span style="color: #f4c430; font-size: 10px; font-weight: 900; letter-spacing: 0.2em; text-transform: uppercase;">Moksha Intelligence</span>
+        </div>
+        <h1 style="margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2;">${title}</h1>
+        <p style="margin: 12px 0 0 0; opacity: 0.8; font-size: 14px; font-weight: 400; font-style: italic;">${subtitle}</p>
       </div>
-      <div style="padding: 30px; background-color: white;">
+      <div style="padding: 40px; background-color: white;">
         ${content}
       </div>
-      <div style="background-color: #f1f5f9; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
-        <p style="margin: 0; color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
-          Moksha Sewa Foundation • Admin Intelligence System
+      <div style="background-color: #f8fafc; padding: 30px; text-align: center; border-top: 1px solid #e2e8f0;">
+        <div style="margin-bottom: 15px;">
+           <span style="background: #000080; color: white; padding: 4px 12px; border-radius: 6px; font-size: 10px; font-weight: 800;">ADMIN NOTICE</span>
+        </div>
+        <p style="margin: 0; color: #1e293b; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+          Moksha Sewa Foundation • Humanitarian Logistics
         </p>
-        <p style="margin: 8px 0 0 0; color: #94a3b8; font-size: 11px;">
-          This is an automated notification. Generated at ${new Date().toLocaleString('en-IN')}
+        <p style="margin: 8px 0 0 0; color: #64748b; font-size: 11px; line-height: 1.5;">
+          This message is intended for authorized administrators of the Moksha Sewa platform. 
+          Generated via <span style="color: #000080; font-weight: bold;">Moksha Core v2.4</span> on ${new Date().toLocaleString('en-IN')}
         </p>
       </div>
     </div>
@@ -1198,22 +1202,63 @@ const emailTemplates = {
   }),
 
   volunteerAdminNotification: (data) => ({
-    subject: `🤝 New Volunteer - ${data.name}`,
+    subject: `🤝 NEW VOLUNTEER: ${data.name} - ${data.city}`,
     html: emailTemplates.wrapAdminTemplate(
-      '🤝 New Volunteer Application',
-      `ID: ${data.volunteerId}`,
+      '🌟 New Volunteer Enrolled',
+      `Application Reference: MS-V-${data.volunteerId.toString().slice(-6).toUpperCase()}`,
       `
-        <table style="width: 100%; border-collapse: separate; border-spacing: 0 8px;">
-          <tr><td style="width: 140px; color: #64748b; font-size: 13px; font-weight: bold;">NAME:</td><td style="color: #1e293b; font-weight: 600;">${data.name}</td></tr>
-          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">CONTACT:</td><td style="color: #1e293b; font-weight: 600;">${data.phone || 'N/A'}</td></tr>
-          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">EMAIL:</td><td style="color: #1976d2;">${data.email || 'N/A'}</td></tr>
-          <tr><td colspan="2"><hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 10px 0;"></td></tr>
-          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">LOCATION:</td><td style="color: #1e293b;">${data.city}, ${data.state}</td></tr>
-          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">SKILLS:</td><td style="color: #1e293b;">${data.skills || 'N/A'}</td></tr>
-          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">TYPE:</td><td style="color: #1e293b; font-weight: 600;">${data.volunteerTypes ? data.volunteerTypes.join(', ') : data.registrationType}</td></tr>
+        <div style="background-color: #f0f7ff; border-radius: 12px; padding: 20px; margin-bottom: 25px; border: 1px solid #bfdbfe;">
+           <p style="margin: 0 0 10px 0; color: #1e3a8a; font-size: 12px; font-weight: 800; text-transform: uppercase;">Application Insight</p>
+           <p style="margin: 0; color: #1e40af; font-size: 14px; line-height: 1.6;">
+             A new candidate has expressed interest in joining the Moksha mission. Below are the verified details from the <span style="font-weight: bold;">Multi-Step Onboarding System</span>.
+           </p>
+        </div>
+
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0 12px;">
+          <tr>
+            <td style="width: 150px; color: #64748b; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Full Name</td>
+            <td style="color: #0f172a; font-size: 15px; font-weight: 700;">${data.name}</td>
+          </tr>
+          <tr>
+            <td style="color: #64748b; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Primary Contact</td>
+            <td style="color: #0f172a; font-size: 15px; font-weight: 700;">${data.phone || 'N/A'}</td>
+          </tr>
+          <tr>
+            <td style="color: #64748b; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Secure Email</td>
+            <td style="color: #000080; font-size: 15px; font-weight: 600; text-decoration: underline;">${data.email || 'N/A'}</td>
+          </tr>
+          <tr>
+            <td style="color: #64748b; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Operating Zone</td>
+            <td style="color: #0f172a; font-size: 15px;">${data.city}, ${data.state}</td>
+          </tr>
+          <tr>
+             <td colspan="2" style="padding: 10px 0;">
+                <div style="height: 1px; background: #f1f5f9;"></div>
+             </td>
+          </tr>
+          <tr>
+            <td style="color: #64748b; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Specialization</td>
+            <td style="color: #0f172a; font-size: 14px;">
+              ${data.volunteerTypes ? data.volunteerTypes.map(t => `<span style="background: #000080; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-right: 4px;">${t}</span>`).join('') : data.registrationType}
+            </td>
+          </tr>
+          <tr>
+            <td style="color: #64748b; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Current Occupation</td>
+            <td style="color: #0f172a; font-size: 14px;">${data.occupation || 'N/A'}</td>
+          </tr>
+          <tr>
+            <td style="color: #64748b; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Identified Skills</td>
+            <td style="color: #0f172a; font-size: 14px; font-style: italic;">"${data.skills || 'Self-motivated volunteer'}"</td>
+          </tr>
         </table>
+
+        <div style="margin-top: 30px; text-align: center;">
+          <a href="${process.env.ADMIN_URL || 'http://localhost:3000'}/admin/volunteers" style="background-color: #000080; color: #f4c430; padding: 16px 32px; border-radius: 12px; font-weight: 800; text-decoration: none; display: inline-block; box-shadow: 0 10px 15px -3px rgba(0, 0, 128, 0.2);">
+            REVIEW APPLICATION IN DASHBOARD
+          </a>
+        </div>
       `,
-      '#f59e0b'
+      '#000080'
     )
   }),
 

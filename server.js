@@ -140,6 +140,8 @@ app.options('*', cors());
 const newsletterRoutes = require('./routes/newsletterRoutes');
 const complianceRoutes = require('./routes/complianceRoutes');
 
+const chatRoutes = require('./routes/chatRoutes');
+
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/users', userRoutes);
@@ -168,6 +170,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/page-config', pageConfigRoutes);
+app.use('/api/chat', chatRoutes);
 
 // 404 Handler
 app.use('*', (req, res) => {
