@@ -1,186 +1,172 @@
-const Report = require('../models/Report');
-const Volunteer = require('../models/Volunteer');
-const Donation = require('../models/Donation');
-const Admin = require('../models/Admin');
-const Task = require('../models/Task');
-const ActivityLog = require('../models/ActivityLog');
+const VisitorActivity = require('../models/VisitorActivity');
+const geoip = require('geoip-lite');
 
-// @desc    Get analytics overview
-// @route   GET /api/analytics
-// @access  Private
-const getAnalytics = async (req, res) => {
+// Track user activity
+exports.trackActivity = async (req, res) => {
   try {
-    const totalReports = await Report.countDocuments();
-    const totalVolunteers = await Volunteer.countDocuments();
-    const totalDonations = await Donation.countDocuments();
-    const totalAdmins = await Admin.countDocuments();
-    const totalTasks = await Task.countDocuments();
+    const { sessionId, path, events, duration, startTime, endTime, isNewSession, referer } = req.body;
+    
+    // Get IP Address from request
+    let ipAddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+    
+    // Clean up IPv6 localhost or proxied IPs
+    if (ipAddress === '::1' || ipAddress === '::ffff:127.0.0.1') {
+      ipAddress = '127.0.0.1';
+    } else if (ipAddress.includes(',')) {
+      ipAddress = ipAddress.split(',')[0].trim();
+    }
 
-    // Trends for reports (last 6 months)
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const userAgent = req.headers['user-agent'];
 
-    const reportTrends = await Report.aggregate([
-      { $match: { createdAt: { $gte: sixMonthsAgo } } },
-      {
-        $group: {
-          _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
-          count: { $sum: 1 },
-          resolved: {
-            $sum: { $cond: [{ $eq: ["$status", "resolved"] }, 1, 0] }
-          }
-        }
-      },
-      { $sort: { "_id.year": 1, "_id.month": 1 } }
-    ]);
-
-    const donationStats = await Donation.aggregate([
-      { $group: { _id: null, totalAmount: { $sum: "$amount" }, count: { $sum: 1 } } }
-    ]);
-
-    const analyticsData = {
-      overview: {
-        totalReports,
-        totalVolunteers,
-        totalDonations: donationStats.length > 0 ? donationStats[0].count : 0,
-        totalRevenue: donationStats.length > 0 ? donationStats[0].totalAmount : 0,
-        totalAdmins,
-        totalTasks
-      },
-      trends: {
-        reports: reportTrends.map(t => ({
-          month: new Date(0, t._id.month - 1).toLocaleString('default', { month: 'short' }),
-          count: t.count,
-          resolved: t.resolved
-        }))
-      },
-      demographics: {
-        reportsByCategory: await Report.aggregate([
-          { $group: { _id: "$category", count: { $sum: 1 } } },
-          { $project: { category: "$_id", count: 1, _id: 0 } }
-        ])
+    // Get geolocation from IP
+    let location = { city: 'Unknown', region: 'Unknown', country: 'Unknown' };
+    if (ipAddress !== '127.0.0.1') {
+      const geo = geoip.lookup(ipAddress);
+      if (geo) {
+        location = {
+          city: geo.city || 'Unknown',
+          region: geo.region || 'Unknown',
+          country: geo.country || 'Unknown'
+        };
       }
-    };
+    }
 
-    res.status(200).json({
-      success: true,
-      data: analyticsData,
-      generatedAt: new Date()
-    });
+    // Optimization Theory: If this is a click-event coming from the same session and page,
+    // we should append it to the existing page-view document instead of creating a new one.
+    // This prevents "Stats Inflation" and "Database Bloat".
+    
+    // Look for an existing document for this session and path updated in the last 30 minutes
+    let activity = await VisitorActivity.findOne({
+      sessionId,
+      path,
+      updatedAt: { $gte: new Date(Date.now() - 30 * 60 * 1000) }
+    }).sort({ updatedAt: -1 });
+
+    if (activity && !isNewSession) {
+      // Update existing record
+      if (events && events.length > 0) {
+        activity.events.push(...events);
+      }
+      if (duration) activity.duration = duration;
+      if (endTime) activity.endTime = endTime;
+      await activity.save();
+    } else {
+      // Create the activity record
+      activity = new VisitorActivity({
+        sessionId,
+        ipAddress,
+        userAgent,
+        path,
+        referer,
+        startTime: startTime || new Date(),
+        endTime,
+        duration: duration || 0,
+        events: events || [],
+        location,
+        isNewSession: !!isNewSession
+      });
+      await activity.save();
+    }
+
+    res.status(200).json({ success: true });
   } catch (error) {
-    console.error('❌ Get analytics failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch analytics data'
-    });
+    console.error('Track Activity Error:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 
-// @desc    Get analytics overview summary
-// @route   GET /api/analytics/overview
-// @access  Private
-const getAnalyticsOverview = async (req, res) => {
+// Get stats for admin panel
+exports.getVisitorStats = async (req, res) => {
   try {
-    const totalReports = await Report.countDocuments();
-    const totalVolunteers = await Volunteer.countDocuments();
-    const totalTasks = await Task.countDocuments();
-    const totalAdmins = await Admin.countDocuments();
+    const { timeRange = '24h' } = req.query;
+    let startDate = new Date();
+    
+    if (timeRange === '24h') startDate.setHours(startDate.getHours() - 24);
+    else if (timeRange === '7d') startDate.setDate(startDate.getDate() - 7);
+    else if (timeRange === '30d') startDate.setDate(startDate.getDate() - 30);
+    else startDate.setHours(startDate.getHours() - 24); // default 24h
+
+    // Get basic stats - Only count distinctive sessions or page_view events to avoid inflation
+    // A single document now represents a page session, so countDocuments is safer, 
+    // but counting entries with 'page_view' in events is more accurate.
+    const totalViews = await VisitorActivity.countDocuments({ 
+      createdAt: { $gte: startDate },
+      'events.type': 'page_view'
+    });
+    
+    const uniqueIPs = await VisitorActivity.distinct('ipAddress', { createdAt: { $gte: startDate } });
+    const uniqueSessions = await VisitorActivity.distinct('sessionId', { createdAt: { $gte: startDate } });
+
+    // Get recent activities - Group by IP to show Unique Explorers/Visitors instead of every single session
+    const recentActivities = await VisitorActivity.aggregate([
+      { $match: { createdAt: { $gte: startDate } } },
+      { $sort: { createdAt: -1 } },
+      { 
+        $group: {
+          _id: '$ipAddress',
+          ipAddress: { $first: '$ipAddress' },
+          path: { $first: '$path' },
+          startTime: { $first: '$startTime' },
+          duration: { $first: '$duration' },
+          events: { $first: '$events' },
+          sessionId: { $first: '$sessionId' }
+        }
+      },
+      { $sort: { startTime: -1 } },
+      { $limit: 50 }
+    ]);
+
+    // Get popular pages
+    const popularPages = await VisitorActivity.aggregate([
+      { $match: { createdAt: { $gte: startDate }, 'events.type': 'page_view' } },
+      { $group: { _id: '$path', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // Get top clicking buttons
+    const topButtons = await VisitorActivity.aggregate([
+      { $match: { createdAt: { $gte: startDate } } },
+      { $unwind: '$events' },
+      { $match: { 'events.type': 'click' } },
+      { $group: { _id: '$events.targetText', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
 
     res.status(200).json({
       success: true,
       data: {
-        totalReports,
-        totalVolunteers,
-        totalTasks,
-        totalAdmins
+        stats: {
+          totalViews,
+          uniqueIPs: uniqueIPs.length,
+          uniqueSessions: uniqueSessions.length
+        },
+        recentActivities,
+        popularPages,
+        topButtons
       }
     });
   } catch (error) {
-    console.error('❌ Get analytics overview failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch analytics overview'
-    });
+    console.error('Get Stats Error:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 
-// @desc    Get analytics trends
-// @route   GET /api/analytics/trends
-// @access  Private
-const getAnalyticsTrends = async (req, res) => {
+// Get specific visitor details by IP
+exports.getVisitorDetailsByIP = async (req, res) => {
   try {
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-    const trends = await Report.aggregate([
-      { $match: { createdAt: { $gte: sixMonthsAgo } } },
-      {
-        $group: {
-          _id: { month: { $month: "$createdAt" } },
-          reports: { $sum: 1 }
-        }
-      },
-      { $sort: { "_id.month": 1 } }
-    ]);
-
-    res.status(200).json({
-      success: true,
-      data: trends
-    });
-  } catch (error) {
-    console.error('❌ Get analytics trends failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch analytics trends'
-    });
-  }
-};
-
-// @desc    Get real-time analytics
-// @route   GET /api/analytics/realtime
-// @access  Private
-const getRealtimeAnalytics = async (req, res) => {
-  try {
-    const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    
-    const recentReports = await Report.countDocuments({ createdAt: { $gte: last24Hours } });
-    const recentVolunteers = await Volunteer.countDocuments({ createdAt: { $gte: last24Hours } });
-    
-    const recentActivity = await ActivityLog.find()
-      .populate('admin', 'name')
+    const { ip } = req.params;
+    const activities = await VisitorActivity.find({ ipAddress: ip })
       .sort({ createdAt: -1 })
-      .limit(5);
+      .limit(50);
 
     res.status(200).json({
       success: true,
-      data: {
-        activeReports24h: recentReports,
-        newVolunteers24h: recentVolunteers,
-        recentActivity: recentActivity.map(a => ({
-          type: a.action,
-          message: `${a.admin ? a.admin.name : 'System'} ${a.action} ${a.module}`,
-          timestamp: a.createdAt
-        }))
-      }
+      data: activities
     });
   } catch (error) {
-    console.error('❌ Get realtime analytics failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch realtime analytics'
-    });
+    console.error('Get Visitor Details Error:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
-};
-
-module.exports = {
-  getAnalytics,
-  getAnalyticsOverview,
-  getAnalyticsTrends,
-  getRealtimeAnalytics,
-  // Placeholders for compatibility if other routes exist
-  getAnalyticsDemographics: (req, res) => res.status(200).json({ success: true, data: {} }),
-  getPerformanceMetrics: (req, res) => res.status(200).json({ success: true, data: {} }),
-  getGeographicAnalytics: (req, res) => res.status(200).json({ success: true, data: {} }),
-  getTimeAnalytics: (req, res) => res.status(200).json({ success: true, data: {} }),
-  exportAnalytics: (req, res) => res.status(200).json({ success: true, message: 'Export scheduled' })
 };

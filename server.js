@@ -137,6 +137,10 @@ app.get('/api/health', (req, res) => {
 app.options('*', cors());
 
 // API Routes
+const newsletterRoutes = require('./routes/newsletterRoutes');
+const complianceRoutes = require('./routes/complianceRoutes');
+
+// Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/users', userRoutes);
 app.use('/api/admin/activities', activityRoutes);
@@ -155,10 +159,13 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/content', contentRoutes);
+app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/compliance', complianceRoutes);
 app.use('/api/press', pressRoutes);
 app.use('/api/documentaries', documentaryRoutes);
 app.use('/api/seo', seoRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/page-config', pageConfigRoutes);
 

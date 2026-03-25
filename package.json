@@ -28,6 +28,7 @@
     "express-async-handler": "^1.2.0",
     "express-rate-limit": "^6.10.0",
     "express-validator": "^7.0.1",
+    "geoip-lite": "^2.0.1",
     "helmet": "^7.0.0",
     "html-pdf-node": "^1.0.8",
     "jsonwebtoken": "^9.0.2",
