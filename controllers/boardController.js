@@ -35,10 +35,16 @@ const createBoardApplication = async (req, res) => {
     // Send admin notification
     await sendEmail(process.env.ADMIN_EMAIL, 'boardApplicationAdminNotification', {
       applicantName: application.name,
+      email: application.email,
+      phone: application.phone,
       applicationId: application.applicationId,
       positionInterested: application.positionInterested,
       experience: application.experience,
-      organization: application.organization
+      organization: application.organization,
+      city: application.city,
+      state: application.state,
+      qualifications: application.qualifications,
+      motivationStatement: application.motivationStatement
     });
 
     res.status(201).json({

@@ -38,6 +38,13 @@ exports.subscribe = async (req, res) => {
       source: source || 'blog_page'
     });
 
+    // Send admin notification
+    const { sendEmail } = require('../services/emailService');
+    await sendEmail(process.env.ADMIN_EMAIL, 'newsletterAdminNotification', {
+      email: subscriber.email,
+      source: subscriber.source
+    });
+
     res.status(201).json({
       success: true,
       data: subscriber,

@@ -8,7 +8,11 @@ const {
   changePassword,
   forgotPassword,
   resetPassword,
-  refreshToken
+  refreshToken,
+  sendOTP,
+  verifyOTP,
+  sendMobileOTP,
+  verifyMobileOTP
 } = require('../controllers/authController');
 const { protect, authorize, authRateLimit } = require('../middleware/auth');
 const { body } = require('express-validator');
@@ -54,6 +58,10 @@ router.post('/login', authRateLimit, loginValidation, login);
 router.post('/forgot-password', authRateLimit, forgotPasswordValidation, forgotPassword);
 router.put('/reset-password/:resettoken', resetPasswordValidation, resetPassword);
 router.post('/refresh-token', refreshToken);
+router.post('/send-otp', authRateLimit, sendOTP);
+router.post('/verify-otp', authRateLimit, verifyOTP);
+router.post('/send-mobile-otp', authRateLimit, sendMobileOTP);
+router.post('/verify-mobile-otp', authRateLimit, verifyMobileOTP);
 
 // Protected routes
 router.post('/register', protect, authorize('super_admin', 'manager'), registerValidation, register);

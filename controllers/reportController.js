@@ -24,7 +24,7 @@ const createReport = async (req, res) => {
     // Handle file uploads if present
     if (req.files) {
       const fileUploads = {};
-      
+
       for (const [fieldName, files] of Object.entries(req.files)) {
         if (files && files.length > 0) {
           const file = files[0];
@@ -32,7 +32,7 @@ const createReport = async (req, res) => {
           fileUploads[fieldName] = uploadResult.url;
         }
       }
-      
+
       // Add uploaded file URLs to report data
       Object.assign(reportData, fileUploads);
     }
@@ -52,12 +52,15 @@ const createReport = async (req, res) => {
     }
 
     // Send admin notification email
-    await sendEmail(process.env.ADMIN_EMAIL, 'reportConfirmation', {
+    await sendEmail(process.env.ADMIN_EMAIL, 'reportAdminNotification', {
       reporterName: report.reporterName || 'Anonymous',
       caseNumber: report.caseNumber,
       exactLocation: report.exactLocation,
       area: report.area,
-      city: report.city
+      city: report.city,
+      state: report.state,
+      reporterPhone: report.reporterPhone,
+      reporterEmail: report.reporterEmail
     });
 
     res.status(201).json({
@@ -150,16 +153,12 @@ const getReport = async (req, res) => {
     });
   }
 };
-
-// @desc    Update report status and notes
-// @route   PUT /api/reports/:id
-// @access  Private/Admin
 const updateReport = async (req, res) => {
   try {
     const { status, notes, assignedTo, priority } = req.body;
-    
+
     const report = await Report.findById(req.params.id);
-    
+
     if (!report) {
       return res.status(404).json({
         success: false,
@@ -171,7 +170,7 @@ const updateReport = async (req, res) => {
     if (status) report.status = status;
     if (priority) report.priority = priority;
     if (assignedTo) report.assignedTo = assignedTo;
-    
+
     // Add note if provided
     if (notes) {
       report.notes.push({
@@ -190,7 +189,7 @@ const updateReport = async (req, res) => {
     if (status === 'resolved') {
       report.resolvedAt = new Date();
     }
-    
+
     await report.save();
 
     // Send status update email to reporter if email exists

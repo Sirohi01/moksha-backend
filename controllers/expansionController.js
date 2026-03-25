@@ -12,11 +12,15 @@ const createExpansionRequest = async (req, res) => {
     });
     await sendEmail(process.env.ADMIN_EMAIL, 'expansionRequestAdminNotification', {
       name: expansionRequest.name,
+      email: expansionRequest.email,
+      phone: expansionRequest.phone,
       requestId: expansionRequest.requestId,
       requestedCity: expansionRequest.requestedCity,
       requestedState: expansionRequest.requestedState,
       localSupport: expansionRequest.localSupport,
-      organization: expansionRequest.organization
+      organization: expansionRequest.organization,
+      urgencyLevel: expansionRequest.urgencyLevel,
+      whyNeeded: expansionRequest.whyNeeded
     });
 
     res.status(201).json({

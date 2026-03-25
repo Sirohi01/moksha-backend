@@ -38,6 +38,56 @@ const createTransporter = () => {
 
 // Complete Email Templates for ALL Forms
 const emailTemplates = {
+  // Helper for consistent premium admin templates
+  wrapAdminTemplate: (title, subtitle, content, color = '#1e3a8a') => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8fafc; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+      <div style="background: linear-gradient(135deg, ${color}, ${color}dd); padding: 40px 20px; text-align: center; color: white;">
+        <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; text-transform: uppercase;">${title}</h1>
+        <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px; font-weight: 500;">${subtitle}</p>
+      </div>
+      <div style="padding: 30px; background-color: white;">
+        ${content}
+      </div>
+      <div style="background-color: #f1f5f9; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0; color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+          Moksha Sewa Foundation • Admin Intelligence System
+        </p>
+        <p style="margin: 8px 0 0 0; color: #94a3b8; font-size: 11px;">
+          This is an automated notification. Generated at ${new Date().toLocaleString('en-IN')}
+        </p>
+      </div>
+    </div>
+  `,
+
+  // OTP Verification Template
+  otpVerification: (data) => ({
+    subject: `Verification Code: ${data.otp} - Moksha Sewa`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
+          <h1 style="margin: 0; font-size: 24px;">🔐 Verification Required</h1>
+          <p style="margin: 5px 0 0 0; opacity: 0.9;">Moksha Sewa Security</p>
+        </div>
+        
+        <div style="padding: 0 10px; text-align: center;">
+          <h2 style="color: #1e3a8a; margin-bottom: 20px;">Your One-Time Password (OTP)</h2>
+          <p style="color: #374151; font-size: 16px; line-height: 1.6;">Please use the following code to verify your email address. This code is valid for 5 minutes.</p>
+          
+          <div style="background: #f1f5f9; border-radius: 12px; padding: 25px; margin: 30px auto; display: inline-block; border: 2px dashed #3b82f6; width: 80%;">
+            <h1 style="margin: 0; font-size: 40px; letter-spacing: 12px; color: #1e3a8a; font-family: 'Courier New', Courier, monospace;">${data.otp}</h1>
+          </div>
+          
+          <p style="color: #64748b; font-size: 14px; margin-top: 20px;">If you didn't request this code, please ignore this email.</p>
+          
+          <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 40px;">
+            <p style="color: #374151; margin: 0; font-weight: bold;">Moksha Sewa Team</p>
+            <p style="color: #64748b; margin: 5px 0; font-size: 12px;">Liberation Through Service</p>
+          </div>
+        </div>
+      </div>
+    `
+  }),
+
   // Report Form Templates
   reportConfirmation: (data) => ({
     subject: `Report Received - Case #${data.caseNumber}`,
@@ -1099,237 +1149,221 @@ const emailTemplates = {
   // Admin Notification Templates
   reportAdminNotification: (data) => ({
     subject: `🚨 URGENT: New Report Submitted - ${data.caseNumber}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #dc2626;">🚨 URGENT: New Report Submitted</h2>
-        <p><strong>Case Number:</strong> ${data.caseNumber}</p>
-        <p><strong>Reporter:</strong> ${data.reporterName || 'Anonymous'}</p>
-        <p><strong>Location:</strong> ${data.exactLocation}, ${data.area}, ${data.city}</p>
-        <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-        <p style="color: #dc2626;"><strong>ACTION REQUIRED: Immediate response needed</strong></p>
-      </div>
-    `
+    html: emailTemplates.wrapAdminTemplate(
+      '🚨 Urgent Case Report',
+      `Reference: ${data.caseNumber}`,
+      `
+        <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin-bottom: 25px; border-radius: 4px;">
+          <h3 style="margin: 0; color: #991b1b; font-size: 16px;">Immediate Action Required</h3>
+          <p style="margin: 5px 0 0 0; color: #b91c1c; font-size: 14px;">A new case has been reported at ${data.area}, ${data.city}.</p>
+        </div>
+
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0 8px;">
+          <tr><td style="width: 140px; color: #64748b; font-size: 13px; font-weight: bold;">REPORTER:</td><td style="color: #1e293b; font-weight: 600;">${data.reporterName || 'Anonymous'}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">CONTACT:</td><td style="color: #1e293b; font-weight: 600;">${data.reporterPhone || 'N/A'}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">EMAIL:</td><td style="color: #1e293b;">${data.reporterEmail || 'N/A'}</td></tr>
+          <tr><td colspan="2"><hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 10px 0;"></td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">LOCATION:</td><td style="color: #1e293b;">${data.exactLocation}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">CITY/STATE:</td><td style="color: #1e293b;">${data.city}, ${data.state || ''}</td></tr>
+        </table>
+      `,
+      '#dc2626'
+    )
   }),
 
   donationAdminNotification: (data) => ({
-    subject: `💰 New Donation Request - ₹${data.amount} - ${data.donorName} - ACTION REQUIRED`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; background: #fff; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #dc2626, #b91c1c); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
-          <h1 style="margin: 0; font-size: 28px;">💰 New Donation Request</h1>
-          <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 16px;">Moksha Sewa - Admin Notification</p>
+    subject: `💰 New Donation Request - ₹${data.amount} - ${data.donorName}`,
+    html: emailTemplates.wrapAdminTemplate(
+      '💰 Donation Received',
+      `ID: ${data.donationId}`,
+      `
+        <div style="background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 15px; margin-bottom: 25px; border-radius: 4px; text-align: center;">
+          <h2 style="margin: 0; color: #059669; font-size: 28px;">₹${data.amount}</h2>
+          <p style="margin: 5px 0 0 0; color: #065f46; font-size: 14px; font-weight: 600;">via ${data.paymentMethod.toUpperCase()}</p>
         </div>
+
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0 10px;">
+          <tr><td style="width: 130px; color: #64748b; font-size: 13px; font-weight: bold;">DONOR:</td><td style="color: #1e293b; font-weight: 600; font-size: 16px;">${data.donorName}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">CONTACT:</td><td style="color: #1e293b; font-weight: 600;">${data.phone}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">EMAIL:</td><td style="color: #1e293b;">${data.email}</td></tr>
+          <tr><td colspan="2"><hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 10px 0;"></td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">LOCATION:</td><td style="color: #1e293b;">${data.city}, ${data.state}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">PURPOSE:</td><td style="color: #1e293b; font-weight: 600;">${data.purpose || 'General'}</td></tr>
+        </table>
         
-        <div style="background: #fef2f2; border: 2px solid #fca5a5; border-radius: 12px; padding: 20px; margin: 20px 0;">
-          <h2 style="color: #dc2626; margin-top: 0; text-align: center;">🚨 IMMEDIATE ACTION REQUIRED</h2>
-          <p style="color: #991b1b; text-align: center; font-size: 16px; font-weight: bold;">
-            Contact the donor below to confirm and process the donation
-          </p>
-        </div>
-
-        <div style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 2px solid #93c5fd; border-radius: 12px; padding: 25px; margin: 25px 0;">
-          <h3 style="color: #1e40af; margin-top: 0; font-size: 20px;">👤 Donor Information</h3>
-          <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
-            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-              <td style="padding: 15px; font-weight: bold; color: #1e40af; width: 30%;">Name:</td>
-              <td style="padding: 15px; font-size: 18px; font-weight: bold; color: #059669;">${data.donorName}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #e2e8f0;">
-              <td style="padding: 15px; font-weight: bold; color: #1e40af;">Phone:</td>
-              <td style="padding: 15px; font-size: 16px; color: #dc2626; font-weight: bold;">
-                <a href="tel:${data.phone}" style="color: #dc2626; text-decoration: none;">📞 ${data.phone}</a>
-              </td>
-            </tr>
-            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-              <td style="padding: 15px; font-weight: bold; color: #1e40af;">Email:</td>
-              <td style="padding: 15px;">
-                <a href="mailto:${data.email}" style="color: #059669; text-decoration: none;">📧 ${data.email}</a>
-              </td>
-            </tr>
-            <tr style="border-bottom: 1px solid #e2e8f0;">
-              <td style="padding: 15px; font-weight: bold; color: #1e40af;">Address:</td>
-              <td style="padding: 15px;">${data.address || 'Not provided'}</td>
-            </tr>
-            <tr style="background: #f8fafc;">
-              <td style="padding: 15px; font-weight: bold; color: #1e40af;">City, State:</td>
-              <td style="padding: 15px;">${data.city || ''}, ${data.state || ''} - ${data.pincode || ''}</td>
-            </tr>
-          </table>
-        </div>
-
-        <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid #86efac; border-radius: 12px; padding: 25px; margin: 25px 0;">
-          <h3 style="color: #166534; margin-top: 0; font-size: 20px;">💰 Donation Details</h3>
-          <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
-            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-              <td style="padding: 15px; font-weight: bold; color: #166534;">Amount:</td>
-              <td style="padding: 15px; font-size: 24px; font-weight: bold; color: #dc2626;">₹${data.amount}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #e2e8f0;">
-              <td style="padding: 15px; font-weight: bold; color: #166534;">Donation ID:</td>
-              <td style="padding: 15px; font-family: monospace; background: #f1f5f9; border-radius: 4px;">${data.donationId}</td>
-            </tr>
-            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-              <td style="padding: 15px; font-weight: bold; color: #166534;">Payment Method:</td>
-              <td style="padding: 15px; text-transform: uppercase; font-weight: bold;">${data.paymentMethod}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #e2e8f0;">
-              <td style="padding: 15px; font-weight: bold; color: #166534;">Purpose:</td>
-              <td style="padding: 15px;">${data.purpose || 'General'}</td>
-            </tr>
-            <tr style="background: #f8fafc;">
-              <td style="padding: 15px; font-weight: bold; color: #166534;">Submitted:</td>
-              <td style="padding: 15px;">${new Date().toLocaleString('en-IN')}</td>
-            </tr>
-          </table>
-        </div>
-
-        ${data.panNumber ? `
-        <div style="background: #fefce8; border: 2px solid #fde047; border-radius: 12px; padding: 20px; margin: 20px 0;">
-          <h3 style="color: #a16207; margin-top: 0;">📄 Tax Information</h3>
-          <p style="color: #92400e; margin: 5px 0;"><strong>PAN Number:</strong> ${data.panNumber}</p>
-          ${data.aadharNumber ? `<p style="color: #92400e; margin: 5px 0;"><strong>Aadhar Number:</strong> ${data.aadharNumber}</p>` : ''}
-          <p style="color: #92400e; margin: 5px 0;"><strong>Receipt Required:</strong> ${data.needReceipt ? 'Yes' : 'No'}</p>
-        </div>
-        ` : ''}
-
-        ${data.message ? `
-        <div style="background: #f0f9ff; border: 2px solid #7dd3fc; border-radius: 12px; padding: 20px; margin: 20px 0;">
-          <h3 style="color: #0369a1; margin-top: 0;">💬 Donor's Message</h3>
-          <p style="color: #0c4a6e; font-style: italic; font-size: 16px;">"${data.message}"</p>
-        </div>
-        ` : ''}
-
-        <div style="background: #fef7ff; border: 2px solid #e879f9; border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;">
-          <h3 style="color: #a21caf; margin-top: 0;">⚡ Action Items - Complete Immediately</h3>
-          <div style="text-align: left; color: #86198f;">
-            <p style="margin: 10px 0;">✅ <strong>1. Call the donor:</strong> <a href="tel:${data.phone}" style="color: #dc2626; font-weight: bold;">${data.phone}</a></p>
-            <p style="margin: 10px 0;">✅ <strong>2. Confirm donation</strong> and collect payment details</p>
-            <p style="margin: 10px 0;">✅ <strong>3. Process payment</strong> (UPI/Bank Transfer/Cash)</p>
-            <p style="margin: 10px 0;">✅ <strong>4. Send receipt</strong> (80G receipt if PAN provided)</p>
-            <p style="margin: 10px 0;">✅ <strong>5. Update database</strong> - Mark as "Completed"</p>
-            <p style="margin: 10px 0;">✅ <strong>6. Send thank you message</strong></p>
-          </div>
-        </div>
-
-        <div style="background: #1f2937; color: white; border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;">
-          <h3 style="color: #fbbf24; margin-top: 0;">📞 Call Script Template</h3>
-          <div style="background: #374151; border-radius: 8px; padding: 15px; margin: 15px 0; text-align: left;">
-            <p style="margin: 5px 0; color: #d1d5db;"><strong>Hello ${data.donorName},</strong></p>
-            <p style="margin: 5px 0; color: #d1d5db;">This is [Your Name] from Moksha Sewa. Thank you for your donation request of ₹${data.amount} on our website.</p>
-            <p style="margin: 5px 0; color: #d1d5db;">I'm calling to confirm your donation and provide you with payment details. Would you like to proceed?</p>
-            <p style="margin: 5px 0; color: #fbbf24;"><strong>Reference: ${data.donationId}</strong></p>
-          </div>
-        </div>
-
-        <div style="border-top: 2px solid #e5e7eb; padding-top: 20px; margin-top: 30px; text-align: center;">
-          <p style="color: #6b7280; margin: 0; font-size: 14px;">
-            This is an automatic notification. Please update the donation status in admin panel after contacting the donor.
-          </p>
-          <p style="color: #9ca3af; font-size: 12px; margin: 10px 0 0 0;">
-            Generated: ${new Date().toLocaleString('en-IN')} | Moksha Sewa Admin System
-          </p>
-        </div>
-      </div>
-    `
+        ${data.message ? `<div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; font-style: italic;">"${data.message}"</div>` : ''}
+      `,
+      '#059669'
+    )
   }),
 
   volunteerAdminNotification: (data) => ({
-    subject: `🤝 New Volunteer Application - ${data.volunteerId}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #f59e0b;">🤝 New Volunteer Application</h2>
-        <p><strong>Volunteer:</strong> ${data.name}</p>
-        <p><strong>Volunteer ID:</strong> ${data.volunteerId}</p>
-        <p><strong>Registration Type:</strong> ${data.registrationType}</p>
-        <p><strong>Volunteer Types:</strong> ${data.volunteerTypes ? data.volunteerTypes.join(', ') : 'Not specified'}</p>
-        <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-      </div>
-    `
+    subject: `🤝 New Volunteer - ${data.name}`,
+    html: emailTemplates.wrapAdminTemplate(
+      '🤝 New Volunteer Application',
+      `ID: ${data.volunteerId}`,
+      `
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0 8px;">
+          <tr><td style="width: 140px; color: #64748b; font-size: 13px; font-weight: bold;">NAME:</td><td style="color: #1e293b; font-weight: 600;">${data.name}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">CONTACT:</td><td style="color: #1e293b; font-weight: 600;">${data.phone || 'N/A'}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">EMAIL:</td><td style="color: #1976d2;">${data.email || 'N/A'}</td></tr>
+          <tr><td colspan="2"><hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 10px 0;"></td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">LOCATION:</td><td style="color: #1e293b;">${data.city}, ${data.state}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">SKILLS:</td><td style="color: #1e293b;">${data.skills || 'N/A'}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">TYPE:</td><td style="color: #1e293b; font-weight: 600;">${data.volunteerTypes ? data.volunteerTypes.join(', ') : data.registrationType}</td></tr>
+        </table>
+      `,
+      '#f59e0b'
+    )
   }),
 
   contactAdminNotification: (data) => ({
     subject: `📞 New Contact Inquiry - ${data.ticketNumber}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #6366f1;">📞 New Contact Inquiry</h2>
-        <p><strong>Name:</strong> ${data.name}</p>
-        <p><strong>Ticket Number:</strong> ${data.ticketNumber}</p>
-        <p><strong>Subject:</strong> ${data.subject}</p>
-        <p><strong>Inquiry Type:</strong> ${data.inquiryType || 'General'}</p>
-        <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-      </div>
-    `
+    html: emailTemplates.wrapAdminTemplate(
+      '📞 New Inquiry',
+      `Ticket: ${data.ticketNumber}`,
+      `
+        <div style="background-color: #f1f5f9; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+          <p style="margin: 0; color: #1e293b; font-weight: 700; font-size: 16px;">Subject: ${data.subject}</p>
+          <p style="margin: 10px 0 0 0; color: #475569; font-style: italic; line-height: 1.6;">"${data.message}"</p>
+        </div>
+
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0 8px;">
+          <tr><td style="width: 130px; color: #64748b; font-size: 13px; font-weight: bold;">FROM:</td><td style="color: #1e293b; font-weight: 600;">${data.name}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">PHONE:</td><td style="color: #1e293b;">${data.phone || 'N/A'}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">EMAIL:</td><td style="color: #1e293b;">${data.email || 'N/A'}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">DEPARTMENT:</td><td style="color: #1e293b; text-transform: uppercase; font-size: 12px; font-weight: 700; color: #6366f1;">${data.inquiryType || 'General'}</td></tr>
+        </table>
+      `,
+      '#6366f1'
+    )
   }),
 
   boardApplicationAdminNotification: (data) => ({
-    subject: `👔 New Board Application - ${data.applicationId}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #1e40af;">👔 New Board Application</h2>
-        <p><strong>Applicant:</strong> ${data.applicantName}</p>
-        <p><strong>Application ID:</strong> ${data.applicationId}</p>
-        <p><strong>Position:</strong> ${data.positionInterested}</p>
-        <p><strong>Experience:</strong> ${data.experience} years</p>
-        <p><strong>Organization:</strong> ${data.organization}</p>
-        <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-      </div>
-    `
+    subject: `👔 New Board Application - ${data.applicantName}`,
+    html: emailTemplates.wrapAdminTemplate(
+      '👔 Board Application',
+      `ID: ${data.applicationId}`,
+      `
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0 8px;">
+          <tr><td style="width: 150px; color: #64748b; font-size: 13px; font-weight: bold;">APPLICANT:</td><td style="color: #1e293b; font-weight: 600;">${data.applicantName}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">POSITION:</td><td style="color: #1e3a8a; font-weight: 700;">${data.positionInterested}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">EXPERIENCE:</td><td style="color: #1e293b;">${data.experience} Years</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">ORGANIZATION:</td><td style="color: #1e293b;">${data.organization || 'N/A'}</td></tr>
+          <tr><td colspan="2"><hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 10px 0;"></td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">CONTACT:</td><td style="color: #1e293b;">${data.phone} / ${data.email}</td></tr>
+        </table>
+        <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <p style="margin: 0; color: #64748b; font-size: 11px; font-weight: bold; text-transform: uppercase;">MOTIVATION:</p>
+          <p style="margin: 5px 0 0 0; color: #1e293b; font-size: 13px; font-style: italic;">"${data.motivationStatement}"</p>
+        </div>
+      `,
+      '#1e3a8a'
+    )
   }),
 
   legacyGivingAdminNotification: (data) => ({
-    subject: `🌟 New Legacy Giving Request - ${data.requestId}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #7c3aed;">🌟 New Legacy Giving Request</h2>
-        <p><strong>Requester:</strong> ${data.requesterName}</p>
-        <p><strong>Request ID:</strong> ${data.requestId}</p>
-        <p><strong>Legacy Type:</strong> ${data.legacyType}</p>
-        <p><strong>Estimated Value:</strong> ${data.estimatedValue || 'Not specified'}</p>
-        <p><strong>Timeframe:</strong> ${data.timeframe || 'Not specified'}</p>
-        <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-      </div>
-    `
+    subject: `🌟 New Legacy Giving - ${data.requesterName}`,
+    html: emailTemplates.wrapAdminTemplate(
+      '🌟 Legacy Giving',
+      `ID: ${data.requestId}`,
+      `
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0 8px;">
+          <tr><td style="width: 150px; color: #64748b; font-size: 13px; font-weight: bold;">REQUESTER:</td><td style="color: #1e293b; font-weight: 600;">${data.requesterName}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">LEGACY TYPE:</td><td style="color: #7c3aed; font-weight: 700;">${data.legacyType}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">EST. VALUE:</td><td style="color: #1e293b;">${data.estimatedValue}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">TIMEFRAME:</td><td style="color: #1e293b;">${data.timeframe}</td></tr>
+          <tr><td colspan="2"><hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 10px 0;"></td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">CONTACT:</td><td style="color: #1e293b;">${data.phone} / ${data.email}</td></tr>
+        </table>
+      `,
+      '#7c3aed'
+    )
   }),
 
   schemeApplicationAdminNotification: (data) => ({
-    subject: `🏛️ New Scheme Application - ${data.applicationId}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #dc2626;">🏛️ New Government Scheme Application</h2>
-        <p><strong>Applicant:</strong> ${data.name}</p>
-        <p><strong>Application ID:</strong> ${data.applicationId}</p>
-        <p><strong>Scheme:</strong> ${data.schemeName}</p>
-        <p><strong>Type:</strong> ${data.schemeType}</p>
-        <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-      </div>
-    `
+    subject: `🏛️ New Scheme Application - ${data.name}`,
+    html: emailTemplates.wrapAdminTemplate(
+      '🏛️ Gov Scheme App',
+      `ID: ${data.applicationId}`,
+      `
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0 8px;">
+          <tr><td style="width: 140px; color: #64748b; font-size: 13px; font-weight: bold;">APPLICANT:</td><td style="color: #1e293b; font-weight: 600;">${data.name}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">SCHEME:</td><td style="color: #dc2626; font-weight: 700;">${data.schemeName}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">TYPE:</td><td style="color: #1e293b;">${data.schemeType}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">CATEGORY:</td><td style="color: #1e293b;">${data.incomeCategory}</td></tr>
+          <tr><td colspan="2"><hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 10px 0;"></td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">CONTACT:</td><td style="color: #1e293b;">${data.phone} / ${data.email}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">LOCATION:</td><td style="color: #1e293b;">${data.city}, ${data.state}</td></tr>
+        </table>
+      `,
+      '#dc2626'
+    )
   }),
 
   expansionRequestAdminNotification: (data) => ({
-    subject: `🌍 New Expansion Request - ${data.requestId}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #0891b2;">🌍 New Expansion Request</h2>
-        <p><strong>Requester:</strong> ${data.name}</p>
-        <p><strong>Request ID:</strong> ${data.requestId}</p>
-        <p><strong>Location:</strong> ${data.requestedCity}, ${data.requestedState}</p>
-        <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-      </div>
-    `
+    subject: `🌍 Expansion Request - ${data.requestedCity}`,
+    html: emailTemplates.wrapAdminTemplate(
+      '🌍 Expansion Intent',
+      `ID: ${data.requestId}`,
+      `
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0 8px;">
+          <tr><td style="width: 140px; color: #64748b; font-size: 13px; font-weight: bold;">REQUESTER:</td><td style="color: #1e293b; font-weight: 600;">${data.name}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">HUB LOCATION:</td><td style="color: #0891b2; font-weight: 700;">${data.requestedCity}, ${data.requestedState}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">URGENCY:</td><td style="color: #1e293b;">${data.urgencyLevel}</td></tr>
+          <tr><td colspan="2"><hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 10px 0;"></td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">ORGANIZATION:</td><td style="color: #1e293b;">${data.organization || 'Individual'}</td></tr>
+        </table>
+        <div style="margin-top: 20px; padding: 15px; background: #f0f9ff; border-radius: 8px; border: 1px solid #e0f2fe;">
+          <p style="margin: 0; color: #0891b2; font-size: 11px; font-weight: bold; text-transform: uppercase;">RATIONALE:</p>
+          <p style="margin: 5px 0 0 0; color: #1e293b; font-size: 13px; line-height: 1.5;">${data.whyNeeded}</p>
+        </div>
+      `,
+      '#0891b2'
+    )
   }),
 
   feedbackAdminNotification: (data) => ({
-    subject: `💚 New Feedback Received - ${data.referenceNumber}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #10b981;">💚 New Feedback Received</h2>
-        <p><strong>Name:</strong> ${data.name}</p>
-        <p><strong>Reference:</strong> ${data.referenceNumber}</p>
-        <p><strong>Type:</strong> ${data.feedbackType}</p>
-        <p><strong>Rating:</strong> ${data.experienceRating}/5 stars</p>
-        <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-      </div>
-    `
+    subject: `💚 New Feedback - ${data.experienceRating}⭐`,
+    html: emailTemplates.wrapAdminTemplate(
+      '💚 User Feedback',
+      'Quality Control System',
+      `
+        <div style="text-align: center; margin-bottom: 25px;">
+          <div style="font-size: 32px; color: #10b981;">${'⭐'.repeat(data.experienceRating)}</div>
+          <p style="margin: 5px 0 0 0; color: #64748b; font-size: 12px; font-weight: bold;">RATING: ${data.experienceRating}/5</p>
+        </div>
+
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0 8px;">
+          <tr><td style="width: 130px; color: #64748b; font-size: 13px; font-weight: bold;">FROM:</td><td style="color: #1e293b; font-weight: 600;">${data.name}</td></tr>
+          <tr><td style="color: #64748b; font-size: 13px; font-weight: bold;">TYPE:</td><td style="color: #1e293b; text-transform: capitalize;">${data.feedbackType}</td></tr>
+        </table>
+        
+        <div style="margin-top: 20px; padding: 20px; background: #f0fdf4; border-radius: 12px; border: 1px solid #d1fae5; color: #065f46; font-style: italic;">
+          "${data.message}"
+        </div>
+      `,
+      '#10b981'
+    )
+  }),
+
+  newsletterAdminNotification: (data) => ({
+    subject: `📩 New Newsletter Subscriber - ${data.email}`,
+    html: module.exports.wrapAdminTemplate(
+      '📩 New Subscription',
+      'Mailing List Update',
+      `
+        <div style="text-align: center; padding: 20px 0;">
+          <div style="font-size: 48px; margin-bottom: 20px;">💌</div>
+          <p style="color: #64748b; font-size: 16px; margin: 0;">New audience member joined:</p>
+          <h2 style="color: #1e3a8a; font-size: 24px; margin: 15px 0;">${data.email}</h2>
+          <div style="display: inline-block; background-color: #eff6ff; color: #2563eb; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+            SOURCE: ${data.source || 'Website'}
+          </div>
+        </div>
+      `,
+      '#6366f1'
+    )
   }),
 
   expansionRequestStatusUpdate: (data) => ({

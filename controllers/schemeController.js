@@ -39,10 +39,14 @@ const createSchemeApplication = async (req, res) => {
     // Send admin notification
     await sendEmail(process.env.ADMIN_EMAIL, 'schemeApplicationAdminNotification', {
       name: application.name,
+      email: application.email,
+      phone: application.phone,
       applicationId: application.applicationId,
       schemeName: application.schemeName,
       schemeType: application.schemeType,
-      incomeCategory: application.incomeCategory
+      incomeCategory: application.incomeCategory,
+      city: application.city,
+      state: application.state
     });
 
     res.status(201).json({

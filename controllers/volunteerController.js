@@ -20,11 +20,17 @@ const createVolunteer = async (req, res) => {
     // Send admin notification
     await sendEmail(process.env.ADMIN_EMAIL, 'volunteerAdminNotification', {
       name: volunteer.name,
+      email: volunteer.email,
+      phone: volunteer.phone,
+      city: volunteer.city,
+      state: volunteer.state,
       volunteerId: volunteer.volunteerId,
       registrationType: volunteer.registrationType,
       volunteerTypes: volunteer.volunteerTypes,
-      city: volunteer.city,
-      state: volunteer.state
+      occupation: volunteer.occupation,
+      skills: volunteer.skills,
+      availability: volunteer.availability,
+      languagesKnown: volunteer.languagesKnown
     });
 
     res.status(201).json({

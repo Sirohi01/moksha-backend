@@ -19,10 +19,13 @@ const createFeedback = async (req, res) => {
     // Send admin notification
     await sendEmail(process.env.ADMIN_EMAIL, 'feedbackAdminNotification', {
       name: feedback.name,
+      email: feedback.email,
+      phone: feedback.phone,
       referenceNumber: feedback.referenceNumber,
       feedbackType: feedback.feedbackType,
       experienceRating: feedback.experienceRating,
-      message: feedback.message
+      message: feedback.message,
+      suggestions: feedback.suggestions
     });
 
     res.status(201).json({

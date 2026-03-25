@@ -25,6 +25,8 @@ const createContact = async (req, res) => {
     // Send admin notification
     await sendEmail(process.env.ADMIN_EMAIL, 'contactAdminNotification', {
       name: contact.name,
+      email: contact.email,
+      phone: contact.phone,
       ticketNumber: contact.ticketNumber,
       subject: contact.subject,
       inquiryType: contact.inquiryType,

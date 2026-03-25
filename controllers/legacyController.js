@@ -19,6 +19,8 @@ const createLegacyRequest = async (req, res) => {
     // Send admin notification
     await sendEmail(process.env.ADMIN_EMAIL, 'legacyGivingAdminNotification', {
       requesterName: legacyRequest.name,
+      email: legacyRequest.email,
+      phone: legacyRequest.phone,
       requestId: legacyRequest.requestId,
       legacyType: legacyRequest.legacyType,
       estimatedValue: legacyRequest.estimatedValue,

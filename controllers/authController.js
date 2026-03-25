@@ -1,11 +1,9 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
+const OTP = require('../models/OTP');
 const { sendEmail } = require('../services/emailService');
-
-// @desc    Register admin (Super Admin only)
-// @route   POST /api/auth/register
-// @access  Private/Super Admin
+const { sendWhatsAppOTP } = require('../services/whatsappService');
 const register = async (req, res) => {
   try {
     const { name, email, phone, password, role, allowedIPs } = req.body;
@@ -113,14 +111,14 @@ const login = async (req, res) => {
     }
 
     // IP checking disabled for production compatibility
-    
+
     // Check if password matches
     const isMatch = await admin.comparePassword(password);
 
     if (!isMatch) {
       // Increment login attempts
       await admin.incLoginAttempts();
-      
+
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
@@ -134,7 +132,7 @@ const login = async (req, res) => {
 
     // Update last login
     admin.lastLogin = new Date();
-    
+
     // Generate tokens
     const token = admin.generateAuthToken();
     const refreshToken = admin.generateRefreshToken();
@@ -351,7 +349,7 @@ const forgotPassword = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Forgot password failed:', error);
-    
+
     // Clear reset fields if email fails
     if (req.admin) {
       req.admin.resetPasswordToken = undefined;
@@ -461,6 +459,207 @@ const refreshToken = async (req, res) => {
     });
   }
 };
+const sendOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    // Check for existing OTP to prevent spamming (within 1 minute)
+    const existingOTP = await OTP.findOne({ email, createdAt: { $gt: new Date(Date.now() - 60000) } });
+    if (existingOTP) {
+      return res.status(429).json({
+        success: false,
+        message: 'Please wait 60 seconds before requesting another OTP'
+      });
+    }
+
+    // Generate 6-digit OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save OTP to DB
+    await OTP.create({
+      email,
+      otp: otpCode
+    });
+
+    // Send Email
+    await sendEmail(email, 'otpVerification', {
+      otp: otpCode
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP sent successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ Send OTP failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send OTP. Please try again later.'
+    });
+  }
+};
+
+/**
+ * @desc    Send OTP via WhatsApp to mobile number
+ * @route   POST /api/auth/send-mobile-otp
+ * @access  Public
+ */
+const sendMobileOTP = async (req, res) => {
+  try {
+    const { mobile } = req.body;
+
+    if (!mobile) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mobile number is required'
+      });
+    }
+
+    // Check for existing OTP to prevent spamming (within 1 minute)
+    const existingOTP = await OTP.findOne({ mobile, createdAt: { $gt: new Date(Date.now() - 60000) } });
+    if (existingOTP) {
+      return res.status(429).json({
+        success: false,
+        message: 'Please wait 60 seconds before requesting another OTP'
+      });
+    }
+
+    // Generate 6-digit OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save OTP to DB
+    await OTP.create({
+      mobile,
+      otp: otpCode
+    });
+
+    // Send WhatsApp OTP
+    const waResponse = await sendWhatsAppOTP(mobile, otpCode);
+
+    if (waResponse.success) {
+      res.status(200).json({
+        success: true,
+        message: 'OTP sent successfully to your WhatsApp'
+      });
+    } else {
+      // If WhatsApp fails, we still let the user know there was an issue
+      res.status(500).json({
+        success: false,
+        message: waResponse.message || 'Failed to send WhatsApp OTP. Please try again or check your number.'
+      });
+    }
+
+  } catch (error) {
+    console.error('❌ Send Mobile OTP failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send WhatsApp OTP. Please try again later.'
+    });
+  }
+};
+
+const verifyOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and OTP are required'
+      });
+    }
+
+    // Find the latest OTP for this email
+    const otpRecord = await OTP.findOne({ email }).sort({ createdAt: -1 });
+
+    if (!otpRecord) {
+      return res.status(400).json({
+        success: false,
+        message: 'OTP has expired or never requested'
+      });
+    }
+
+    if (otpRecord.otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid OTP code'
+      });
+    }
+
+    // Success - Delete the OTP record so it can't be used again
+    await OTP.deleteMany({ email });
+
+    res.status(200).json({
+      success: true,
+      message: 'Email verified successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ Verify OTP failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Verification failed'
+    });
+  }
+};
+
+/**
+ * @desc    Verify mobile OTP for WhatsApp
+ * @route   POST /api/auth/verify-mobile-otp
+ * @access  Public
+ */
+const verifyMobileOTP = async (req, res) => {
+  try {
+    const { mobile, otp } = req.body;
+
+    if (!mobile || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mobile number and OTP are required'
+      });
+    }
+
+    // Find the latest OTP for this mobile
+    const otpRecord = await OTP.findOne({ mobile }).sort({ createdAt: -1 });
+
+    if (!otpRecord) {
+      return res.status(400).json({
+        success: false,
+        message: 'OTP has expired or never requested'
+      });
+    }
+
+    if (otpRecord.otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid OTP code'
+      });
+    }
+
+    // Success - Delete the OTP record so it can't be used again
+    await OTP.deleteMany({ mobile });
+
+    res.status(200).json({
+      success: true,
+      message: 'Mobile number verified successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ Verify Mobile OTP failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Verification failed'
+    });
+  }
+};
 
 module.exports = {
   register,
@@ -471,5 +670,10 @@ module.exports = {
   changePassword,
   forgotPassword,
   resetPassword,
-  refreshToken
+  refreshToken,
+  sendOTP,
+  verifyOTP,
+  sendMobileOTP,
+  verifyMobileOTP
 };
+
