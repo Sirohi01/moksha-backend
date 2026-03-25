@@ -5,10 +5,10 @@ const geoip = require('geoip-lite');
 exports.trackActivity = async (req, res) => {
   try {
     const { sessionId, path, events, duration, startTime, endTime, isNewSession, referer } = req.body;
-    
+
     // Get IP Address from request
     let ipAddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
-    
+
     // Clean up IPv6 localhost or proxied IPs
     if (ipAddress === '::1' || ipAddress === '::ffff:127.0.0.1') {
       ipAddress = '127.0.0.1';
@@ -34,7 +34,7 @@ exports.trackActivity = async (req, res) => {
     // Optimization Theory: If this is a click-event coming from the same session and page,
     // we should append it to the existing page-view document instead of creating a new one.
     // This prevents "Stats Inflation" and "Database Bloat".
-    
+
     // Look for an existing document for this session and path updated in the last 30 minutes
     let activity = await VisitorActivity.findOne({
       sessionId,
@@ -78,30 +78,39 @@ exports.trackActivity = async (req, res) => {
 // Get stats for admin panel
 exports.getVisitorStats = async (req, res) => {
   try {
-    const { timeRange = '24h' } = req.query;
+    const { timeRange = '24h', customStart, customEnd } = req.query;
     let startDate = new Date();
-    
-    if (timeRange === '24h') startDate.setHours(startDate.getHours() - 24);
-    else if (timeRange === '7d') startDate.setDate(startDate.getDate() - 7);
-    else if (timeRange === '30d') startDate.setDate(startDate.getDate() - 30);
-    else startDate.setHours(startDate.getHours() - 24); // default 24h
+    let endDate = new Date();
 
-    // Get basic stats - Only count distinctive sessions or page_view events to avoid inflation
-    // A single document now represents a page session, so countDocuments is safer, 
-    // but counting entries with 'page_view' in events is more accurate.
-    const totalViews = await VisitorActivity.countDocuments({ 
-      createdAt: { $gte: startDate },
+    if (customStart && customEnd) {
+      startDate = new Date(customStart);
+      endDate = new Date(customEnd);
+      // Ensure time covers full day
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+    } else {
+      if (timeRange === '24h') startDate.setHours(startDate.getHours() - 24);
+      else if (timeRange === '7d') startDate.setDate(startDate.getDate() - 7);
+      else if (timeRange === '30d') startDate.setDate(startDate.getDate() - 30);
+      else startDate.setHours(startDate.getHours() - 24); // default 24h
+    }
+
+    const dateFilter = { createdAt: { $gte: startDate, $lte: endDate } };
+
+    // Get basic stats
+    const totalViews = await VisitorActivity.countDocuments({
+      ...dateFilter,
       'events.type': 'page_view'
     });
-    
-    const uniqueIPs = await VisitorActivity.distinct('ipAddress', { createdAt: { $gte: startDate } });
-    const uniqueSessions = await VisitorActivity.distinct('sessionId', { createdAt: { $gte: startDate } });
+
+    const uniqueIPs = await VisitorActivity.distinct('ipAddress', dateFilter);
+    const uniqueSessions = await VisitorActivity.distinct('sessionId', dateFilter);
 
     // Get recent activities - Group by IP to show Unique Explorers/Visitors instead of every single session
     const recentActivities = await VisitorActivity.aggregate([
-      { $match: { createdAt: { $gte: startDate } } },
+      { $match: dateFilter },
       { $sort: { createdAt: -1 } },
-      { 
+      {
         $group: {
           _id: '$ipAddress',
           ipAddress: { $first: '$ipAddress' },
@@ -118,7 +127,7 @@ exports.getVisitorStats = async (req, res) => {
 
     // Get popular pages
     const popularPages = await VisitorActivity.aggregate([
-      { $match: { createdAt: { $gte: startDate }, 'events.type': 'page_view' } },
+      { $match: { ...dateFilter, 'events.type': 'page_view' } },
       { $group: { _id: '$path', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 10 }
@@ -126,7 +135,7 @@ exports.getVisitorStats = async (req, res) => {
 
     // Get top clicking buttons
     const topButtons = await VisitorActivity.aggregate([
-      { $match: { createdAt: { $gte: startDate } } },
+      { $match: dateFilter },
       { $unwind: '$events' },
       { $match: { 'events.type': 'click' } },
       { $group: { _id: '$events.targetText', count: { $sum: 1 } } },
