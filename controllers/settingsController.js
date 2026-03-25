@@ -1,10 +1,10 @@
 // In-memory settings storage (replace with database in production)
 let systemSettings = {
   general: {
-    siteName: 'Moksha Seva',
+    siteName: 'Moksha Sewa',
     siteDescription: 'Dignified Last Rites for All',
-    contactEmail: 'contact@mokshaseva.org',
-    supportEmail: 'support@mokshaseva.org',
+    contactEmail: 'contact@MokshaSewa.org',
+    supportEmail: 'support@MokshaSewa.org',
     maintenanceMode: false,
     timezone: 'Asia/Kolkata',
     language: 'en',
@@ -23,10 +23,10 @@ let systemSettings = {
   email: {
     smtpHost: 'smtp.gmail.com',
     smtpPort: 587,
-    smtpUser: 'noreply@mokshaseva.org',
+    smtpUser: 'noreply@MokshaSewa.org',
     smtpPassword: '', // encrypted
-    fromName: 'Moksha Seva',
-    fromEmail: 'noreply@mokshaseva.org',
+    fromName: 'Moksha Sewa',
+    fromEmail: 'noreply@MokshaSewa.org',
     enableTLS: true,
     enableSSL: false
   },
@@ -50,7 +50,7 @@ let systemSettings = {
   api: {
     rateLimit: 100, // requests per 15 minutes
     enableCORS: true,
-    allowedOrigins: ['http://localhost:3000', 'https://mokshaseva.org'],
+    allowedOrigins: ['http://localhost:3000', 'https://MokshaSewa.org'],
     apiVersion: 'v1',
     enableLogging: true
   },
@@ -175,7 +175,7 @@ const updateSettings = async (req, res) => {
 const getSettingsSection = async (req, res) => {
   try {
     const { section } = req.params;
-    
+
     if (!systemSettings[section]) {
       return res.status(404).json({
         success: false,
@@ -213,7 +213,7 @@ const updateSettingsSection = async (req, res) => {
   try {
     const { section } = req.params;
     const updateData = req.body;
-    
+
     if (!systemSettings[section]) {
       return res.status(404).json({
         success: false,
@@ -324,7 +324,7 @@ const testEmailConfig = async (req, res) => {
     // In a real implementation, this would actually send a test email
     // For now, we'll simulate the test
     const emailConfig = systemSettings.email;
-    
+
     if (!emailConfig.smtpHost || !emailConfig.smtpUser) {
       return res.status(400).json({
         success: false,
@@ -358,10 +358,10 @@ const testEmailConfig = async (req, res) => {
 const getDefaultSettings = () => {
   return {
     general: {
-      siteName: 'Moksha Seva',
+      siteName: 'Moksha Sewa',
       siteDescription: 'Dignified Last Rites for All',
-      contactEmail: 'contact@mokshaseva.org',
-      supportEmail: 'support@mokshaseva.org',
+      contactEmail: 'contact@MokshaSewa.org',
+      supportEmail: 'support@MokshaSewa.org',
       maintenanceMode: false,
       timezone: 'Asia/Kolkata',
       language: 'en',
@@ -382,7 +382,7 @@ const getDefaultSettings = () => {
       smtpPort: 587,
       smtpUser: '',
       smtpPassword: '',
-      fromName: 'Moksha Seva',
+      fromName: 'Moksha Sewa',
       fromEmail: '',
       enableTLS: true,
       enableSSL: false

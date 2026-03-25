@@ -108,10 +108,10 @@ const sampleConfigs = {
       ]
     },
     about: {
-      badge: "About Moksha Seva",
+      badge: "About Moksha Sewa",
       title: "Restoring Dignity to the",
       titleHighlight: "Final Journey",
-      description: "Moksha Seva is dedicated to ensuring that no soul departs this world without the sacred rites and dignity they deserve.",
+      description: "Moksha Sewa is dedicated to ensuring that no soul departs this world without the sacred rites and dignity they deserve.",
       stats: [
         { number: "5000+", label: "Souls Served" },
         { number: "38+", label: "Cities" },
@@ -231,7 +231,7 @@ const sampleConfigs = {
     transparency: {
       title: "TRANSPARENCY",
       titleHighlight: "IS OUR SANCTITY",
-      description: "Every rupee donated to Moksha Seva is a sacred trust. We maintain 100% visibility on all our mission operational costs and final rites expenditures.",
+      description: "Every rupee donated to Moksha Sewa is a sacred trust. We maintain 100% visibility on all our mission operational costs and final rites expenditures.",
       stats: [
         { label: "Direct Mission Costs", percentage: "82%" },
         { label: "Service Maintenance", percentage: "12%" },
@@ -247,7 +247,7 @@ const sampleConfigs = {
       }
     },
     labels: {
-      heroAltText: "Moksha Seva - Dignified Final Journey",
+      heroAltText: "Moksha Sewa - Dignified Final Journey",
       learnMore: "Learn More",
       joinMissionAltText: "Join Our Mission"
     },
@@ -312,7 +312,7 @@ const sampleConfigs = {
       badge: "WHISPERED VOICES",
       slides: [
         {
-          quote: "Moksha Seva provided a dignified farewell when we had no one else to turn to.",
+          quote: "Moksha Sewa provided a dignified farewell when we had no one else to turn to.",
           author: "Rajesh K., Beneficiary"
         },
         {
@@ -348,7 +348,7 @@ const sampleConfigs = {
         },
         {
           question: "IS THE DONATION TAX-EXEMPT?",
-          answer: "Yes, Moksha Seva is a registered entity and all donations are 80G tax-exempted according to regulations."
+          answer: "Yes, Moksha Sewa is a registered entity and all donations are 80G tax-exempted according to regulations."
         }
       ]
     }
@@ -357,8 +357,8 @@ const sampleConfigs = {
   about: {
     hero: {
       badge: "✦ Our Story ✦",
-      title: "About Moksha Seva",
-      description: "Founded in 2018, Moksha Seva began with a simple conviction: that every human being — regardless of identity, wealth, or social status — deserves a respectful and dignified farewell.",
+      title: "About Moksha Sewa",
+      description: "Founded in 2018, Moksha Sewa began with a simple conviction: that every human being — regardless of identity, wealth, or social status — deserves a respectful and dignified farewell.",
       stats: [
         { number: "2,847", label: "Lives Honored" },
         { number: "38+", label: "Cities Served" },
@@ -382,11 +382,11 @@ const sampleConfigs = {
     },
     story: {
       tag: "Journey",
-      title: "How Moksha Seva Began",
+      title: "How Moksha Sewa Began",
       paragraphs: [
-        "In 2017, our founder Suresh Narayan witnessed an unclaimed body lying uncremated near a Delhi railway station for three days due to bureaucratic delays and lack of resources. That experience became the seed of Moksha Seva.",
+        "In 2017, our founder Suresh Narayan witnessed an unclaimed body lying uncremated near a Delhi railway station for three days due to bureaucratic delays and lack of resources. That experience became the seed of Moksha Sewa.",
         "Starting with just 5 volunteers and a small fund, the organization began documenting and coordinating cremations in partnership with Delhi Police. Within a year, we had performed 200 cremations and helped 50 families navigate government processes.",
-        "Today, Moksha Seva operates in 38 cities with 412 active volunteers, and has performed 2,847 cremations — each one documented and publicly accessible. We work in formal partnership with 12 police districts, 8 hospitals, and 25 NGOs."
+        "Today, Moksha Sewa operates in 38 cities with 412 active volunteers, and has performed 2,847 cremations — each one documented and publicly accessible. We work in formal partnership with 12 police districts, 8 hospitals, and 25 NGOs."
       ],
       stats: [
         { number: "2,847", label: "Cremations Performed" },
@@ -425,7 +425,7 @@ const sampleConfigs = {
     },
     team: {
       tag: "Team",
-      title: "The People Behind Moksha Seva",
+      title: "The People Behind Moksha Sewa",
       members: [
         {
           name: "Suresh Narayan",
@@ -483,7 +483,7 @@ const sampleConfigs = {
     hero: {
       badge: "✦ Our Sacred Process ✦",
       title: "How",
-      titleHighlight: "Moksha Seva",
+      titleHighlight: "Moksha Sewa",
       description: "A transparent, humane, and legally compliant 6-step process — from the first report to a permanent public record."
     },
     steps: [
@@ -582,11 +582,11 @@ const sampleConfigs = {
 
   "why-moksha-seva": {
     metadata: {
-      title: "Why Moksha Seva"
+      title: "Why Moksha Sewa"
     },
     hero: {
       title: "Why Choose",
-      titleHighlight: "Moksha Seva",
+      titleHighlight: "Moksha Sewa",
       description: "When dignity matters most, trust the organization that has served with compassion for over 8 years",
       stats: [
         { number: "2,840+", label: "Lives Honored" },
@@ -594,7 +594,7 @@ const sampleConfigs = {
         { number: "8+", label: "Years" }
       ],
       image: "/gallery/image0010.png",
-      imageAlt: "Moksha Seva service"
+      imageAlt: "Moksha Sewa service"
     },
     reasons: [
       {
@@ -667,7 +667,7 @@ const sampleConfigs = {
       badge: "OUR SERVICE NETWORK",
       title: "OUR GLOBAL",
       titleHighlight: "REACH",
-      description: "Moksha Seva operates across 38+ major cities in India, with a dedicated Force of 400+ Saathis ready to respond to any call for dignity."
+      description: "Moksha Sewa operates across 38+ major cities in India, with a dedicated Force of 400+ Saathis ready to respond to any call for dignity."
     },
     regions: [
       {
@@ -718,11 +718,11 @@ const sampleConfigs = {
       ]
     },
     form: {
-      title: "BRING MOKSHA SEVA",
+      title: "BRING Moksha Sewa",
       titleHighlight: "TO YOUR CITY",
       description: "Help us expand our mission of dignity. We'll work with local partners, volunteers, and authorities to establish operations in your city.",
       successTitle: "REQUEST RECEIVED!",
-      successDescription: "Thank you for your interest in bringing Moksha Seva to your city. Our expansion team will review your request and contact you within 5-7 business days.",
+      successDescription: "Thank you for your interest in bringing Moksha Sewa to your city. Our expansion team will review your request and contact you within 5-7 business days.",
       successRequestId: "Request ID:",
       whatWeProvideText: "What we provide: Training for volunteers, ambulance coordination, legal support, and ongoing operational guidance. All services remain 100% free for beneficiaries.",
       submitButtonText: "SUBMIT EXPANSION REQUEST",
@@ -789,7 +789,7 @@ const sampleConfigs = {
       badge: "OUR LEADERSHIP",
       title: "OUR BOARD &",
       titleHighlight: "ADVISORS",
-      description: "Moksha Seva is guided by a collective of experts in legal, medical, and spiritual domains. Together, we ensure the mission remains pure and powerful."
+      description: "Moksha Sewa is guided by a collective of experts in legal, medical, and spiritual domains. Together, we ensure the mission remains pure and powerful."
     },
     leadership: [
       {
@@ -940,7 +940,7 @@ const sampleConfigs = {
       title: "Who Can Access Our Services?",
       description: "Our services are completely free and available to anyone in need. We believe dignity in death is a fundamental right, not a privilege.",
       mainImage: "/gallery/image6.png",
-      mainImageAlt: "Moksha Seva services",
+      mainImageAlt: "Moksha Sewa services",
       items: [
         {
           icon: "UserCheck",
@@ -996,7 +996,7 @@ const sampleConfigs = {
     },
     importantNotice: {
       title: "Important Notice",
-      message: "Please also inform your nearest police station. Moksha Seva works in coordination with law enforcement. Do not move or disturb the body."
+      message: "Please also inform your nearest police station. Moksha Sewa works in coordination with law enforcement. Do not move or disturb the body."
     },
     formHeader: {
       title: "Case Report Form",
@@ -1071,7 +1071,7 @@ const sampleConfigs = {
       panNumber: "PAN Number",
       panPhoto: "Upload PAN Card Photo",
       agreeToTerms: "I confirm that the information provided is accurate to the best of my knowledge *",
-      consentToShare: "I consent to share this information with authorities and Moksha Seva team *",
+      consentToShare: "I consent to share this information with authorities and Moksha Sewa team *",
       submitButton: "Submit Emergency Report",
       confidentialityText: "Your information is confidential and used only for case resolution."
     },
@@ -1342,13 +1342,13 @@ const sampleConfigs = {
       title: "Voices of Impact",
       testimonials: [
         {
-          quote: "Moksha Seva gave my father the dignified farewell he deserved when we had nowhere else to turn.",
+          quote: "Moksha Sewa gave my father the dignified farewell he deserved when we had nowhere else to turn.",
           author: "Priya Sharma, Delhi",
           role: "Beneficiary Family",
           image: "/gallery/image4.png"
         },
         {
-          quote: "Working with Moksha Seva has been the most fulfilling experience of my life. Every soul matters.",
+          quote: "Working with Moksha Sewa has been the most fulfilling experience of my life. Every soul matters.",
           author: "Rajesh Kumar, Volunteer",
           role: "5 Years of Service",
           image: "/gallery/image5.png"
@@ -1531,7 +1531,7 @@ const sampleConfigs = {
           role: "Beneficiary Family",
           location: "Delhi",
           rating: 5,
-          quote: "When my father passed away and we had no resources for proper rites, Moksha Seva stepped in like angels. They performed every ritual with such care and respect, following all Hindu traditions perfectly. I will be forever grateful.",
+          quote: "When my father passed away and we had no resources for proper rites, Moksha Sewa stepped in like angels. They performed every ritual with such care and respect, following all Hindu traditions perfectly. I will be forever grateful.",
           image: "/gallery/image1.png"
         },
         {
@@ -1539,7 +1539,7 @@ const sampleConfigs = {
           role: "Hospital Administrator",
           location: "Mumbai",
           rating: 5,
-          quote: "We work closely with Moksha Seva for unclaimed bodies at our hospital. Their professionalism, speed of response, and adherence to legal protocols is exemplary. They treat every case with dignity.",
+          quote: "We work closely with Moksha Sewa for unclaimed bodies at our hospital. Their professionalism, speed of response, and adherence to legal protocols is exemplary. They treat every case with dignity.",
           image: "/gallery/image2.png"
         },
         {
@@ -1547,7 +1547,7 @@ const sampleConfigs = {
           role: "Volunteer",
           location: "Varanasi",
           rating: 5,
-          quote: "Being a volunteer with Moksha Seva for 3 years has been the most fulfilling experience of my life. Every soul we serve reminds me why this work is so sacred and important.",
+          quote: "Being a volunteer with Moksha Sewa for 3 years has been the most fulfilling experience of my life. Every soul we serve reminds me why this work is so sacred and important.",
           image: "/gallery/image3.png"
         },
         {
@@ -1555,7 +1555,7 @@ const sampleConfigs = {
           role: "Corporate Partner",
           location: "Ahmedabad",
           rating: 5,
-          quote: "Our company has been supporting Moksha Seva for 2 years. Their transparency in fund utilization and regular impact reports give us complete confidence in their mission.",
+          quote: "Our company has been supporting Moksha Sewa for 2 years. Their transparency in fund utilization and regular impact reports give us complete confidence in their mission.",
           image: "/gallery/image4.png"
         },
         {
@@ -1563,7 +1563,7 @@ const sampleConfigs = {
           role: "Social Worker",
           location: "Lucknow",
           rating: 5,
-          quote: "I've referred many families to Moksha Seva during their most difficult times. The compassion and support they provide goes beyond just the final rites - they truly care for the families.",
+          quote: "I've referred many families to Moksha Sewa during their most difficult times. The compassion and support they provide goes beyond just the final rites - they truly care for the families.",
           image: "/gallery/image5.png"
         },
         {
@@ -1571,7 +1571,7 @@ const sampleConfigs = {
           role: "Government Official",
           location: "Patna",
           rating: 5,
-          quote: "Moksha Seva has been an invaluable partner in our efforts to ensure dignified treatment of unclaimed bodies. Their systematic approach and documentation is commendable.",
+          quote: "Moksha Sewa has been an invaluable partner in our efforts to ensure dignified treatment of unclaimed bodies. Their systematic approach and documentation is commendable.",
           image: "/gallery/image6.png"
         }
       ]
@@ -1693,7 +1693,7 @@ const sampleConfigs = {
         },
         {
           src: "/gallery/gallery_ambulance_unit_1772862517482.png",
-          title: "Moksha Seva Mobile Unit",
+          title: "Moksha Sewa Mobile Unit",
           category: "Infrastructure",
           location: "Service Station",
           date: "Feb 2024",
@@ -1741,7 +1741,7 @@ const sampleConfigs = {
         },
         {
           src: "/gallery/hero_moksha_1.png",
-          title: "Moksha Seva Team",
+          title: "Moksha Sewa Team",
           category: "Team",
           location: "Head Office",
           date: "Oct 2023",
@@ -1841,8 +1841,8 @@ const sampleConfigs = {
       subject: "Subject *",
       detailedMessage: "Detailed Message *",
       suggestionsForImprovement: "Suggestions for Improvement",
-      wouldRecommend: "Would you recommend Moksha Seva to others? *",
-      consentToPublish: "I consent to Moksha Seva using my feedback (anonymously) for testimonials and service improvement purposes",
+      wouldRecommend: "Would you recommend Moksha Sewa to others? *",
+      consentToPublish: "I consent to Moksha Sewa using my feedback (anonymously) for testimonials and service improvement purposes",
       submitButton: "Submit Feedback",
       confidentialityText: "Your feedback is confidential and helps us serve better."
     },
@@ -1917,7 +1917,7 @@ const sampleConfigs = {
       description: "Join 412 volunteers across 38 cities. No special qualifications needed — only compassion and a few hours a month."
     },
     success: {
-      title: "Welcome to the Moksha Seva Family!",
+      title: "Welcome to the Moksha Sewa Family!",
       description: "Thank you for registering as a volunteer. Our coordination team will reach out to you within 2–3 business days.",
       registerAnotherText: "Register another volunteer"
     },
@@ -2235,7 +2235,7 @@ const sampleConfigs = {
       badge: "THE 100-YEAR MISSION",
       title: "LEGACY",
       subtitle: "GIVING",
-      description: "Your kindness can be immortal. By including Moksha Seva in your long-term planning, you ensure no individual dies alone or without dignity for the next century."
+      description: "Your kindness can be immortal. By including Moksha Sewa in your long-term planning, you ensure no individual dies alone or without dignity for the next century."
     },
     options: [
       {
@@ -2334,7 +2334,7 @@ const sampleConfigs = {
     hero: {
       badge: "✦ Public Record ✦",
       title: "Transparency Dashboard",
-      description: "Every cremation performed by Moksha Seva is publicly documented. Search, verify, and download certificates freely.",
+      description: "Every cremation performed by Moksha Sewa is publicly documented. Search, verify, and download certificates freely.",
       icon: "Shield"
     },
     stats: {
@@ -2862,7 +2862,7 @@ const sampleConfigs = {
         {
           source: "Times of India",
           date: "February 2024",
-          title: "Moksha Seva's Saathi Force expands to 38 cities",
+          title: "Moksha Sewa's Saathi Force expands to 38 cities",
           type: "News Report"
         },
         {
@@ -2874,7 +2874,7 @@ const sampleConfigs = {
         {
           source: "Hindustan Times",
           date: "December 2023",
-          title: "Digital transformation in social sector: Moksha Seva case study",
+          title: "Digital transformation in social sector: Moksha Sewa case study",
           type: "Analysis"
         },
         {
@@ -2969,7 +2969,7 @@ const sampleConfigs = {
           duration: "18:00",
           type: "Main Feature",
           year: "2024",
-          desc: "A cinematic deep-dive into the founding philosophy of Moksha Seva and the people who make it possible.",
+          desc: "A cinematic deep-dive into the founding philosophy of Moksha Sewa and the people who make it possible.",
           image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?q=80&w=2000&auto=format&fit=crop",
           youtubeId: "t0VRWdWN1fs"
         },
@@ -2996,7 +2996,7 @@ const sampleConfigs = {
           duration: "22:15",
           type: "Documentary Series",
           year: "2024",
-          desc: "Interviews with volunteers, families, and community members sharing their experiences with Moksha Seva's mission.",
+          desc: "Interviews with volunteers, families, and community members sharing their experiences with Moksha Sewa's mission.",
           image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2000&auto=format&fit=crop",
           youtubeId: "t0VRWdWN1fs"
         },
@@ -3084,8 +3084,8 @@ const sampleConfigs = {
     navbar: {
       logo: {
         src: "/logo.png",
-        alt: "Moksha Seva Logo",
-        title: "Moksha Seva",
+        alt: "Moksha Sewa Logo",
+        title: "Moksha Sewa",
         subtitle: "Liberation Through Service"
       },
       navigation: [
@@ -3181,9 +3181,9 @@ const sampleConfigs = {
       brand: {
         logo: {
           src: "/logo.png",
-          alt: "Moksha Seva Logo"
+          alt: "Moksha Sewa Logo"
         },
-        title: "Moksha Seva",
+        title: "Moksha Sewa",
         subtitle: "THE FINAL DIGNITY",
         description: "A world-class humanitarian force dedicated to the restoration of dignity for the forgotten dead. Powered by devotion and the vision of a society where no one departs alone."
       },
@@ -3233,7 +3233,7 @@ const sampleConfigs = {
       },
       bottom: {
         missionStatus: "MISSION SCALE: 12+ CITIES ACTIVE",
-        copyright: "MOKSHA SEVA",
+        copyright: "Moksha Sewa",
         legalLinks: [
           { label: "TAX EXEMPT (80G)", href: "/compliance" },
           { label: "Privacy Policy", href: "/privacy" }
@@ -3278,108 +3278,108 @@ const sampleConfigs = {
 
   blog: {
     hero: {
-        badge: "INSIGHTS & STORIES",
-        title: "REFLECTIONS ON",
-        highlightText: "LAST DIGNITY",
-        description: "Deep dives into why every soul deserves a dignified departure, our journey across India, and how you can make a difference."
-      },
-      featuredBlog: {
-        title: "FEATURED INSIGHT",
-        badge: "EDITOR'S PICK"
-      },
-      blogGrid: {
-        title: "MORE FROM OUR MISSION",
-        description: "Read updates, success stories, and thought-provoking pieces on humanitarian service.",
-        categories: ["All", "Impact", "Stories", "Updates", "Reflections"],
-        blogs: [
-          {
-            id: "1",
-            title: "The Silent Service: Providing Dignity for the Forgotten",
-            slug: "the-silent-service",
-            excerpt: "Inside the daily mission of Moksha Seva, where we ensure no one departs this world alone or without honor.",
-            image: "/gallery/gallery_peaceful_departure_1772861335733.png",
-            imageAlt: "Peaceful departure service",
-            author: "Dr. Aryan Sharma",
-            authorRole: "Founder, Moksha Seva",
-            date: "March 15, 2026",
-            readingTime: "5 min read",
-            category: "Reflections",
-            featured: true
-          },
-          {
-            id: "2",
-            title: "A City Transformed: How Varanasi Embraces Change",
-            slug: "varanasi-transformation",
-            excerpt: "Exploring our sacred river initiative and how community awareness is bringing a new level of dignity to funeral rites.",
-            image: "/gallery/gallery_cremation_ceremony_1772861295131.png",
-            imageAlt: "Varanasi sacred rites",
-            author: "Priya Varma",
-            authorRole: "Field Coordinator",
-            date: "March 10, 2026",
-            readingTime: "8 min read",
-            category: "Impact"
-          },
-          {
-            id: "3",
-            title: "The Technology of Transparency: Monitoring 500+ Missions",
-            slug: "transparency-tech",
-            excerpt: "A look into how our dashboard uses real-time updates to maintain the highest levels of trust with our donors.",
-            image: "/gallery/gallery_memorial_site_1772862535416.png",
-            imageAlt: "Transparency in action",
-            author: "Vikram Das",
-            authorRole: "CTO",
-            date: "March 5, 2026",
-            readingTime: "6 min read",
-            category: "Updates"
-          },
-          {
-            id: "4",
-            title: "Dignity Beyond Borders: Our Vision for 2027",
-            slug: "vision-2027",
-            excerpt: "How we plan to scale the 'Force of Dignity' to over 100 cities across India, leveraging local communities.",
-            image: "/gallery/gallery_community_support_1772861359875.png",
-            imageAlt: "Community outreach mission",
-            author: "Dr. Aryan Sharma",
-            authorRole: "Founder, Moksha Seva",
-            date: "Feb 28, 2026",
-            readingTime: "10 min read",
-            category: "Reflections"
-          },
-          {
-            id: "5",
-            title: "The Psychology of Grief: Supporting Destitute Families",
-            slug: "psychology-of-grief",
-            excerpt: "Understanding the unique challenges faced by families who cannot afford the final rites of their loved ones.",
-            image: "/gallery/gallery_volunteer_service_1772861316550.png",
-            imageAlt: "Volunteer providing support",
-            author: "Sneha Gupta",
-            authorRole: "Lead Counselor",
-            date: "Feb 20, 2026",
-            readingTime: "7 min read",
-            category: "Stories"
-          },
-          {
-            id: "6",
-            title: "Sustainable Rites: Eco-friendly Cremation Practices",
-            slug: "sustainable-rites",
-            excerpt: "Reducing the environmental footprint of traditional funeral ceremonies without compromising on sanctity.",
-            image: "/gallery/gallery_ambulance_unit_1772862517482.png",
-            imageAlt: "Eco-friendly specialized unit",
-            author: "Rajesh Mehra",
-            authorRole: "Sustainability Consultant",
-            date: "Feb 15, 2026",
-            readingTime: "6 min read",
-            category: "Updates"
-          }
-        ]
-      },
-      cta: {
-        title: "BRING DIGNITY TO SOMEONE TODAY",
-        description: "Your small contribution can provide a peaceful and dignified departure for those who have no one else.",
-        buttonText: "DONATE NOW",
-        buttonHref: "/donate"
-      }
+      badge: "INSIGHTS & STORIES",
+      title: "REFLECTIONS ON",
+      highlightText: "LAST DIGNITY",
+      description: "Deep dives into why every soul deserves a dignified departure, our journey across India, and how you can make a difference."
     },
+    featuredBlog: {
+      title: "FEATURED INSIGHT",
+      badge: "EDITOR'S PICK"
+    },
+    blogGrid: {
+      title: "MORE FROM OUR MISSION",
+      description: "Read updates, success stories, and thought-provoking pieces on humanitarian service.",
+      categories: ["All", "Impact", "Stories", "Updates", "Reflections"],
+      blogs: [
+        {
+          id: "1",
+          title: "The Silent Service: Providing Dignity for the Forgotten",
+          slug: "the-silent-service",
+          excerpt: "Inside the daily mission of Moksha Sewa, where we ensure no one departs this world alone or without honor.",
+          image: "/gallery/gallery_peaceful_departure_1772861335733.png",
+          imageAlt: "Peaceful departure service",
+          author: "Dr. Aryan Sharma",
+          authorRole: "Founder, Moksha Sewa",
+          date: "March 15, 2026",
+          readingTime: "5 min read",
+          category: "Reflections",
+          featured: true
+        },
+        {
+          id: "2",
+          title: "A City Transformed: How Varanasi Embraces Change",
+          slug: "varanasi-transformation",
+          excerpt: "Exploring our sacred river initiative and how community awareness is bringing a new level of dignity to funeral rites.",
+          image: "/gallery/gallery_cremation_ceremony_1772861295131.png",
+          imageAlt: "Varanasi sacred rites",
+          author: "Priya Varma",
+          authorRole: "Field Coordinator",
+          date: "March 10, 2026",
+          readingTime: "8 min read",
+          category: "Impact"
+        },
+        {
+          id: "3",
+          title: "The Technology of Transparency: Monitoring 500+ Missions",
+          slug: "transparency-tech",
+          excerpt: "A look into how our dashboard uses real-time updates to maintain the highest levels of trust with our donors.",
+          image: "/gallery/gallery_memorial_site_1772862535416.png",
+          imageAlt: "Transparency in action",
+          author: "Vikram Das",
+          authorRole: "CTO",
+          date: "March 5, 2026",
+          readingTime: "6 min read",
+          category: "Updates"
+        },
+        {
+          id: "4",
+          title: "Dignity Beyond Borders: Our Vision for 2027",
+          slug: "vision-2027",
+          excerpt: "How we plan to scale the 'Force of Dignity' to over 100 cities across India, leveraging local communities.",
+          image: "/gallery/gallery_community_support_1772861359875.png",
+          imageAlt: "Community outreach mission",
+          author: "Dr. Aryan Sharma",
+          authorRole: "Founder, Moksha Sewa",
+          date: "Feb 28, 2026",
+          readingTime: "10 min read",
+          category: "Reflections"
+        },
+        {
+          id: "5",
+          title: "The Psychology of Grief: Supporting Destitute Families",
+          slug: "psychology-of-grief",
+          excerpt: "Understanding the unique challenges faced by families who cannot afford the final rites of their loved ones.",
+          image: "/gallery/gallery_volunteer_service_1772861316550.png",
+          imageAlt: "Volunteer providing support",
+          author: "Sneha Gupta",
+          authorRole: "Lead Counselor",
+          date: "Feb 20, 2026",
+          readingTime: "7 min read",
+          category: "Stories"
+        },
+        {
+          id: "6",
+          title: "Sustainable Rites: Eco-friendly Cremation Practices",
+          slug: "sustainable-rites",
+          excerpt: "Reducing the environmental footprint of traditional funeral ceremonies without compromising on sanctity.",
+          image: "/gallery/gallery_ambulance_unit_1772862517482.png",
+          imageAlt: "Eco-friendly specialized unit",
+          author: "Rajesh Mehra",
+          authorRole: "Sustainability Consultant",
+          date: "Feb 15, 2026",
+          readingTime: "6 min read",
+          category: "Updates"
+        }
+      ]
+    },
+    cta: {
+      title: "BRING DIGNITY TO SOMEONE TODAY",
+      description: "Your small contribution can provide a peaceful and dignified departure for those who have no one else.",
+      buttonText: "DONATE NOW",
+      buttonHref: "/donate"
+    }
+  },
 
 
   compliance: {
@@ -3387,12 +3387,12 @@ const sampleConfigs = {
       badge: "TRUST & ACCOUNTABILITY",
       title: "AUDIT &",
       titleHighlight: "COMPLIANCE",
-      description: "Moksha Seva operates with 100% legal compliance and transparency. We are a registered trust with deep accountability to the law and our donors."
+      description: "Moksha Sewa operates with 100% legal compliance and transparency. We are a registered trust with deep accountability to the law and our donors."
     },
     taxExemption: {
       title: "TAX",
       titleHighlight: "EXEMPTION",
-      description: "All donations made to Moksha Seva Foundation are eligible for tax deduction under Section 80G of the Income Tax Act, 1961. We provide instant digital receipts for all contributions.",
+      description: "All donations made to Moksha Sewa Foundation are eligible for tax deduction under Section 80G of the Income Tax Act, 1961. We provide instant digital receipts for all contributions.",
       registrations: [
         { label: "NGO DARPAN ID", value: "UP/2023/0345678" },
         { label: "CSR REGISTRATION NO", value: "CSR00012345" }

@@ -5,12 +5,12 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Moksha Seva API',
+      title: 'Moksha Sewa API',
       version: '1.0.0',
-      description: 'Complete API documentation for Moksha Seva multi-panel management system',
+      description: 'Complete API documentation for Moksha Sewa multi-panel management system',
       contact: {
-        name: 'Moksha Seva Tech Team',
-        email: 'tech@mokshaseva.org'
+        name: 'Moksha Sewa Tech Team',
+        email: 'tech@MokshaSewa.org'
       }
     },
     servers: [

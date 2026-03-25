@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 const createTransporter = () => {
   console.log(`📧 Creating email transporter...`);
-  
+
   // Use Gmail SMTP for both development and production
   const config = {
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -44,7 +44,7 @@ const emailTemplates = {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
         <div style="background: linear-gradient(135deg, #f4c430, #20b2aa); padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
-          <h2 style="color: white; margin: 0;">🙏 Report Received - Moksha Seva</h2>
+          <h2 style="color: white; margin: 0;">🙏 Report Received - Moksha Sewa</h2>
         </div>
         <p>Dear ${data.reporterName || 'Reporter'},</p>
         <p>Thank you for reporting an unclaimed body. Your report has been received and assigned case number: <strong>${data.caseNumber}</strong></p>
@@ -62,7 +62,7 @@ const emailTemplates = {
           <p style="margin: 5px 0;">• For urgent assistance, call: <strong>1800-123-456</strong></p>
         </div>
         <p style="margin-top: 20px;">Thank you for your service to humanity.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -108,7 +108,7 @@ const emailTemplates = {
         </div>
         ` : ''}
         <p style="margin-top: 20px;">Thank you for your service to humanity.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -120,7 +120,7 @@ const emailTemplates = {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
         <div style="background: linear-gradient(135deg, #10b981, #06b6d4); padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
-          <h2 style="color: white; margin: 0;">💚 Thank You - Moksha Seva</h2>
+          <h2 style="color: white; margin: 0;">💚 Thank You - Moksha Sewa</h2>
         </div>
         <p>Dear ${data.name},</p>
         <p>Thank you for sharing your valuable feedback with us. Your voice matters and helps us improve our services.</p>
@@ -131,7 +131,7 @@ const emailTemplates = {
           <p><strong>Rating:</strong> ${'⭐'.repeat(data.experienceRating)} (${data.experienceRating}/5)</p>
         </div>
         <p>Your feedback helps us serve better and reach more people in need.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -157,7 +157,7 @@ const emailTemplates = {
           <p style="color: #374151; line-height: 1.6;">${data.responseMessage}</p>
         </div>
         <p>We appreciate your time and input. If you have any further questions, please don't hesitate to contact us.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -171,7 +171,7 @@ const emailTemplates = {
           <h2 style="color: white; margin: 0;">📋 Feedback Status Update</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>We have an update regarding your feedback submission with Moksha Seva.</p>
+        <p>We have an update regarding your feedback submission with Moksha Sewa.</p>
         <div style="background: #f0fdf4; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #10b981;">
           <h3 style="color: #333; margin-top: 0;">Status Update:</h3>
           <p><strong>Reference:</strong> ${data.referenceNumber}</p>
@@ -204,7 +204,7 @@ const emailTemplates = {
         </div>
         ` : ''}
         <p style="margin-top: 20px;">Thank you for taking the time to share your feedback with us.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -212,14 +212,14 @@ const emailTemplates = {
 
   // Volunteer Form Templates
   volunteerWelcome: (data) => ({
-    subject: `Welcome to Moksha Seva Family - ${data.volunteerId}`,
+    subject: `Welcome to Moksha Sewa Family - ${data.volunteerId}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
         <div style="background: linear-gradient(135deg, #f59e0b, #f97316); padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
-          <h2 style="color: white; margin: 0;">🤝 Welcome to Moksha Seva Family!</h2>
+          <h2 style="color: white; margin: 0;">🤝 Welcome to Moksha Sewa Family!</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>Welcome to the Moksha Seva volunteer family! Your application has been received and you are now part of our mission to serve humanity.</p>
+        <p>Welcome to the Moksha Sewa volunteer family! Your application has been received and you are now part of our mission to serve humanity.</p>
         <div style="background: #fef3c7; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #f59e0b;">
           <h3 style="color: #333; margin-top: 0;">Volunteer Details:</h3>
           <p><strong>Volunteer ID:</strong> ${data.volunteerId}</p>
@@ -234,7 +234,7 @@ const emailTemplates = {
           <p style="margin: 5px 0;">• Background verification process will begin</p>
         </div>
         <p style="margin-top: 20px;">Thank you for choosing to serve with us. Together, we make a difference.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -248,7 +248,7 @@ const emailTemplates = {
           <h2 style="color: white; margin: 0;">🤝 Volunteer Status Update</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>We have an update regarding your volunteer application with Moksha Seva.</p>
+        <p>We have an update regarding your volunteer application with Moksha Sewa.</p>
         <div style="background: #fef3c7; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #f59e0b;">
           <h3 style="color: #333; margin-top: 0;">Status Update:</h3>
           <p><strong>Volunteer ID:</strong> ${data.volunteerId}</p>
@@ -289,8 +289,8 @@ const emailTemplates = {
           <p style="margin: 5px 0;">• Contact us if you'd like to reactivate your volunteer status</p>
         </div>
         ` : ''}
-        <p style="margin-top: 20px;">Thank you for your interest in volunteering with Moksha Seva.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p style="margin-top: 20px;">Thank you for your interest in volunteering with Moksha Sewa.</p>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -305,7 +305,7 @@ const emailTemplates = {
           <h2 style="color: white; margin: 0;">📞 Contact Inquiry Received</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>Thank you for contacting Moksha Seva. We have received your inquiry and will respond promptly.</p>
+        <p>Thank you for contacting Moksha Sewa. We have received your inquiry and will respond promptly.</p>
         <div style="background: #f3f4f6; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #6366f1;">
           <h3 style="color: #333; margin-top: 0;">Inquiry Details:</h3>
           <p><strong>Ticket Number:</strong> ${data.ticketNumber}</p>
@@ -319,7 +319,7 @@ const emailTemplates = {
           <p style="margin: 5px 0;">• For urgent matters, call: <strong>1800-123-456</strong></p>
         </div>
         <p style="margin-top: 20px;">We appreciate your interest in our mission.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -345,7 +345,7 @@ const emailTemplates = {
           <p style="color: #374151; line-height: 1.6;">${data.responseMessage}</p>
         </div>
         <p>If you have any further questions, please don't hesitate to contact us again.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -359,7 +359,7 @@ const emailTemplates = {
           <h2 style="color: white; margin: 0;">📋 Inquiry Status Update</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>We have an update regarding your contact inquiry with Moksha Seva.</p>
+        <p>We have an update regarding your contact inquiry with Moksha Sewa.</p>
         <div style="background: #f3f4f6; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #6366f1;">
           <h3 style="color: #333; margin-top: 0;">Status Update:</h3>
           <p><strong>Ticket Number:</strong> ${data.ticketNumber}</p>
@@ -378,7 +378,7 @@ const emailTemplates = {
         <div style="background: #f0fdf4; padding: 15px; border-radius: 5px; border: 1px solid #86efac;">
           <p style="margin: 0;"><strong>✅ Inquiry Responded:</strong></p>
           <p style="margin: 5px 0;">• We have responded to your inquiry</p>
-          <p style="margin: 5px 0;">• Thank you for contacting Moksha Seva</p>
+          <p style="margin: 5px 0;">• Thank you for contacting Moksha Sewa</p>
           <p style="margin: 5px 0;">• Feel free to reach out if you need further assistance</p>
         </div>
         ` : ''}
@@ -390,8 +390,8 @@ const emailTemplates = {
           <p style="margin: 5px 0;">• Thank you for your patience</p>
         </div>
         ` : ''}
-        <p style="margin-top: 20px;">Thank you for contacting Moksha Seva.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p style="margin-top: 20px;">Thank you for contacting Moksha Sewa.</p>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -399,14 +399,14 @@ const emailTemplates = {
 
   // Donation Form Templates
   donationConfirmation: (data) => ({
-    subject: `🙏 Donation Request Received - ${data.donationId} - Moksha Seva`,
+    subject: `🙏 Donation Request Received - ${data.donationId} - Moksha Sewa`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
         <div style="background: linear-gradient(135deg, #059669, #0d9488); padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
           <h2 style="color: white; margin: 0;">🙏 Thank You! Your Donation Request Received</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>Thank you for your donation request to Moksha Seva. Our team will contact you shortly to complete the donation process.</p>
+        <p>Thank you for your donation request to Moksha Sewa. Our team will contact you shortly to complete the donation process.</p>
         
         <div style="background: #f0fdfa; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #059669;">
           <h3 style="color: #333; margin-top: 0;">Your Donation Details:</h3>
@@ -432,25 +432,25 @@ const emailTemplates = {
         </div>
         
         <p style="margin-top: 20px;">Your kindness will bring dignity to someone's final journey.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
   }),
 
   donationReceiptWithPDF: (data) => ({
-    subject: `🙏 Donation Receipt - ${data.receiptNumber} - Moksha Seva`,
+    subject: `🙏 Donation Receipt - ${data.receiptNumber} - Moksha Sewa`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
         <div style="background: linear-gradient(135deg, #f59e0b, #f97316); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
-          <h1 style="margin: 0; font-size: 28px;">🙏 Moksha Seva</h1>
+          <h1 style="margin: 0; font-size: 28px;">🙏 Moksha Sewa</h1>
           <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 16px;">Dignity in Departure</p>
         </div>
         
         <div style="padding: 0 10px;">
           <h2 style="color: #ea580c; margin-bottom: 20px; text-align: center;">Thank You for Your Donation!</h2>
           <p style="font-size: 16px; color: #374151;">Dear ${data.name},</p>
-          <p style="color: #6b7280; line-height: 1.6;">Thank you for your generous donation to Moksha Seva. Your contribution helps us provide dignified services to those in need during their final journey.</p>
+          <p style="color: #6b7280; line-height: 1.6;">Thank you for your generous donation to Moksha Sewa. Your contribution helps us provide dignified services to those in need during their final journey.</p>
           
           <div style="background: linear-gradient(135deg, #fff7ed, #fef3c7); border: 2px solid #fed7aa; border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;">
             <h3 style="color: #ea580c; margin-top: 0; font-size: 20px;">📄 Receipt Attached</h3>
@@ -510,7 +510,7 @@ const emailTemplates = {
           
           <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
             <div style="margin-bottom: 15px;">
-              <h4 style="color: #374151; margin: 0; font-size: 18px;">🙏 Moksha Seva Foundation</h4>
+              <h4 style="color: #374151; margin: 0; font-size: 18px;">🙏 Moksha Sewa Foundation</h4>
               <p style="color: #6b7280; margin: 5px 0; font-style: italic;">Liberation Through Service</p>
             </div>
             
@@ -537,7 +537,7 @@ const emailTemplates = {
           <h2 style="color: white; margin: 0;">✅ Payment Successful!</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>Your payment has been successfully processed. Thank you for your generous donation to Moksha Seva.</p>
+        <p>Your payment has been successfully processed. Thank you for your generous donation to Moksha Sewa.</p>
         <div style="background: #f0fdf4; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #16a34a;">
           <h3 style="color: #333; margin-top: 0;">Payment Details:</h3>
           <p><strong>Donation ID:</strong> ${data.donationId}</p>
@@ -553,7 +553,7 @@ const emailTemplates = {
           <p style="margin: 5px 0;">• Thank you for supporting our mission of dignity</p>
         </div>
         <p style="margin-top: 20px;">Your contribution makes a real difference in providing dignified services to those in need.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -561,12 +561,12 @@ const emailTemplates = {
 
   // Task Management Templates
   taskAssignment: (data) => ({
-    subject: `🎯 New Task Assignment - ${data.taskId} - Moksha Seva`,
+    subject: `🎯 New Task Assignment - ${data.taskId} - Moksha Sewa`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
         <div style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
           <h1 style="margin: 0; font-size: 28px;">🎯 Task Assignment</h1>
-          <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 16px;">Moksha Seva - Volunteer Task</p>
+          <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 16px;">Moksha Sewa - Volunteer Task</p>
         </div>
         
         <div style="padding: 0 10px;">
@@ -635,7 +635,7 @@ const emailTemplates = {
           </div>
           
           <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
-            <h4 style="color: #374151; margin: 0; font-size: 18px;">🙏 Moksha Seva Foundation</h4>
+            <h4 style="color: #374151; margin: 0; font-size: 18px;">🙏 Moksha Sewa Foundation</h4>
             <p style="color: #6b7280; margin: 5px 0; font-style: italic;">Liberation Through Service</p>
             <div style="color: #6b7280; font-size: 14px; margin-top: 15px;">
               <p>📧 Email: volunteer@moksha-seva.org | 📞 Phone: [Support Number]</p>
@@ -681,7 +681,7 @@ const emailTemplates = {
           </div>
           
           <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
-            <h4 style="color: #374151; margin: 0;">🙏 Moksha Seva Team</h4>
+            <h4 style="color: #374151; margin: 0;">🙏 Moksha Sewa Team</h4>
             <p style="color: #6b7280; margin: 5px 0;">Liberation Through Service</p>
           </div>
         </div>
@@ -715,7 +715,7 @@ const emailTemplates = {
           </div>
           
           <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
-            <h4 style="color: #374151; margin: 0;">🙏 Moksha Seva Team</h4>
+            <h4 style="color: #374151; margin: 0;">🙏 Moksha Sewa Team</h4>
             <p style="color: #6b7280; margin: 5px 0;">Liberation Through Service</p>
           </div>
         </div>
@@ -749,7 +749,7 @@ const emailTemplates = {
           </div>
           
           <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
-            <h4 style="color: #374151; margin: 0;">🙏 Moksha Seva Team</h4>
+            <h4 style="color: #374151; margin: 0;">🙏 Moksha Sewa Team</h4>
             <p style="color: #6b7280; margin: 5px 0;">Liberation Through Service</p>
             <p style="color: #6b7280; font-size: 12px; margin-top: 15px;">Your service record has been updated. Thank you for being part of our mission.</p>
           </div>
@@ -772,7 +772,7 @@ const emailTemplates = {
           <p><strong>Task ID:</strong> ${data.taskId}</p>
         </div>
         <p>The volunteer is now committed to completing this task. You can track progress in the admin dashboard.</p>
-        <p><strong>Moksha Seva Admin Team</strong></p>
+        <p><strong>Moksha Sewa Admin Team</strong></p>
       </div>
     `
   }),
@@ -791,7 +791,7 @@ const emailTemplates = {
           <p><strong>Reason:</strong> ${data.rejectionReason}</p>
         </div>
         <p>You may need to assign this task to another volunteer or handle it differently.</p>
-        <p><strong>Moksha Seva Admin Team</strong></p>
+        <p><strong>Moksha Sewa Admin Team</strong></p>
       </div>
     `
   }),
@@ -811,7 +811,7 @@ const emailTemplates = {
           ${data.rating ? `<p><strong>Rating:</strong> ${data.rating}/5 stars</p>` : ''}
         </div>
         <p>The task has been marked as completed. You can review the details in the admin dashboard.</p>
-        <p><strong>Moksha Seva Admin Team</strong></p>
+        <p><strong>Moksha Sewa Admin Team</strong></p>
       </div>
     `
   }),
@@ -823,7 +823,7 @@ const emailTemplates = {
           <h2 style="color: white; margin: 0;">👔 Board Application Received</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>Thank you for your interest in joining the Moksha Seva Board. Your application has been received and is under review.</p>
+        <p>Thank you for your interest in joining the Moksha Sewa Board. Your application has been received and is under review.</p>
         <div style="background: #eff6ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #1e40af;">
           <h3 style="color: #333; margin-top: 0;">Application Details:</h3>
           <p><strong>Application ID:</strong> ${data.applicationId}</p>
@@ -837,7 +837,7 @@ const emailTemplates = {
           <p style="margin: 5px 0;">• Final decision notification</p>
         </div>
         <p style="margin-top: 20px;">We appreciate your commitment to our mission.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -851,7 +851,7 @@ const emailTemplates = {
           <h2 style="color: white; margin: 0;">📋 Application Status Update</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>We have an update regarding your board application with Moksha Seva.</p>
+        <p>We have an update regarding your board application with Moksha Sewa.</p>
         <div style="background: #eff6ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #1e40af;">
           <h3 style="color: #333; margin-top: 0;">Status Update:</h3>
           <p><strong>Application ID:</strong> ${data.applicationId}</p>
@@ -871,14 +871,14 @@ const emailTemplates = {
           <p style="margin: 0;"><strong>🎯 Interview Scheduled:</strong></p>
           <p style="margin: 5px 0;">• Congratulations! You have been shortlisted for an interview</p>
           <p style="margin: 5px 0;">• Our team will contact you soon to schedule the interview</p>
-          <p style="margin: 5px 0;">• Please prepare to discuss your experience and vision for Moksha Seva</p>
+          <p style="margin: 5px 0;">• Please prepare to discuss your experience and vision for Moksha Sewa</p>
         </div>
         ` : ''}
         ${data.status === 'approved' ? `
         <div style="background: #f0fdf4; padding: 15px; border-radius: 5px; border: 1px solid #86efac;">
           <p style="margin: 0;"><strong>🎉 Congratulations!</strong></p>
           <p style="margin: 5px 0;">• Your application has been approved!</p>
-          <p style="margin: 5px 0;">• Welcome to the Moksha Seva Board of Advisors</p>
+          <p style="margin: 5px 0;">• Welcome to the Moksha Sewa Board of Advisors</p>
           <p style="margin: 5px 0;">• Our team will contact you with onboarding details</p>
         </div>
         ` : ''}
@@ -890,8 +890,8 @@ const emailTemplates = {
           <p style="margin: 5px 0;">• Consider volunteering with us in other capacities</p>
         </div>
         ` : ''}
-        <p style="margin-top: 20px;">Thank you for your interest in serving with Moksha Seva.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p style="margin-top: 20px;">Thank you for your interest in serving with Moksha Sewa.</p>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -906,7 +906,7 @@ const emailTemplates = {
           <h2 style="color: white; margin: 0;">🌟 Legacy Giving Request</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>Thank you for considering a legacy gift to Moksha Seva. Your thoughtful planning will create a lasting impact for generations.</p>
+        <p>Thank you for considering a legacy gift to Moksha Sewa. Your thoughtful planning will create a lasting impact for generations.</p>
         <div style="background: #faf5ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #7c3aed;">
           <h3 style="color: #333; margin-top: 0;">Request Details:</h3>
           <p><strong>Request ID:</strong> ${data.requestId}</p>
@@ -920,7 +920,7 @@ const emailTemplates = {
           <p style="margin: 5px 0;">• Information packet will be sent</p>
         </div>
         <p style="margin-top: 20px;">Your legacy will help ensure dignified farewells for generations to come.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -934,7 +934,7 @@ const emailTemplates = {
           <h2 style="color: white; margin: 0;">📋 Legacy Giving Update</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>We have an update regarding your legacy giving request with Moksha Seva.</p>
+        <p>We have an update regarding your legacy giving request with Moksha Sewa.</p>
         <div style="background: #faf5ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #7c3aed;">
           <h3 style="color: #333; margin-top: 0;">Status Update:</h3>
           <p><strong>Request ID:</strong> ${data.requestId}</p>
@@ -971,11 +971,11 @@ const emailTemplates = {
           <p style="margin: 0;"><strong>Thank you for considering us</strong></p>
           <p style="margin: 5px 0;">• We understand that legacy planning is a personal decision</p>
           <p style="margin: 5px 0;">• You are always welcome to reconsider in the future</p>
-          <p style="margin: 5px 0;">• Thank you for your interest in Moksha Seva's mission</p>
+          <p style="margin: 5px 0;">• Thank you for your interest in Moksha Sewa's mission</p>
         </div>
         ` : ''}
-        <p style="margin-top: 20px;">Thank you for considering Moksha Seva for your legacy giving.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p style="margin-top: 20px;">Thank you for considering Moksha Sewa for your legacy giving.</p>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -1005,7 +1005,7 @@ const emailTemplates = {
           <p style="margin: 5px 0;">• Final decision: 2-4 weeks</p>
         </div>
         <p style="margin-top: 20px;">We will keep you updated on the progress.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -1060,7 +1060,7 @@ const emailTemplates = {
         </div>
         ` : ''}
         <p style="margin-top: 20px;">Thank you for using our scheme assistance service.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -1075,7 +1075,7 @@ const emailTemplates = {
           <h2 style="color: white; margin: 0;">🌍 Expansion Request Received</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>Thank you for your request to expand Moksha Seva services to ${data.requestedCity}, ${data.requestedState}. We appreciate your initiative.</p>
+        <p>Thank you for your request to expand Moksha Sewa services to ${data.requestedCity}, ${data.requestedState}. We appreciate your initiative.</p>
         <div style="background: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0891b2;">
           <h3 style="color: #333; margin-top: 0;">Request Details:</h3>
           <p><strong>Request ID:</strong> ${data.requestId}</p>
@@ -1090,7 +1090,7 @@ const emailTemplates = {
           <p style="margin: 5px 0;">• Final decision within 4-6 weeks</p>
         </div>
         <p style="margin-top: 20px;">Your vision helps us reach more communities in need.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -1117,7 +1117,7 @@ const emailTemplates = {
       <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; background: #fff; padding: 20px;">
         <div style="background: linear-gradient(135deg, #dc2626, #b91c1c); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
           <h1 style="margin: 0; font-size: 28px;">💰 New Donation Request</h1>
-          <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 16px;">Moksha Seva - Admin Notification</p>
+          <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 16px;">Moksha Sewa - Admin Notification</p>
         </div>
         
         <div style="background: #fef2f2; border: 2px solid #fca5a5; border-radius: 12px; padding: 20px; margin: 20px 0;">
@@ -1215,7 +1215,7 @@ const emailTemplates = {
           <h3 style="color: #fbbf24; margin-top: 0;">📞 Call Script Template</h3>
           <div style="background: #374151; border-radius: 8px; padding: 15px; margin: 15px 0; text-align: left;">
             <p style="margin: 5px 0; color: #d1d5db;"><strong>Hello ${data.donorName},</strong></p>
-            <p style="margin: 5px 0; color: #d1d5db;">This is [Your Name] from Moksha Seva. Thank you for your donation request of ₹${data.amount} on our website.</p>
+            <p style="margin: 5px 0; color: #d1d5db;">This is [Your Name] from Moksha Sewa. Thank you for your donation request of ₹${data.amount} on our website.</p>
             <p style="margin: 5px 0; color: #d1d5db;">I'm calling to confirm your donation and provide you with payment details. Would you like to proceed?</p>
             <p style="margin: 5px 0; color: #fbbf24;"><strong>Reference: ${data.donationId}</strong></p>
           </div>
@@ -1226,7 +1226,7 @@ const emailTemplates = {
             This is an automatic notification. Please update the donation status in admin panel after contacting the donor.
           </p>
           <p style="color: #9ca3af; font-size: 12px; margin: 10px 0 0 0;">
-            Generated: ${new Date().toLocaleString('en-IN')} | Moksha Seva Admin System
+            Generated: ${new Date().toLocaleString('en-IN')} | Moksha Sewa Admin System
           </p>
         </div>
       </div>
@@ -1340,7 +1340,7 @@ const emailTemplates = {
           <h2 style="color: white; margin: 0;">📋 Expansion Request Update</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>We have an update regarding your expansion request for Moksha Seva services.</p>
+        <p>We have an update regarding your expansion request for Moksha Sewa services.</p>
         <div style="background: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0891b2;">
           <h3 style="color: #333; margin-top: 0;">Status Update:</h3>
           <p><strong>Request ID:</strong> ${data.requestId}</p>
@@ -1387,8 +1387,8 @@ const emailTemplates = {
           <p style="margin: 5px 0;">• Thank you for your patience during this time</p>
         </div>
         ` : ''}
-        <p style="margin-top: 20px;">Thank you for your interest in expanding Moksha Seva's reach.</p>
-        <p><strong>Moksha Seva Team</strong><br>
+        <p style="margin-top: 20px;">Thank you for your interest in expanding Moksha Sewa's reach.</p>
+        <p><strong>Moksha Sewa Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -1396,14 +1396,14 @@ const emailTemplates = {
 
   // Authentication Email Templates
   adminWelcome: (data) => ({
-    subject: `Welcome to Moksha Seva Admin Panel - ${data.role.toUpperCase()}`,
+    subject: `Welcome to Moksha Sewa Admin Panel - ${data.role.toUpperCase()}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
         <div style="background: linear-gradient(135deg, #1e40af, #3730a3); padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
-          <h2 style="color: white; margin: 0;">🔐 Welcome to Moksha Seva Admin Panel</h2>
+          <h2 style="color: white; margin: 0;">🔐 Welcome to Moksha Sewa Admin Panel</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>Welcome to the Moksha Seva Admin Panel! Your account has been created successfully.</p>
+        <p>Welcome to the Moksha Sewa Admin Panel! Your account has been created successfully.</p>
         <div style="background: #eff6ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #1e40af;">
           <h3 style="color: #333; margin-top: 0;">Account Details:</h3>
           <p><strong>Email:</strong> ${data.email}</p>
@@ -1417,21 +1417,21 @@ const emailTemplates = {
           <p style="margin: 5px 0;">• Only access the panel from authorized IP addresses</p>
         </div>
         <p style="margin-top: 20px;">Thank you for joining our mission to serve humanity with dignity.</p>
-        <p><strong>Moksha Seva Admin Team</strong><br>
+        <p><strong>Moksha Sewa Admin Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
   }),
 
   passwordReset: (data) => ({
-    subject: `Password Reset Request - Moksha Seva Admin`,
+    subject: `Password Reset Request - Moksha Sewa Admin`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
         <div style="background: linear-gradient(135deg, #dc2626, #ea580c); padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
           <h2 style="color: white; margin: 0;">🔒 Password Reset Request</h2>
         </div>
         <p>Dear ${data.name},</p>
-        <p>You have requested to reset your password for your Moksha Seva Admin account.</p>
+        <p>You have requested to reset your password for your Moksha Sewa Admin account.</p>
         <div style="background: #fef2f2; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #dc2626;">
           <h3 style="color: #333; margin-top: 0;">Reset Instructions:</h3>
           <p>Click the button below to reset your password. This link will expire in 10 minutes.</p>
@@ -1447,7 +1447,7 @@ const emailTemplates = {
           <p style="margin: 5px 0;">• Contact support if you suspect unauthorized access</p>
         </div>
         <p style="margin-top: 20px;">Stay secure!</p>
-        <p><strong>Moksha Seva Security Team</strong><br>
+        <p><strong>Moksha Sewa Security Team</strong><br>
         <small>Liberation Through Service</small></p>
       </div>
     `
@@ -1455,7 +1455,7 @@ const emailTemplates = {
 
   // Assignment Approval Templates
   assignmentApproved: (data) => ({
-    subject: `✅ Assignment Approved - ${data.taskId} - Moksha Seva`,
+    subject: `✅ Assignment Approved - ${data.taskId} - Moksha Sewa`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
         <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
@@ -1485,7 +1485,7 @@ const emailTemplates = {
           </div>
           
           <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
-            <h4 style="color: #374151; margin: 0; font-size: 18px;">🙏 Moksha Seva Foundation</h4>
+            <h4 style="color: #374151; margin: 0; font-size: 18px;">🙏 Moksha Sewa Foundation</h4>
             <p style="color: #6b7280; margin: 5px 0; font-style: italic;">Liberation Through Service</p>
           </div>
         </div>
@@ -1494,7 +1494,7 @@ const emailTemplates = {
   }),
 
   assignmentRejected: (data) => ({
-    subject: `❌ Assignment Update - ${data.taskId} - Moksha Seva`,
+    subject: `❌ Assignment Update - ${data.taskId} - Moksha Sewa`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
         <div style="background: linear-gradient(135deg, #ef4444, #dc2626); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
@@ -1525,7 +1525,7 @@ const emailTemplates = {
           </div>
           
           <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
-            <h4 style="color: #374151; margin: 0; font-size: 18px;">🙏 Moksha Seva Foundation</h4>
+            <h4 style="color: #374151; margin: 0; font-size: 18px;">🙏 Moksha Sewa Foundation</h4>
             <p style="color: #6b7280; margin: 5px 0; font-style: italic;">Liberation Through Service</p>
           </div>
         </div>
@@ -1535,7 +1535,7 @@ const emailTemplates = {
 
   // Completion Certificate Template
   completionCertificate: (data) => ({
-    subject: `🏆 Certificate of Appreciation - ${data.taskId} - Moksha Seva`,
+    subject: `🏆 Certificate of Appreciation - ${data.taskId} - Moksha Sewa`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 20px;">
         <div style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); padding: 30px; text-align: center; color: white; border-radius: 12px; margin-bottom: 30px;">
@@ -1571,12 +1571,12 @@ const emailTemplates = {
               Your compassionate service has made a real difference in someone's life. 
               Through your dedication, you have helped families during their most difficult times 
               and embodied the true spirit of humanity. We are honored to have you as part of 
-              the Moksha Seva family.
+              the Moksha Sewa family.
             </p>
           </div>
           
           <div style="border-top: 2px solid #e5e7eb; padding-top: 25px; margin-top: 30px; text-align: center;">
-            <h4 style="color: #374151; margin: 0; font-size: 18px;">🙏 Moksha Seva Foundation</h4>
+            <h4 style="color: #374151; margin: 0; font-size: 18px;">🙏 Moksha Sewa Foundation</h4>
             <p style="color: #6b7280; margin: 5px 0; font-style: italic;">Liberation Through Service</p>
             <p style="color: #9ca3af; font-size: 12px; margin-top: 15px;">
               Continue making a difference. Check our volunteer portal for more opportunities to serve.
@@ -1595,7 +1595,7 @@ const sendEmail = async (to, template, data, attachment = null) => {
     console.log(`📧 To: ${to}`);
     console.log(`📧 Template: ${template}`);
     console.log(`📧 Environment check - NODE_ENV: ${process.env.NODE_ENV}`);
-    
+
     // Skip email sending in test environment or if SMTP fails in development
     if (process.env.NODE_ENV === 'test') {
       console.log(`📧 Email skipped in test: ${template} to ${to}`);
@@ -1626,8 +1626,8 @@ const sendEmail = async (to, template, data, attachment = null) => {
     // Check if SMTP is configured
     if (!process.env.SMTP_PASS) {
       console.log(`⚠️ SMTP config missing - returning success to prevent blocking`);
-      return { 
-        success: true, 
+      return {
+        success: true,
         messageId: 'smtp-bypass-' + Date.now(),
         note: 'Email bypassed due to missing SMTP config'
       };
@@ -1635,13 +1635,13 @@ const sendEmail = async (to, template, data, attachment = null) => {
 
     const transporter = createTransporter();
     console.log(`📧 Transporter created`);
-    
+
     const emailContent = emailTemplates[template](data);
     console.log(`📧 Email content generated for template: ${template}`);
     console.log(`📧 Subject: ${emailContent.subject}`);
-    
+
     const mailOptions = {
-      from: `${process.env.FROM_NAME || 'Moksha Seva'} <${process.env.FROM_EMAIL || process.env.SMTP_USER}>`,
+      from: `${process.env.FROM_NAME || 'Moksha Sewa'} <${process.env.FROM_EMAIL || process.env.SMTP_USER}>`,
       to,
       subject: emailContent.subject,
       html: emailContent.html
@@ -1662,21 +1662,21 @@ const sendEmail = async (to, template, data, attachment = null) => {
     }
 
     console.log(`📧 Attempting to send email...`);
-    
+
     // Add timeout wrapper for production
     const sendWithTimeout = (transporter, mailOptions, timeout = 30000) => {
       return Promise.race([
         transporter.sendMail(mailOptions),
-        new Promise((_, reject) => 
+        new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Email send timeout after 30 seconds')), timeout)
         )
       ]);
     };
-    
+
     const result = await sendWithTimeout(transporter, mailOptions);
     console.log('✅ Email sent successfully:', result.messageId);
     return { success: true, messageId: result.messageId };
-    
+
   } catch (error) {
     console.error('❌ Email sending failed:', error);
     console.error('❌ Error details:', {
@@ -1691,8 +1691,8 @@ const sendEmail = async (to, template, data, attachment = null) => {
     const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER;
     if (isProduction) {
       console.log('⚠️ Production mode: Email failure will not block application');
-      return { 
-        success: false, 
+      return {
+        success: false,
         error: error.message,
         production_bypass: true,
         note: 'Application continued despite email failure'
@@ -1707,13 +1707,13 @@ const sendEmail = async (to, template, data, attachment = null) => {
 const testEmail = async () => {
   try {
     console.log(`📧 Testing email configuration...`);
-    
+
     const transporter = createTransporter();
-    
+
     // Verify connection
     const verified = await transporter.verify();
     console.log(`📧 SMTP connection verified:`, verified);
-    
+
     // Send test email
     const testResult = await sendEmail(
       process.env.SMTP_USER, // Send to self for testing
@@ -1726,10 +1726,10 @@ const testEmail = async () => {
         city: 'Test City'
       }
     );
-    
+
     console.log(`📧 Test email result:`, testResult);
     return testResult;
-    
+
   } catch (error) {
     console.error(`❌ Email test failed:`, error);
     return { success: false, error: error.message };

@@ -75,16 +75,16 @@ app.use(cors({
       'https://moksha-seva.org',
       'https://www.moksha-seva.org'
     ];
-    
+
     if (allowedOrigins.indexOf(origin) !== -1) {
       return callback(null, true);
     }
-    
+
     // For development, allow all origins
     if (process.env.NODE_ENV === 'development') {
       return callback(null, true);
     }
-    
+
     const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
     return callback(new Error(msg), false);
   },
@@ -104,7 +104,7 @@ if (process.env.NODE_ENV === 'development') {
 
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs, {
   customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'Moksha Seva API Documentation'
+  customSiteTitle: 'Moksha Sewa API Documentation'
 }));
 
 app.get('/sitemap.xml', async (req, res) => {
@@ -127,7 +127,7 @@ app.get('/robots.txt', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'Moksha Seva API is running',
+    message: 'Moksha Sewa API is running',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV
   });
@@ -183,17 +183,17 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, async () => {
-  console.log(`🚀 Moksha Seva API Server running on port ${PORT}`);
+  console.log(`🚀 Moksha Sewa API Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV}`);
   console.log(`🔗 Health Check: http://localhost:${PORT}/api/health`);
   console.log(`📚 API Documentation: http://localhost:${PORT}/api/docs`);
   console.log(`🗺️ Sitemap: http://localhost:${PORT}/sitemap.xml`);
-  
+
   // Auto-seed page configurations on startup (production-safe)
   try {
     const seedPageConfigs = require('./seedPageConfigs');
     const seedSEO = require('./seedSEO');
-    
+
     const configResult = await seedPageConfigs();
     if (configResult.success) {
       console.log(`📦 Page configs: ${configResult.message}`);
@@ -203,7 +203,7 @@ const server = app.listen(PORT, async () => {
     if (seoResult.success) {
       console.log(`🎯 SEO pages: Created ${seoResult.created}, Skipped ${seoResult.skipped}`);
     }
-    
+
     console.log(`📦 MongoDB Connected: ${process.env.MONGODB_URI ? 'Remote' : 'localhost'}`);
   } catch (error) {
     console.error('⚠️ Seeding failed:', error.message);

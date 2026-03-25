@@ -23,12 +23,12 @@ const seedCompliance = async () => {
         badge: "TRUST & ACCOUNTABILITY",
         title: "AUDIT &",
         titleHighlight: "COMPLIANCE",
-        description: "Moksha Seva operates with 100% legal compliance and transparency. We are a registered trust with deep accountability to the law and our donors."
+        description: "Moksha Sewa operates with 100% legal compliance and transparency. We are a registered trust with deep accountability to the law and our donors."
       },
       taxExemption: {
         title: "TAX",
         titleHighlight: "EXEMPTION",
-        description: "All donations made to Moksha Seva Foundation are eligible for tax deduction under Section 80G of the Income Tax Act, 1961. We provide instant digital receipts for all contributions.",
+        description: "All donations made to Moksha Sewa Foundation are eligible for tax deduction under Section 80G of the Income Tax Act, 1961. We provide instant digital receipts for all contributions.",
         registrations: [
           { label: "NGO DARPAN ID", value: "UP/2023/0345678" },
           { label: "CSR REGISTRATION NO", value: "CSR00012345" }
@@ -52,8 +52,8 @@ const seedCompliance = async () => {
         category: 'configuration',
         status: 'published',
         author: admin._id,
-        metaTitle: 'Compliance & Audit - Moksha Seva',
-        metaDescription: 'Official legal documents and compliance certificates of Moksha Seva Foundation.'
+        metaTitle: 'Compliance & Audit - Moksha Sewa',
+        metaDescription: 'Official legal documents and compliance certificates of Moksha Sewa Foundation.'
       },
       { upsert: true, new: true }
     );
@@ -103,7 +103,7 @@ const seedCompliance = async () => {
       },
       {
         title: "Trust Deed & Bylaws",
-        description: "Founding governing documents of Moksha Seva Trust.",
+        description: "Founding governing documents of Moksha Sewa Trust.",
         fileUrl: "https://example.com/trust_deed.pdf",
         fileSize: "3.1 MB",
         validityDate: "Updated 2023",

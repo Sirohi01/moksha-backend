@@ -1,8 +1,8 @@
-# Moksha Seva Backend API
+# Moksha Sewa Backend API
 
 ## 🎉 Phase 1: Backend Foundation - COMPLETED ✅
 
-A comprehensive backend API for Moksha Seva form management system with email notifications, file uploads, and database integration.
+A comprehensive backend API for Moksha Sewa form management system with email notifications, file uploads, and database integration.
 
 ## ✅ Features Implemented
 
@@ -100,8 +100,8 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
-FROM_NAME=Moksha Seva
-FROM_EMAIL=noreply@mokshaseva.org
+FROM_NAME=Moksha Sewa
+FROM_EMAIL=noreply@MokshaSewa.org
 FRONTEND_URL=http://localhost:3000
 ADMIN_EMAIL=officialmanishsirohi.01@gmail.com
 ```

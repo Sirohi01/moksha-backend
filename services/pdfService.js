@@ -18,7 +18,7 @@ const generatePDF = async (htmlContent, options = {}) => {
 
     const file = { content: htmlContent };
     const pdfBuffer = await htmlPdf.generatePdf(file, defaultOptions);
-    
+
     return pdfBuffer;
 
   } catch (error) {
@@ -50,7 +50,7 @@ const generateReceiptPDF = async (donation) => {
       const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
       const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
       const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-      
+
       const convertHundreds = (num) => {
         let result = '';
         if (num > 99) {
@@ -71,7 +71,7 @@ const generateReceiptPDF = async (donation) => {
       };
 
       if (amount === 0) return 'Zero Rupees Only';
-      
+
       let crores = Math.floor(amount / 10000000);
       amount %= 10000000;
       let lakhs = Math.floor(amount / 100000);
@@ -384,7 +384,7 @@ const generateReceiptPDF = async (donation) => {
               <div class="logo-section">
                 <div class="logo-circle">🙏</div>
                 <div>
-                  <h1 class="org-name">Moksha Seva</h1>
+                  <h1 class="org-name">Moksha Sewa</h1>
                   <p class="tagline">Dignity in Departure</p>
                 </div>
               </div>
@@ -482,7 +482,7 @@ const generateReceiptPDF = async (donation) => {
                 <h3 class="tax-title">Tax Exemption Information</h3>
                 <ul class="tax-list">
                   <li>This donation is eligible for tax deduction under Section 80G of the Income Tax Act, 1961.</li>
-                  <li>Moksha Seva is registered under Section 12A and has valid 80G certification.</li>
+                  <li>Moksha Sewa is registered under Section 12A and has valid 80G certification.</li>
                   <li>Please retain this receipt for your tax filing purposes.</li>
                   <li>For any queries regarding tax exemption, please contact our accounts department.</li>
                 </ul>
@@ -493,7 +493,7 @@ const generateReceiptPDF = async (donation) => {
                 <div class="org-grid">
                   <div class="org-section">
                     <h4>Organization Details</h4>
-                    <p><strong>Moksha Seva Foundation</strong></p>
+                    <p><strong>Moksha Sewa Foundation</strong></p>
                     <p>Registered Address: [Your Organization Address]</p>
                     <p>Phone: [Your Phone Number]</p>
                     <p>Email: info@moksha-seva.org</p>
@@ -542,7 +542,7 @@ const generateReceiptPDF = async (donation) => {
 
     const file = { content: htmlContent };
     const pdfBuffer = await htmlPdf.generatePdf(file, options);
-    
+
     return pdfBuffer;
 
   } catch (error) {

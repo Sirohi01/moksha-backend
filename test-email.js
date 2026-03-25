@@ -25,22 +25,22 @@ const testEmailConnection = async () => {
     console.log('🔍 Verifying SMTP connection...');
     await transporter.verify();
     console.log('✅ SMTP connection successful!');
-    
+
     console.log('📧 Sending test email...');
     const result = await transporter.sendMail({
       from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
       to: process.env.SMTP_USER,
-      subject: 'Test Email - Moksha Seva',
+      subject: 'Test Email - Moksha Sewa',
       html: '<h1>Test Email</h1><p>If you receive this, SMTP is working!</p>'
     });
-    
+
     console.log('✅ Test email sent successfully!');
     console.log('📧 Message ID:', result.messageId);
-    
+
   } catch (error) {
     console.error('❌ SMTP Error:', error.message);
     console.error('❌ Error Code:', error.code);
-    
+
     if (error.code === 'EAUTH') {
       console.log('\n🔧 SOLUTION:');
       console.log('1. Enable 2-Factor Authentication on Gmail');

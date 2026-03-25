@@ -13,7 +13,7 @@ const createTask = async (req, res) => {
     };
 
     const task = await Task.create(taskData);
-    
+
     // If volunteers are assigned, send notifications
     if (req.body.volunteerIds && req.body.volunteerIds.length > 0) {
       await assignTaskToVolunteers(task._id, req.body.volunteerIds, req.admin._id);
@@ -46,14 +46,14 @@ const assignTaskToVolunteers = async (taskId, volunteerIds, adminId) => {
 
     // Get volunteer details
     const volunteers = await Volunteer.find({ _id: { $in: volunteerIds } });
-    
+
     // Add assignments to task
     const newAssignments = volunteers.map(volunteer => ({
       volunteer: volunteer._id,
       status: 'pending',
       assignedAt: new Date()
     }));
-    
+
     task.assignedTo.push(...newAssignments);
     await task.save();
 
@@ -81,14 +81,14 @@ const assignTaskToVolunteers = async (taskId, volunteerIds, adminId) => {
 const sendTaskAssignmentEmail = async (task, volunteer) => {
   try {
     console.log(`📧 Preparing email for volunteer: ${volunteer.name}`);
-    
+
     // Create direct response URLs that handle the action via API
     const acceptUrl = `${process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL}/api/tasks/${task._id}/accept-direct?volunteerId=${volunteer._id}&token=${generateTaskToken(task._id, volunteer._id, 'accept')}`;
     const rejectUrl = `${process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL}/api/tasks/${task._id}/reject-direct?volunteerId=${volunteer._id}&token=${generateTaskToken(task._id, volunteer._id, 'reject')}`;
-    
+
     console.log(`📧 Accept URL: ${acceptUrl}`);
     console.log(`📧 Reject URL: ${rejectUrl}`);
-    
+
     const emailData = {
       volunteerName: volunteer.name,
       taskTitle: task.title,
@@ -110,9 +110,9 @@ const sendTaskAssignmentEmail = async (task, volunteer) => {
       acceptUrl,
       rejectUrl
     };
-    
+
     console.log(`📧 Email data prepared for ${volunteer.name}`);
-    
+
     const result = await sendEmail(volunteer.email, 'taskAssignment', emailData);
     console.log(`📧 Email send result:`, result);
 
@@ -295,7 +295,7 @@ const deleteTask = async (req, res) => {
 const acceptTaskDirect = async (req, res) => {
   try {
     const { token, volunteerId } = req.query;
-    
+
     // Verify token
     if (!verifyTaskToken(token, req.params.id, volunteerId, 'accept')) {
       return res.status(403).send(`
@@ -347,7 +347,7 @@ const acceptTaskDirect = async (req, res) => {
 
     // Get volunteer details
     const volunteer = await Volunteer.findById(volunteerId);
-    
+
     // Send confirmation email
     await sendEmail(volunteer.email, 'taskAccepted', {
       volunteerName: volunteer.name,
@@ -406,7 +406,7 @@ const acceptTaskDirect = async (req, res) => {
 const rejectTaskDirect = async (req, res) => {
   try {
     const { token, volunteerId, reason } = req.query;
-    
+
     // Verify token
     if (!verifyTaskToken(token, req.params.id, volunteerId, 'reject')) {
       return res.status(403).send(`
@@ -459,7 +459,7 @@ const rejectTaskDirect = async (req, res) => {
 
     // Get volunteer details
     const volunteer = await Volunteer.findById(volunteerId);
-    
+
     // Send confirmation email
     await sendEmail(volunteer.email, 'taskRejected', {
       volunteerName: volunteer.name,
@@ -493,7 +493,7 @@ const rejectTaskDirect = async (req, res) => {
               <p style="color: #374151; margin: 5px 0;">Task ID: ${task.taskId}</p>
             </div>
             <p style="color: #6b7280;">We understand that you may not be available for this task. Thank you for letting us know.</p>
-            <p style="color: #6b7280; margin-top: 30px;">We appreciate your continued support of Moksha Seva.</p>
+            <p style="color: #6b7280; margin-top: 30px;">We appreciate your continued support of Moksha Sewa.</p>
           </div>
         </body>
       </html>
@@ -519,7 +519,7 @@ const rejectTaskDirect = async (req, res) => {
 const acceptTask = async (req, res) => {
   try {
     const { token, volunteerId } = req.body;
-    
+
     const task = await Task.findById(req.params.id);
     if (!task) {
       return res.status(404).json({
@@ -549,7 +549,7 @@ const acceptTask = async (req, res) => {
 
     // Get volunteer details
     const volunteer = await Volunteer.findById(volunteerId);
-    
+
     // Send confirmation email
     await sendEmail(volunteer.email, 'taskAccepted', {
       volunteerName: volunteer.name,
@@ -589,7 +589,7 @@ const acceptTask = async (req, res) => {
 const rejectTask = async (req, res) => {
   try {
     const { token, volunteerId, reason } = req.body;
-    
+
     const task = await Task.findById(req.params.id);
     if (!task) {
       return res.status(404).json({
@@ -619,7 +619,7 @@ const rejectTask = async (req, res) => {
 
     // Get volunteer details
     const volunteer = await Volunteer.findById(volunteerId);
-    
+
     // Send confirmation email
     await sendEmail(volunteer.email, 'taskRejected', {
       volunteerName: volunteer.name,
@@ -707,7 +707,7 @@ const getVolunteerTasks = async (req, res) => {
 const approveVolunteerAssignment = async (req, res) => {
   try {
     const { volunteerId, approved, rejectionReason } = req.body;
-    
+
     const task = await Task.findById(req.params.id);
     if (!task) {
       return res.status(404).json({
@@ -746,7 +746,7 @@ const approveVolunteerAssignment = async (req, res) => {
 
     // Get volunteer details for notification
     const volunteer = await Volunteer.findById(volunteerId);
-    
+
     if (approved) {
       // Send approval notification
       await sendEmail(volunteer.email, 'assignmentApproved', {
@@ -786,7 +786,7 @@ const approveVolunteerAssignment = async (req, res) => {
 const updateTaskStatus = async (req, res) => {
   try {
     const { status, notes } = req.body;
-    
+
     const task = await Task.findById(req.params.id);
     if (!task) {
       return res.status(404).json({
@@ -797,7 +797,7 @@ const updateTaskStatus = async (req, res) => {
 
     const oldStatus = task.overallStatus;
     task.overallStatus = status;
-    
+
     if (notes) {
       task.completionNotes = notes;
     }
@@ -808,10 +808,10 @@ const updateTaskStatus = async (req, res) => {
     if (status === 'completed' && oldStatus !== 'completed') {
       console.log(`🏆 Task marked as completed, generating certificates...`);
       console.log(`🏆 Found ${task.assignedTo.length} assignments`);
-      
+
       for (const assignment of task.assignedTo) {
         console.log(`🏆 Checking assignment for volunteer ${assignment.volunteer}: status=${assignment.status}, certificateGenerated=${assignment.certificateGenerated}`);
-        
+
         if (assignment.status === 'completed' && !assignment.certificateGenerated) {
           console.log(`🏆 Generating certificate for completed assignment`);
           try {
@@ -846,7 +846,7 @@ const updateTaskStatus = async (req, res) => {
 const updateVolunteerStatus = async (req, res) => {
   try {
     const { volunteerId, status } = req.body;
-    
+
     const task = await Task.findById(req.params.id);
     if (!task) {
       return res.status(404).json({
@@ -869,7 +869,7 @@ const updateVolunteerStatus = async (req, res) => {
 
     // Update volunteer status
     assignment.status = status;
-    
+
     // Update timestamps based on status
     if (status === 'accepted') {
       assignment.acceptedAt = new Date();
@@ -901,7 +901,7 @@ const updateVolunteerStatus = async (req, res) => {
 const generateCompletionCertificate = async (task, assignment) => {
   try {
     console.log(`🏆 Generating certificate for volunteer assignment...`);
-    
+
     const volunteer = await Volunteer.findById(assignment.volunteer);
     if (!volunteer) {
       console.error(`❌ Volunteer not found for assignment`);
@@ -940,26 +940,26 @@ const generateCompletionCertificate = async (task, assignment) => {
 
     // Save certificate filename
     const certificateFilename = `certificate-${task.taskId}-${volunteer._id}.pdf`;
-    
+
     // Update assignment with certificate info
     assignment.certificateGenerated = true;
     assignment.certificateUrl = `/certificates/${certificateFilename}`;
     assignment.certificateGeneratedAt = new Date();
-    
+
     await task.save();
 
     console.log(`🏆 Certificate info saved to database`);
 
     // Send certificate via email with correct attachment format
     const emailResult = await sendEmail(
-      volunteer.email, 
-      'completionCertificate', 
+      volunteer.email,
+      'completionCertificate',
       {
         volunteerName: volunteer.name,
         taskTitle: task.title,
         taskId: task.taskId,
         completedDate: (assignment.completedAt || new Date()).toLocaleDateString('en-IN')
-      }, 
+      },
       {
         filename: certificateFilename,
         content: pdfBuffer,
@@ -1253,7 +1253,7 @@ const generateCertificateHTML = (data) => {
         
         <div class="header">
           <div class="logo">🙏</div>
-          <h1 class="org-name">Moksha Seva Foundation</h1>
+          <h1 class="org-name">Moksha Sewa Foundation</h1>
           <p class="org-tagline">Liberation Through Service</p>
           <h2 class="certificate-title">Certificate of Appreciation</h2>
         </div>
@@ -1265,7 +1265,7 @@ const generateCertificateHTML = (data) => {
           <p class="recognition-text">
             In recognition of your dedicated service and compassionate contribution to humanity. 
             Your selfless efforts in helping families during their most difficult times exemplify 
-            the true spirit of service and compassion that Moksha Seva Foundation stands for.
+            the true spirit of service and compassion that Moksha Sewa Foundation stands for.
           </p>
           
           <div class="task-details">
@@ -1282,10 +1282,10 @@ const generateCertificateHTML = (data) => {
               <div class="detail-item">
                 <span class="detail-label">Completion Date</span>
                 <span class="detail-value">${new Date(data.completedDate).toLocaleDateString('en-IN', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}</span>
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label">Service Duration</span>
@@ -1307,12 +1307,12 @@ const generateCertificateHTML = (data) => {
           <div class="signature">
             <div class="signature-line"></div>
             <div class="signature-title">Volunteer Coordinator</div>
-            <div class="signature-name">Moksha Seva Foundation</div>
+            <div class="signature-name">Moksha Sewa Foundation</div>
           </div>
           <div class="signature">
             <div class="signature-line"></div>
             <div class="signature-title">Director</div>
-            <div class="signature-name">Moksha Seva Foundation</div>
+            <div class="signature-name">Moksha Sewa Foundation</div>
           </div>
         </div>
         
@@ -1329,7 +1329,7 @@ const generateCertificateHTML = (data) => {
 const completeTask = async (req, res) => {
   try {
     const { volunteerId, completionNotes, rating, feedback } = req.body;
-    
+
     const task = await Task.findById(req.params.id);
     if (!task) {
       return res.status(404).json({
@@ -1372,7 +1372,7 @@ const completeTask = async (req, res) => {
 
     // Get volunteer details
     const volunteer = await Volunteer.findById(volunteerId);
-    
+
     // Send confirmation email
     await sendEmail(volunteer.email, 'taskCompleted', {
       volunteerName: volunteer.name,

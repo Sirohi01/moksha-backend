@@ -10,11 +10,11 @@ class NotificationService {
 
   initializeWebSocket(server) {
     this.wss = new WebSocket.Server({ server });
-    
+
     this.wss.on('connection', (ws, req) => {
       const clientId = this.generateClientId();
       this.clients.set(clientId, ws);
-      
+
       ws.on('message', (message) => {
         try {
           const data = JSON.parse(message);
@@ -33,7 +33,7 @@ class NotificationService {
       // Send welcome message
       ws.send(JSON.stringify({
         type: 'connection',
-        message: 'Connected to Moksha Seva notifications',
+        message: 'Connected to Moksha Sewa notifications',
         timestamp: new Date().toISOString()
       }));
     });

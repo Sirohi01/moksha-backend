@@ -3,7 +3,7 @@ const path = require('path');
 
 class SitemapService {
   constructor() {
-    this.baseUrl = process.env.FRONTEND_URL || 'https://mokshaseva.org';
+    this.baseUrl = process.env.FRONTEND_URL || 'https://MokshaSewa.org';
     this.staticPages = [
       { url: '/', priority: '1.0', changefreq: 'daily' },
       { url: '/about', priority: '0.9', changefreq: 'monthly' },
@@ -22,7 +22,7 @@ class SitemapService {
 
   generateSitemap() {
     const currentDate = new Date().toISOString().split('T')[0];
-    
+
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 
@@ -112,7 +112,7 @@ class SitemapService {
     try {
       const sitemap = await this.generateDynamicSitemap();
       const sitemapPath = path.join(__dirname, '../../public/sitemap.xml');
-      
+
       // Ensure public directory exists
       const publicDir = path.dirname(sitemapPath);
       if (!fs.existsSync(publicDir)) {
@@ -156,7 +156,7 @@ Allow: /reports`;
     try {
       const robots = this.generateRobotsTxt();
       const robotsPath = path.join(__dirname, '../../public/robots.txt');
-      
+
       // Ensure public directory exists
       const publicDir = path.dirname(robotsPath);
       if (!fs.existsSync(publicDir)) {

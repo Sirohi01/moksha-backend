@@ -2,7 +2,7 @@
 let documentaries = [
   {
     id: '1',
-    title: 'Dignity in Death: The Moksha Seva Story',
+    title: 'Dignity in Death: The Moksha Sewa Story',
     description: 'A comprehensive documentary about our mission to provide dignified last rites for unclaimed bodies.',
     duration: '45 minutes',
     releaseDate: new Date('2024-02-15'),
@@ -72,37 +72,37 @@ let documentaries = [
 const getDocumentaries = async (req, res) => {
   try {
     const { page = 1, limit = 10, status, category, search } = req.query;
-    
+
     let filteredDocumentaries = [...documentaries];
-    
+
     // Filter by status
     if (status && status !== 'all') {
       filteredDocumentaries = filteredDocumentaries.filter(doc => doc.status === status);
     }
-    
+
     // Filter by category
     if (category && category !== 'all') {
       filteredDocumentaries = filteredDocumentaries.filter(doc => doc.category === category);
     }
-    
+
     // Filter by search term
     if (search) {
       const searchTerm = search.toLowerCase();
-      filteredDocumentaries = filteredDocumentaries.filter(doc => 
+      filteredDocumentaries = filteredDocumentaries.filter(doc =>
         doc.title.toLowerCase().includes(searchTerm) ||
         doc.description.toLowerCase().includes(searchTerm) ||
         doc.director.toLowerCase().includes(searchTerm)
       );
     }
-    
+
     // Sort by release date (newest first)
     filteredDocumentaries.sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate));
-    
+
     // Pagination
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + parseInt(limit);
     const paginatedDocumentaries = filteredDocumentaries.slice(startIndex, endIndex);
-    
+
     res.status(200).json({
       success: true,
       data: {
@@ -127,16 +127,16 @@ const getDocumentaries = async (req, res) => {
 const getDocumentary = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const documentary = documentaries.find(doc => doc.id === id);
-    
+
     if (!documentary) {
       return res.status(404).json({
         success: false,
         message: 'Documentary not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: documentary
@@ -219,7 +219,7 @@ const updateDocumentary = async (req, res) => {
     } = req.body;
 
     const docIndex = documentaries.findIndex(doc => doc.id === id);
-    
+
     if (docIndex === -1) {
       return res.status(404).json({
         success: false,
@@ -265,7 +265,7 @@ const deleteDocumentary = async (req, res) => {
     const { id } = req.params;
 
     const docIndex = documentaries.findIndex(doc => doc.id === id);
-    
+
     if (docIndex === -1) {
       return res.status(404).json({
         success: false,

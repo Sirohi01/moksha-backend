@@ -3,8 +3,8 @@ const path = require('path');
 
 const postmanCollection = {
   "info": {
-    "name": "Moksha Seva API Collection",
-    "description": "Complete API collection for Moksha Seva management system",
+    "name": "Moksha Sewa API Collection",
+    "description": "Complete API collection for Moksha Sewa management system",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -35,7 +35,7 @@ const postmanCollection = {
           "name": "Admin Login",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"officialmanishsirohi.01@gmail.com\",\n  \"password\": \"password123\"\n}"
@@ -56,7 +56,7 @@ const postmanCollection = {
           "name": "Submit Contact Form",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"+91 9876543210\",\n  \"subject\": \"General Inquiry\",\n  \"message\": \"Test message\"\n}"
@@ -72,7 +72,7 @@ const postmanCollection = {
           "name": "Submit Volunteer Application",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Jane Smith\",\n  \"email\": \"jane@example.com\",\n  \"phone\": \"+91 9876543210\",\n  \"skills\": \"Teaching, Community Work\",\n  \"availability\": \"Weekends\"\n}"
@@ -88,7 +88,7 @@ const postmanCollection = {
           "name": "Submit Donation",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"donorName\": \"Donor Name\",\n  \"email\": \"donor@example.com\",\n  \"phone\": \"+91 9876543210\",\n  \"amount\": 5000,\n  \"donationType\": \"one-time\",\n  \"paymentMethod\": \"online\"\n}"

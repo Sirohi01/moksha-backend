@@ -1,7 +1,7 @@
 const emailTemplates = {
   // Technical Support Templates
   contactResponse: {
-    subject: 'Thank you for contacting Moksha Seva',
+    subject: 'Thank you for contacting Moksha Sewa',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #2563eb;">Thank you for reaching out!</h2>
@@ -12,18 +12,18 @@ const emailTemplates = {
           {{message}}
         </div>
         <p>Reference ID: <strong>{{referenceId}}</strong></p>
-        <p>Best regards,<br>Moksha Seva Team</p>
+        <p>Best regards,<br>Moksha Sewa Team</p>
       </div>
     `
   },
 
   volunteerWelcome: {
-    subject: 'Welcome to Moksha Seva Volunteer Program',
+    subject: 'Welcome to Moksha Sewa Volunteer Program',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #059669;">Welcome to our volunteer family!</h2>
         <p>Dear {{name}},</p>
-        <p>Thank you for your interest in volunteering with Moksha Seva. We are excited to have you join our mission.</p>
+        <p>Thank you for your interest in volunteering with Moksha Sewa. We are excited to have you join our mission.</p>
         <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin: 20px 0;">
           <h3>Next Steps:</h3>
           <ul>
@@ -33,24 +33,24 @@ const emailTemplates = {
           </ul>
         </div>
         <p>Application ID: <strong>{{applicationId}}</strong></p>
-        <p>Together we serve,<br>Moksha Seva Team</p>
+        <p>Together we serve,<br>Moksha Sewa Team</p>
       </div>
     `
   },
 
   donationReceipt: {
-    subject: 'Donation Receipt - {{receiptNumber}} - Moksha Seva',
+    subject: 'Donation Receipt - {{receiptNumber}} - Moksha Sewa',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
         <div style="background: linear-gradient(135deg, #f59e0b, #f97316); padding: 30px; text-align: center; color: white;">
-          <h1 style="margin: 0; font-size: 28px;">🙏 Moksha Seva</h1>
+          <h1 style="margin: 0; font-size: 28px;">🙏 Moksha Sewa</h1>
           <p style="margin: 5px 0 0 0; opacity: 0.9;">Dignity in Departure</p>
         </div>
         
         <div style="padding: 30px;">
           <h2 style="color: #ea580c; margin-bottom: 20px;">Donation Receipt</h2>
           <p>Dear {{name}},</p>
-          <p>Thank you for your generous donation to Moksha Seva. Your contribution helps us provide dignified services to those in need.</p>
+          <p>Thank you for your generous donation to Moksha Sewa. Your contribution helps us provide dignified services to those in need.</p>
           
           <div style="background: #fff7ed; border: 2px solid #fed7aa; border-radius: 12px; padding: 20px; margin: 25px 0;">
             <h3 style="color: #ea580c; margin-top: 0;">Receipt Details</h3>
@@ -95,7 +95,7 @@ const emailTemplates = {
           <p>Your support enables us to continue our mission of providing dignified cremation services and supporting families in their time of need.</p>
           
           <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 30px; text-align: center; color: #6b7280; font-size: 14px;">
-            <p><strong>Moksha Seva Foundation</strong></p>
+            <p><strong>Moksha Sewa Foundation</strong></p>
             <p>Email: info@moksha-seva.org | Website: www.moksha-seva.org</p>
             <p>This is a computer-generated receipt.</p>
           </div>
@@ -105,11 +105,11 @@ const emailTemplates = {
   },
 
   refundConfirmation: {
-    subject: 'Refund Confirmation - {{donationId}} - Moksha Seva',
+    subject: 'Refund Confirmation - {{donationId}} - Moksha Sewa',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #dc2626, #ef4444); padding: 30px; text-align: center; color: white;">
-          <h1 style="margin: 0; font-size: 28px;">🙏 Moksha Seva</h1>
+          <h1 style="margin: 0; font-size: 28px;">🙏 Moksha Sewa</h1>
           <p style="margin: 5px 0 0 0; opacity: 0.9;">Refund Confirmation</p>
         </div>
         
@@ -147,7 +147,7 @@ const emailTemplates = {
           <p>If you have any questions about this refund, please contact our support team.</p>
           
           <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 30px; text-align: center; color: #6b7280; font-size: 14px;">
-            <p><strong>Moksha Seva Foundation</strong></p>
+            <p><strong>Moksha Sewa Foundation</strong></p>
             <p>Email: info@moksha-seva.org | Website: www.moksha-seva.org</p>
           </div>
         </div>
@@ -188,7 +188,7 @@ const emailTemplates = {
           <p><strong>Notes:</strong> {{notes}}</p>
           {{/if}}
         </div>
-        <p>Best regards,<br>Moksha Seva Team</p>
+        <p>Best regards,<br>Moksha Sewa Team</p>
       </div>
     `
   }

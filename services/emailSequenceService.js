@@ -19,7 +19,7 @@ class EmailSequenceService {
         {
           delay: 0, // Immediate
           template: 'volunteerWelcome',
-          subject: 'Welcome to Moksha Seva!'
+          subject: 'Welcome to Moksha Sewa!'
         },
         {
           delay: 24 * 60 * 60 * 1000, // 1 day
@@ -108,12 +108,12 @@ class EmailSequenceService {
     }
 
     const sequenceInstanceId = `${sequenceId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Schedule all emails in the sequence
     for (let i = 0; i < sequence.emails.length; i++) {
       const email = sequence.emails[i];
       const scheduledTime = new Date(Date.now() + email.delay);
-      
+
       await this.scheduleEmail({
         sequenceInstanceId,
         sequenceId,
@@ -146,9 +146,9 @@ class EmailSequenceService {
       if (!this.scheduledJobs.has(emailData.sequenceInstanceId)) {
         this.scheduledJobs.set(emailData.sequenceInstanceId, []);
       }
-      
+
       this.scheduledJobs.get(emailData.sequenceInstanceId).push(scheduledEmail);
-      
+
       return scheduledEmail.id;
     } catch (error) {
       console.error('Failed to schedule email:', error);
@@ -158,7 +158,7 @@ class EmailSequenceService {
 
   async processScheduledEmails() {
     const now = new Date();
-    
+
     // Process all scheduled email jobs
     for (const [sequenceInstanceId, emails] of this.scheduledJobs.entries()) {
       for (const email of emails) {
@@ -203,7 +203,7 @@ class EmailSequenceService {
 
     } catch (error) {
       console.error('Failed to send scheduled email:', error);
-      
+
       scheduledEmail.status = 'failed';
       scheduledEmail.error = error.message;
       scheduledEmail.lastAttempt = new Date();
@@ -226,7 +226,7 @@ class EmailSequenceService {
         }
       });
     }
-    
+
     console.log(`📧 Stopped sequence ${sequenceInstanceId}`);
   }
 
@@ -310,7 +310,7 @@ class EmailSequenceService {
   async getSequenceAnalytics(sequenceId, dateRange = { days: 30 }) {
     // In a real implementation, you'd query your database
     const startDate = new Date(Date.now() - (dateRange.days * 24 * 60 * 60 * 1000));
-    
+
     // Mock analytics data
     return {
       sequenceId,

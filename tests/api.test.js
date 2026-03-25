@@ -6,9 +6,9 @@ describe('API Health Check', () => {
     const response = await request(app)
       .get('/api/health')
       .expect(200);
-    
+
     expect(response.body.success).toBe(true);
-    expect(response.body.message).toBe('Moksha Seva API is running');
+    expect(response.body.message).toBe('Moksha Sewa API is running');
   });
 });
 
@@ -32,12 +32,12 @@ describe('Report API', () => {
     const response = await request(app)
       .post('/api/reports')
       .send(reportData);
-    
+
     // Debug: Log the response if it's not 201
     if (response.status !== 201) {
       console.log('Report API Error:', response.status, response.body);
     }
-    
+
     expect(response.status).toBe(201);
     expect(response.body.success).toBe(true);
     expect(response.body.data.caseNumber).toBeDefined();
@@ -60,7 +60,7 @@ describe('Feedback API', () => {
       .post('/api/feedback')
       .send(feedbackData)
       .expect(201);
-    
+
     expect(response.body.success).toBe(true);
     expect(response.body.data.referenceNumber).toBeDefined();
   });
@@ -80,7 +80,7 @@ describe('Contact API', () => {
       .post('/api/contact')
       .send(contactData)
       .expect(201);
-    
+
     expect(response.body.success).toBe(true);
     expect(response.body.data.ticketNumber).toBeDefined();
   });
@@ -109,7 +109,7 @@ describe('Volunteer API', () => {
       .post('/api/volunteers')
       .send(volunteerData)
       .expect(201);
-    
+
     expect(response.body.success).toBe(true);
     expect(response.body.data.volunteerId).toBeDefined();
   });
@@ -131,7 +131,7 @@ describe('Donation API', () => {
       .post('/api/donations')
       .send(donationData)
       .expect(201);
-    
+
     expect(response.body.success).toBe(true);
     expect(response.body.data.donationId).toBeDefined();
   });
@@ -153,7 +153,7 @@ describe('Board Application API', () => {
       experience: 5,
       qualifications: 'MBA in Management, 5 years experience in non-profit sector',
       positionInterested: 'board_member',
-      motivationStatement: 'I want to contribute to the noble cause of providing dignified farewells to unclaimed bodies and help expand the reach of Moksha Seva.',
+      motivationStatement: 'I want to contribute to the noble cause of providing dignified farewells to unclaimed bodies and help expand the reach of Moksha Sewa.',
       timeCommitment: '10_hours_month',
       expertise: ['operations', 'fundraising']
     };
@@ -162,7 +162,7 @@ describe('Board Application API', () => {
       .post('/api/board')
       .send(boardData)
       .expect(201);
-    
+
     expect(response.body.success).toBe(true);
     expect(response.body.data.applicationId).toBeDefined();
   });
@@ -184,7 +184,7 @@ describe('Legacy Giving API', () => {
       .post('/api/legacy')
       .send(legacyData)
       .expect(201);
-    
+
     expect(response.body.success).toBe(true);
     expect(response.body.data.requestId).toBeDefined();
   });
@@ -211,7 +211,7 @@ describe('Government Scheme API', () => {
       .post('/api/schemes')
       .send(schemeData)
       .expect(201);
-    
+
     expect(response.body.success).toBe(true);
     expect(response.body.data.applicationId).toBeDefined();
   });
@@ -236,7 +236,7 @@ describe('Expansion Request API', () => {
       .post('/api/expansion')
       .send(expansionData)
       .expect(201);
-    
+
     expect(response.body.success).toBe(true);
     expect(response.body.data.requestId).toBeDefined();
   });
@@ -247,7 +247,7 @@ describe('Admin API', () => {
     const response = await request(app)
       .get('/api/admin/dashboard')
       .expect(200);
-    
+
     expect(response.body.success).toBe(true);
     expect(response.body.data.overview).toBeDefined();
     expect(response.body.data.recentActivity).toBeDefined();
@@ -257,7 +257,7 @@ describe('Admin API', () => {
     const response = await request(app)
       .get('/api/admin/system-health')
       .expect(200);
-    
+
     expect(response.body.success).toBe(true);
     expect(response.body.data.database).toBe('connected');
     expect(response.body.data.server).toBe('running');

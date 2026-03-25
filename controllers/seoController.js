@@ -58,7 +58,7 @@ const getSEOData = async (req, res) => {
 const getSEOPageByName = async (req, res) => {
   try {
     const { pageName } = req.params;
-    
+
     // Try to find SEO page by page name or URL
     let seoPage = await SEOPage.findOne({
       $or: [
@@ -75,11 +75,11 @@ const getSEOPageByName = async (req, res) => {
         title: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page`,
         slug: pageName,
         url: `/${pageName}`,
-        metaTitle: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} | Moksha Seva`,
-        metaDescription: `Learn more about ${pageName} at Moksha Seva - Dignity in Departure`,
-        metaKeywords: `moksha seva, ${pageName}, cremation services, humanitarian`,
-        ogTitle: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} | Moksha Seva`,
-        ogDescription: `Learn more about ${pageName} at Moksha Seva - Dignity in Departure`,
+        metaTitle: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} | Moksha Sewa`,
+        metaDescription: `Learn more about ${pageName} at Moksha Sewa - Dignity in Departure`,
+        metaKeywords: `Moksha Sewa, ${pageName}, cremation services, humanitarian`,
+        ogTitle: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} | Moksha Sewa`,
+        ogDescription: `Learn more about ${pageName} at Moksha Sewa - Dignity in Departure`,
         ogType: 'website',
         schemaType: 'WebPage',
         robots: 'index, follow',
@@ -114,7 +114,7 @@ const updateSEOPageByName = async (req, res) => {
   try {
     const { pageName } = req.params;
     const updateData = req.body;
-    
+
     // Try to find existing SEO page
     let seoPage = await SEOPage.findOne({
       $or: [
@@ -137,9 +137,9 @@ const updateSEOPageByName = async (req, res) => {
         title: updateData.title || `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page`,
         slug: pageName,
         url: updateData.url || `/${pageName}`,
-        metaTitle: updateData.metaTitle || `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} | Moksha Seva`,
-        metaDescription: updateData.metaDescription || `Learn more about ${pageName} at Moksha Seva`,
-        metaKeywords: updateData.metaKeywords || updateData.keywords || `moksha seva, ${pageName}`,
+        metaTitle: updateData.metaTitle || `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} | Moksha Sewa`,
+        metaDescription: updateData.metaDescription || `Learn more about ${pageName} at Moksha Sewa`,
+        metaKeywords: updateData.metaKeywords || updateData.keywords || `Moksha Sewa, ${pageName}`,
         ogTitle: updateData.ogTitle || updateData.metaTitle,
         ogDescription: updateData.ogDescription || updateData.metaDescription,
         ogImage: updateData.ogImage,
@@ -157,7 +157,7 @@ const updateSEOPageByName = async (req, res) => {
     if (seoPage.calculateSEOScore) {
       seoPage.calculateSEOScore();
     }
-    
+
     await seoPage.save();
 
     res.status(200).json({
@@ -330,7 +330,7 @@ const getSEOStats = async (req, res) => {
     const totalPages = await SEOPage.countDocuments();
     const publishedPages = await SEOPage.countDocuments({ status: 'published' });
     const draftPages = await SEOPage.countDocuments({ status: 'draft' });
-    
+
     // Get average SEO score
     const avgScoreResult = await SEOPage.aggregate([
       { $group: { _id: null, avgScore: { $avg: '$seoScore' } } }
