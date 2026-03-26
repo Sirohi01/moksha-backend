@@ -1,4 +1,6 @@
 const Report = require('../models/Report');
+const EmailLog = require('../models/EmailLog');
+
 const Feedback = require('../models/Feedback');
 const Volunteer = require('../models/Volunteer');
 const Contact = require('../models/Contact');
@@ -260,8 +262,43 @@ const getSystemHealth = async (req, res) => {
   }
 };
 
+// @desc    Get email logs
+// @route   GET /api/admin/email-logs
+// @access  Private/Admin
+const getEmailLogs = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const [logs, total] = await Promise.all([
+      EmailLog.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      EmailLog.countDocuments()
+    ]);
+
+    res.status(200).json({
+      success: true,
+      count: logs.length,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      },
+      data: logs
+    });
+  } catch (error) {
+    console.error('❌ Email logs failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch email logs'
+    });
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getRecentActivities,
-  getSystemHealth
+  getSystemHealth,
+  getEmailLogs
 };

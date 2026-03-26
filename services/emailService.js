@@ -1,4 +1,6 @@
 const nodemailer = require('nodemailer');
+const EmailLog = require('../models/EmailLog');
+
 const createTransporter = () => {
   console.log(`📧 Creating email transporter...`);
 
@@ -1674,16 +1676,33 @@ const sendEmail = async (to, template, data, attachment = null) => {
     console.log(`📧 To: ${to}`);
     console.log(`📧 Template: ${template}`);
     console.log(`📧 Environment check - NODE_ENV: ${process.env.NODE_ENV}`);
-
-    // Skip email sending in test environment or if SMTP fails in development
     if (process.env.NODE_ENV === 'test') {
       console.log(`📧 Email skipped in test: ${template} to ${to}`);
+      await EmailLog.create({
+        recipientEmail: to,
+        recipientName: data.name || data.reporterName || 'Test User',
+        subject: `[TEST] ${template}`,
+        body: 'Email content skipped in test mode',
+        templateName: template,
+        status: 'sent',
+        messageId: 'test-skip-' + Date.now()
+      });
       return { success: true, messageId: 'test-message-id' };
     }
 
     // Skip emails in development if SMTP not properly configured
     if (process.env.NODE_ENV === 'development' && !process.env.SMTP_PASS) {
       console.log(`📧 Email skipped in development (SMTP not configured): ${template} to ${to}`);
+      // Log for consistency
+      await EmailLog.create({
+        recipientEmail: to,
+        recipientName: data.name || data.reporterName || 'Dev User',
+        subject: `[DEV] ${template}`,
+        body: 'Email content skipped in development mode (SMTP missing)',
+        templateName: template,
+        status: 'sent',
+        messageId: 'dev-skip-' + Date.now()
+      });
       return { success: true, messageId: 'dev-skip-' + Date.now() };
     }
 
@@ -1754,6 +1773,17 @@ const sendEmail = async (to, template, data, attachment = null) => {
 
     const result = await sendWithTimeout(transporter, mailOptions);
     console.log('✅ Email sent successfully:', result.messageId);
+    await EmailLog.create({
+      recipientEmail: to,
+      recipientName: data.name || data.reporterName || '',
+      subject: mailOptions.subject,
+      body: mailOptions.html,
+      templateName: template,
+      status: 'sent',
+      messageId: result.messageId,
+      metadata: data
+    });
+
     return { success: true, messageId: result.messageId };
 
   } catch (error) {
@@ -1765,6 +1795,20 @@ const sendEmail = async (to, template, data, attachment = null) => {
       response: error.response,
       responseCode: error.responseCode
     });
+    try {
+      await EmailLog.create({
+        recipientEmail: to,
+        recipientName: data?.name || data?.reporterName || '',
+        subject: `[FAILED] ${template}`,
+        body: 'Email sending failed',
+        templateName: template,
+        status: 'failed',
+        errorMessage: error.message,
+        metadata: data
+      });
+    } catch (logError) {
+      console.error('❌ Failed to create email log:', logError);
+    }
 
     // In production, don't block the application for email failures
     const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER;
