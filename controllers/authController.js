@@ -4,6 +4,7 @@ const Admin = require('../models/Admin');
 const OTP = require('../models/OTP');
 const { sendEmail } = require('../services/emailService');
 const { sendWhatsAppOTP } = require('../services/whatsappService');
+
 const register = async (req, res) => {
   try {
     const { name, email, phone, password, role, allowedIPs } = req.body;
@@ -69,7 +70,7 @@ const register = async (req, res) => {
   }
 };
 
-// @desc    Login admin
+// @desc    Login admin - Part 1: Verify Password & Send OTP
 // @route   POST /api/auth/login
 // @access  Public
 const login = async (req, res) => {
@@ -110,8 +111,6 @@ const login = async (req, res) => {
       });
     }
 
-    // IP checking disabled for production compatibility
-
     // Check if password matches
     const isMatch = await admin.comparePassword(password);
 
@@ -125,22 +124,132 @@ const login = async (req, res) => {
       });
     }
 
-    // Reset login attempts on successful login
+    // Reset login attempts on successful credential check
     if (admin.loginAttempts > 0) {
       await admin.resetLoginAttempts();
     }
 
-    // Update last login
-    admin.lastLogin = new Date();
+    // SECOND FACTOR: WhatsApp OTP
+    if (!admin.phone) {
+      return res.status(400).json({
+        success: false,
+        message: 'No WhatsApp number linked to this account. Contact Super Admin.'
+      });
+    }
 
-    // Generate tokens
-    const token = admin.generateAuthToken();
-    const refreshToken = admin.generateRefreshToken();
-    await admin.save();
+    // Generate 6-digit OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Use official normalized email from DB instead of req.body to be 100% accurate
+    const normalizedEmail = admin.email.toLowerCase().trim();
+
+    // Save OTP to DB (associated with email for the second step)
+    await OTP.deleteMany({ email: normalizedEmail }); // Clear old OTPs
+    const savedOTP = await OTP.create({
+      email: normalizedEmail,
+      mobile: admin.phone,
+      otp: otpCode
+    });
+
+    console.log(`✅ Phase 1: OTP [${otpCode}] saved for [${normalizedEmail}] (ID: ${savedOTP._id})`);
+
+    // Send WhatsApp OTP
+    const waResponse = await sendWhatsAppOTP(admin.phone, otpCode);
+
+    if (!waResponse.success) {
+      console.error('❌ WhatsApp OTP send failed:', waResponse.message);
+      // Fallback or error
+    }
 
     res.status(200).json({
       success: true,
-      message: 'Login successful',
+      require2FA: true,
+      message: 'Password verified. Please enter the OTP sent to your WhatsApp.',
+      data: {
+        email: admin.email,
+        mobileMasked: admin.phone.replace(/.(?=.{4})/g, '*')
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Login failed'
+    });
+  }
+};
+
+/**
+ * @desc    Login Phase 2: Verify WhatsApp OTP and issue tokens
+ * @route   POST /api/auth/verify-2fa
+ * @access  Public
+ */
+const verify2FALogin = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and OTP are required'
+      });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // 1. Fetch admin FIRST to be sure of their official record
+    const admin = await Admin.findOne({ email: normalizedEmail });
+    if (!admin) {
+      console.warn(`❌ 2FA Attempt for non-existent admin: ${normalizedEmail}`);
+      return res.status(404).json({
+        success: false,
+        message: 'Admin account not found'
+      });
+    }
+
+    // 2. Verify OTP using BOTH email and mobile as a fail-safe
+    // This handles any dot or case mismatches by relying on the unique WhatsApp ID
+    const otpRecord = await OTP.findOne({ 
+      $or: [
+        { email: normalizedEmail },
+        { mobile: admin.phone }
+      ]
+    }).sort({ createdAt: -1 });
+
+    if (!otpRecord) {
+      console.warn(`⚠️ 2FA Failed: No OTP record found for ${normalizedEmail} or ${admin.phone} in DB.`);
+      return res.status(400).json({
+        success: false,
+        message: 'OTP has expired or was never requested'
+      });
+    }
+
+    if (otpRecord.otp !== otp.toString().trim()) {
+      console.warn(`❌ 2FA Failed: Incorrect OTP [${otp}] for node [${normalizedEmail}].`);
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid OTP code'
+      });
+    }
+
+    // Success - Finalize login
+
+    // Success - Finalize login
+    admin.lastLogin = new Date();
+    
+    // Generate tokens
+    const token = admin.generateAuthToken();
+    const refreshToken = admin.generateRefreshToken();
+    
+    await admin.save();
+
+    // Delete OTP record
+    await OTP.deleteMany({ email });
+
+    res.status(200).json({
+      success: true,
+      message: 'Logged in successfully',
       data: {
         admin: {
           id: admin._id,
@@ -156,9 +265,10 @@ const login = async (req, res) => {
     });
 
   } catch (error) {
+    console.error('❌ 2FA verification failed:', error);
     res.status(500).json({
       success: false,
-      message: 'Login failed'
+      message: 'Verification failed'
     });
   }
 };
@@ -459,6 +569,7 @@ const refreshToken = async (req, res) => {
     });
   }
 };
+
 const sendOTP = async (req, res) => {
   try {
     const { email } = req.body;
@@ -661,9 +772,179 @@ const verifyMobileOTP = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Send OTP via WhatsApp for login
+ * @route   POST /api/auth/send-login-otp
+ * @access  Public
+ */
+const sendLoginOTP = async (req, res) => {
+  try {
+    const { mobile } = req.body;
+
+    if (!mobile) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mobile number is required'
+      });
+    }
+
+    // Check if admin exists with this mobile number
+    const admin = await Admin.findOne({ phone: mobile });
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: 'No admin found with this mobile number'
+      });
+    }
+
+    if (!admin.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Account is deactivated'
+      });
+    }
+
+    // Check for existing OTP to prevent spamming (within 1 minute)
+    const existingOTP = await OTP.findOne({ mobile, createdAt: { $gt: new Date(Date.now() - 60000) } });
+    if (existingOTP) {
+      return res.status(429).json({
+        success: false,
+        message: 'Please wait 60 seconds before requesting another OTP'
+      });
+    }
+
+    // Generate 6-digit OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save OTP to DB
+    await OTP.create({
+      mobile,
+      otp: otpCode
+    });
+
+    // Send WhatsApp OTP
+    const waResponse = await sendWhatsAppOTP(mobile, otpCode);
+
+    if (waResponse.success) {
+      res.status(200).json({
+        success: true,
+        message: 'OTP sent successfully to your WhatsApp'
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: waResponse.message || 'Failed to send WhatsApp OTP. Please try again.'
+      });
+    }
+
+  } catch (error) {
+    console.error('❌ Send login OTP failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send WhatsApp OTP. Please try again later.'
+    });
+  }
+};
+
+/**
+ * @desc    Login admin using WhatsApp OTP
+ * @route   POST /api/auth/login-with-otp
+ * @access  Public
+ */
+const loginWithOTP = async (req, res) => {
+  try {
+    const { mobile, otp } = req.body;
+
+    if (!mobile || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mobile number and OTP are required'
+      });
+    }
+
+    // Verify OTP
+    const otpRecord = await OTP.findOne({ mobile }).sort({ createdAt: -1 });
+
+    if (!otpRecord) {
+      return res.status(400).json({
+        success: false,
+        message: 'OTP has expired or was never requested'
+      });
+    }
+
+    if (otpRecord.otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid OTP code'
+      });
+    }
+
+    // Check if admin exists
+    const admin = await Admin.findOne({ phone: mobile });
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: 'Admin account not found'
+      });
+    }
+
+    if (!admin.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Account is deactivated'
+      });
+    }
+
+    if (admin.isLocked) {
+      return res.status(423).json({
+        success: false,
+        message: 'Account is temporarily locked'
+      });
+    }
+
+    // Success - Update admin info
+    admin.lastLogin = new Date();
+    await admin.resetLoginAttempts();
+    
+    // Generate tokens
+    const token = admin.generateAuthToken();
+    const refreshToken = admin.generateRefreshToken();
+    
+    await admin.save();
+
+    // Delete OTP record
+    await OTP.deleteMany({ mobile });
+
+    res.status(200).json({
+      success: true,
+      message: 'Logged in successfully',
+      data: {
+        admin: {
+          id: admin._id,
+          name: admin.name,
+          email: admin.email,
+          role: admin.role,
+          permissions: admin.permissions,
+          lastLogin: admin.lastLogin
+        },
+        token,
+        refreshToken
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Login with OTP failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Login failed. Please try again later.'
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
+  verify2FALogin,
   logout,
   getMe,
   updateProfile,
@@ -674,6 +955,7 @@ module.exports = {
   sendOTP,
   verifyOTP,
   sendMobileOTP,
-  verifyMobileOTP
+  verifyMobileOTP,
+  sendLoginOTP,
+  loginWithOTP
 };
-

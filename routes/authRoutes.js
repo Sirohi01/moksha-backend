@@ -12,7 +12,10 @@ const {
   sendOTP,
   verifyOTP,
   sendMobileOTP,
-  verifyMobileOTP
+  verifyMobileOTP,
+  sendLoginOTP,
+  loginWithOTP,
+  verify2FALogin
 } = require('../controllers/authController');
 const { protect, authorize, authRateLimit } = require('../middleware/auth');
 const { body } = require('express-validator');
@@ -62,6 +65,9 @@ router.post('/send-otp', authRateLimit, sendOTP);
 router.post('/verify-otp', authRateLimit, verifyOTP);
 router.post('/send-mobile-otp', authRateLimit, sendMobileOTP);
 router.post('/verify-mobile-otp', authRateLimit, verifyMobileOTP);
+router.post('/send-login-otp', authRateLimit, sendLoginOTP);
+router.post('/login-with-otp', authRateLimit, loginWithOTP);
+router.post('/verify-2fa', authRateLimit, verify2FALogin);
 
 // Protected routes
 router.post('/register', protect, authorize('super_admin', 'manager'), registerValidation, register);

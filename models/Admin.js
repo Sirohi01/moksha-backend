@@ -51,6 +51,13 @@ const adminSchema = new mongoose.Schema({
       'view_scheme_applications', 'manage_scheme_applications',
       'view_expansion_requests', 'manage_expansion_requests',
       
+      // Page Specific Permissions (Granular)
+      'page_dashboard', 'page_support', 'page_tasks', 'page_users',
+      'page_reports', 'page_board', 'page_feedback', 'page_schemes',
+      'page_contacts', 'page_legacy', 'page_expansion', 'page_volunteers',
+      'page_donations', 'page_newsletter', 'page_content', 'page_seo',
+      'page_media', 'page_compliance', 'page_analytics', 'page_logs',
+
       // Content Management
       'manage_content', 'manage_seo', 'manage_media',
       'media_read', 'media_write', 'media_delete', 'media_approve', 'media_publish',
