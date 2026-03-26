@@ -580,8 +580,8 @@ const sampleConfigs = {
           href: "/report"
         },
         callButton: {
-          text: "Call 1800-123-456",
-          phoneNumber: "+911800123456"
+          text: "Call 9220147229",
+          phoneNumber: "+919220147229"
         }
       }
     }
@@ -997,8 +997,8 @@ const sampleConfigs = {
       description: "Your report has been received. Our team will contact you within 24 hours.",
       referencePrefix: "MS-2024-",
       urgentAssistanceText: "For urgent assistance, call:",
-      phoneNumber: "+911800123456",
-      phoneLabel: "1800-123-456 (24/7)",
+      phoneNumber: "+919220147229",
+      phoneLabel: "9220147229 (24/7)",
       submitAnotherText: "Submit another report"
     },
     importantNotice: {
@@ -1194,7 +1194,7 @@ const sampleConfigs = {
     },
     emergency: {
       title: "For immediate assistance:",
-      phoneNumber: "1800-123-456",
+      phoneNumber: "9220147229",
       phoneLabel: "Toll Free · 24/7 · All India",
       description: "For immediate assistance:"
     }
@@ -1904,8 +1904,8 @@ const sampleConfigs = {
     contact: {
       title: "Have questions? Contact us:",
       phone: {
-        number: "+911800123456",
-        display: "📞 1800-123-456"
+        number: "+919220147229",
+        display: "📞 9220147229"
       },
       email: {
         address: "help@mokshasewa.org",
@@ -2676,7 +2676,7 @@ const sampleConfigs = {
       title: "NEED HELP",
       subtitle: "FOR APPLYING?",
       description: "Dealing with government paperwork can be overwhelming during a crisis. Our trained volunteers will help you navigate the entire process, 100% free.",
-      phone: "1800-123-456",
+      phone: "9220147229",
       email: "help@mokshasewa.org",
       callLabel: "CALL US",
       emailLabel: "EMAIL SUPPORT"
@@ -2738,9 +2738,9 @@ const sampleConfigs = {
       {
         icon: "Phone",
         title: "Helpline (24/7)",
-        info: "1800-123-456",
+        info: "9220147229",
         sub: "Toll Free · All India",
-        href: "tel:+911800123456"
+        href: "tel:+919220147229"
       },
       {
         icon: "Mail",
@@ -3204,7 +3204,7 @@ const sampleConfigs = {
       contact: {
         phone: {
           number: "tel:1800123456",
-          display: "1800-123-456"
+          display: "9220147229"
         },
         email: {
           address: "mailto:info@mokshasewa.org",

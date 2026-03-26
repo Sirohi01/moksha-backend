@@ -120,7 +120,7 @@ const emailTemplates = {
           <p style="margin: 0;"><strong>⏰ Next Steps:</strong></p>
           <p style="margin: 5px 0;">• Our team will respond within 24 hours</p>
           <p style="margin: 5px 0;">• You will receive updates via email and SMS</p>
-          <p style="margin: 5px 0;">• For urgent assistance, call: <strong>1800-123-456</strong></p>
+          <p style="margin: 5px 0;">• For urgent assistance, call: <strong>9220147229</strong></p>
         </div>
         <p style="margin-top: 20px;">Thank you for your service to humanity.</p>
         <p><strong>Moksha Sewa Team</strong><br>
@@ -377,7 +377,7 @@ const emailTemplates = {
         <div style="background: #ecfdf5; padding: 15px; border-radius: 5px; border: 1px solid #86efac;">
           <p style="margin: 0;"><strong>⏱️ Response Time:</strong></p>
           <p style="margin: 5px 0;">• We will respond within 24 hours</p>
-          <p style="margin: 5px 0;">• For urgent matters, call: <strong>1800-123-456</strong></p>
+          <p style="margin: 5px 0;">• For urgent matters, call: <strong>9220147229</strong></p>
         </div>
         <p style="margin-top: 20px;">We appreciate your interest in our mission.</p>
         <p><strong>Moksha Sewa Team</strong><br>
