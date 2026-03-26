@@ -8,6 +8,7 @@ require('dotenv').config();
 
 const connectDB = require('./config/database');
 const errorHandler = require('./middleware/errorHandler');
+const { monitorPerformance } = require('./middleware/intelligenceMiddleware');
 const notificationService = require('./services/notificationService');
 const sitemapService = require('./services/sitemapService');
 const { specs, swaggerUi } = require('./swagger');
@@ -45,6 +46,9 @@ if (process.env.NODE_ENV === 'production') {
 
 // Connect to Database
 connectDB();
+
+// Performance Monitoring (Latency tracking)
+app.use(monitorPerformance);
 
 // Security Middleware
 app.use(helmet());
@@ -141,6 +145,8 @@ const newsletterRoutes = require('./routes/newsletterRoutes');
 const complianceRoutes = require('./routes/complianceRoutes');
 
 const chatRoutes = require('./routes/chatRoutes');
+const intelligenceRoutes = require('./routes/intelligenceRoutes');
+const marketingRoutes = require('./routes/marketingRoutes');
 
 // Mount routes
 app.use('/api/auth', authRoutes);
@@ -171,6 +177,8 @@ app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/page-config', pageConfigRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/intelligence', intelligenceRoutes);
+app.use('/api/marketing', marketingRoutes);
 
 // 404 Handler
 app.use('*', (req, res) => {

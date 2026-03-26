@@ -1,9 +1,15 @@
-const errorHandler = (err, req, res, next) => {
+const { logSystemError } = require('./intelligenceMiddleware');
+
+const errorHandler = async (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
+  const statusCode = error.statusCode || 500;
 
   // Log error
   console.error('❌ Error:', err);
+  
+  // Log to database for real-time monitoring
+  await logSystemError(err, req, statusCode);
 
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {
