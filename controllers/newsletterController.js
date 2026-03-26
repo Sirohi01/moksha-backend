@@ -1,8 +1,4 @@
 const NewsletterSubscription = require('../models/NewsletterSubscription');
-
-// @desc    Subscribe to newsletter
-// @route   POST /api/newsletter/subscribe
-// @access  Public
 exports.subscribe = async (req, res) => {
   try {
     const { email, source } = req.body;
@@ -59,9 +55,6 @@ exports.subscribe = async (req, res) => {
   }
 };
 
-// @desc    Get all subscribers
-// @route   GET /api/newsletter/subscribers
-// @access  Private/Admin
 exports.getSubscribers = async (req, res) => {
   try {
     const subscribers = await NewsletterSubscription.find().sort('-createdAt');
@@ -79,10 +72,6 @@ exports.getSubscribers = async (req, res) => {
     });
   }
 };
-
-// @desc    Unsubscribe from newsletter
-// @route   PUT /api/newsletter/unsubscribe
-// @access  Public
 exports.unsubscribe = async (req, res) => {
   try {
     const { email } = req.body;
@@ -108,6 +97,94 @@ exports.unsubscribe = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to unsubscribe'
+    });
+  }
+};
+exports.broadcastNewsletter = async (req, res) => {
+  try {
+    const { subject, html, segment } = req.body;
+
+    if (!subject || !html) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide subject and html content'
+      });
+    }
+
+    // Determine target subscribers
+    let filter = { status: 'active' };
+    if (segment && segment !== 'all') {
+      filter.source = segment;
+    }
+
+    const subscribers = await NewsletterSubscription.find(filter);
+
+    if (subscribers.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No active subscribers found for this segment'
+      });
+    }
+
+    const { uploadToCloudinary } = require('../services/cloudinaryService');
+    const { sendEmail } = require('../services/emailService');
+
+    let processedHtml = html;
+
+    // Detect and host base64 images to ensure they show in email clients
+    const base64Regex = /src="(data:image\/[^;]+;base64,[^"]+)"/g;
+    const matches = [...html.matchAll(base64Regex)];
+
+    for (const match of matches) {
+      const base64Data = match[1];
+      try {
+        // Convert base64 to buffer for Cloudinary
+        const buffer = Buffer.from(base64Data.split(',')[1], 'base64');
+        const uploadRes = await uploadToCloudinary({ buffer }, 'newsletters');
+        processedHtml = processedHtml.replace(base64Data, uploadRes.url);
+        console.log('✅ Hosted base64 image to Cloudinary:', uploadRes.url);
+      } catch (uploadError) {
+        console.error('⚠️ Failed to upload image to Cloudinary, sending as base64:', uploadError);
+      }
+    }
+
+    // Wrap with Brand Header
+    const finalHtml = `
+      <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+        <div style="padding: 32px 24px; text-align: center; border-bottom: 2px solid #f1f5f9; background: #ffffff;">
+          <img src="https://res.cloudinary.com/dr8mld4i0/image/upload/v1774522601/newsletters/moksha_logo_official.png" alt="Moksha Sewa" style="height: 60px; display: inline-block;" />
+          <div style="color: #000080; font-size: 11px; font-weight: 900; letter-spacing: 0.4em; margin-top: 12px; text-transform: uppercase;">Liberation Through Service</div>
+        </div>
+        <div style="padding: 0;">
+          ${processedHtml}
+        </div>
+        <div style="padding: 40px 24px; background: #ffffff; text-align: center; border-top: 1px solid #f1f5f9;">
+          <div style="color: #000080; font-weight: 800; font-size: 14px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Moksha Sewa Foundation</div>
+          <div style="color: #64748b; font-size: 11px; line-height: 1.6;">
+            The final dignity for every soul.<br/>
+            © ${new Date().getFullYear()} Moksha Sewa. All Rights Reserved.
+          </div>
+        </div>
+      </div>
+    `;
+
+    const results = await Promise.all(
+      subscribers.map(sub =>
+        sendEmail(sub.email, 'customHtml', { subject, html: finalHtml })
+      )
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Broadcast initiated to ${subscribers.length} nodes`,
+      count: subscribers.length
+    });
+
+  } catch (error) {
+    console.error('❌ Broadcast failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Critical error during broadcast transmission'
     });
   }
 };

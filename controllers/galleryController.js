@@ -1,5 +1,5 @@
 const multer = require('multer');
-const cloudinary = require('../services/cloudinaryService');
+const { uploadToCloudinary, deleteFromCloudinary } = require('../services/cloudinaryService');
 const path = require('path');
 
 // Configure multer for file uploads
@@ -124,45 +124,29 @@ const uploadImage = async (req, res) => {
     const { title, description, category, alt } = req.body;
 
     // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload_stream(
-      {
-        folder: 'moksha-seva/gallery',
-        resource_type: 'image'
-      },
-      (error, result) => {
-        if (error) {
-          console.error('Cloudinary upload error:', error);
-          return res.status(500).json({
-            success: false,
-            message: 'Failed to upload image'
-          });
-        }
+    const result = await uploadToCloudinary(req.file, 'moksha-seva/gallery');
 
-        // Create new image record
-        const newImage = {
-          id: Date.now().toString(),
-          src: result.secure_url,
-          alt: alt || title,
-          title,
-          description,
-          category,
-          uploadDate: new Date(),
-          size: `${(result.bytes / (1024 * 1024)).toFixed(1)} MB`,
-          dimensions: `${result.width}x${result.height}`,
-          cloudinaryId: result.public_id
-        };
+    // Create new image record
+    const newImage = {
+      id: Date.now().toString(),
+      src: result.url,
+      alt: alt || title || 'Gallery Image',
+      title: title || 'Untitled',
+      description: description || '',
+      category: category || 'general',
+      uploadDate: new Date(),
+      size: `${(result.size / (1024 * 1024)).toFixed(1)} MB`,
+      dimensions: 'N/A', // dimensions not available in simplified uploadToCloudinary
+      cloudinaryId: result.publicId
+    };
 
-        galleryImages.unshift(newImage);
+    galleryImages.unshift(newImage);
 
-        res.status(201).json({
-          success: true,
-          message: 'Image uploaded successfully',
-          data: newImage
-        });
-      }
-    );
-
-    result.end(req.file.buffer);
+    res.status(201).json({
+      success: true,
+      message: 'Image uploaded successfully',
+      data: newImage
+    });
   } catch (error) {
     console.error('❌ Image upload failed:', error);
     res.status(500).json({
@@ -233,7 +217,7 @@ const deleteImage = async (req, res) => {
     // Delete from Cloudinary if it exists
     if (image.cloudinaryId) {
       try {
-        await cloudinary.uploader.destroy(image.cloudinaryId);
+        await deleteFromCloudinary(image.cloudinaryId);
       } catch (cloudinaryError) {
         console.error('Cloudinary delete error:', cloudinaryError);
         // Continue with local deletion even if Cloudinary fails

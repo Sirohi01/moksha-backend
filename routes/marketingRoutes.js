@@ -9,9 +9,13 @@ const {
   getSegments, 
   createSegment,
   createMarketingContent,
-  deleteMarketingContent
+  deleteMarketingContent,
+  getActiveMarketingContent
 } = require('../controllers/marketingController');
 const { protect, authorize } = require('../middleware/auth');
+
+// Public routes
+router.get('/active', getActiveMarketingContent);
 
 router.use(protect);
 router.use(authorize('super_admin', 'manager', 'media_team', 'seo_team'));

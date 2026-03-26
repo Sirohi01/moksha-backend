@@ -38,6 +38,11 @@ const createTransporter = () => {
   return nodemailer.createTransport(config);
 };
 const emailTemplates = {
+  customHtml: (data) => ({
+    subject: data.subject || 'Special Update - Moksha Sewa',
+    html: data.html
+  }),
+
   wrapAdminTemplate: (title, subtitle, content, color = '#000080') => `
     <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; overflow: hidden; border: 1px solid rgba(0,0,128,0.1); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
       <div style="background: linear-gradient(135deg, #000080 0%, #000050 100%); padding: 50px 30px; text-align: center; color: white; position: relative; border-bottom: 5px solid #f4c430;">

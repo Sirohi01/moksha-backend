@@ -1,5 +1,4 @@
-const MediaAsset = require('../models/MediaAsset');
-const cloudinary = require('../services/cloudinaryService');
+const { uploadToCloudinary, deleteFromCloudinary, cloudinary } = require('../services/cloudinaryService');
 const asyncHandler = require('express-async-handler');
 
 // @desc    Get all media assets
@@ -104,7 +103,7 @@ const uploadMediaAsset = asyncHandler(async (req, res) => {
     isFeatured
   } = req.body;
 
-  // Upload to Cloudinary
+  // Upload to Cloudinary using standard uploader
   const uploadResult = await cloudinary.uploader.upload(req.file.path, {
     folder: `moksha-seva/media/${category}`,
     resource_type: 'auto',
@@ -216,7 +215,7 @@ const deleteMediaAsset = asyncHandler(async (req, res) => {
 
   // Delete from Cloudinary
   if (asset.cloudinaryId) {
-    await cloudinary.uploader.destroy(asset.cloudinaryId);
+    await deleteFromCloudinary(asset.cloudinaryId);
   }
 
   await asset.deleteOne();

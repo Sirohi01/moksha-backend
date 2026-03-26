@@ -99,5 +99,6 @@ const deleteFromCloudinary = async (publicId) => {
 module.exports = {
   upload,
   uploadToCloudinary,
-  deleteFromCloudinary
+  deleteFromCloudinary,
+  cloudinary // Export raw instance for direct usage if needed
 };

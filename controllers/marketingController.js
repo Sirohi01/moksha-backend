@@ -64,6 +64,12 @@ const createSegment = asyncHandler(async (req, res) => {
   res.status(201).json({ success: true, data: segment });
 });
 
+// @desc    Get active marketing content (Public)
+const getActiveMarketingContent = asyncHandler(async (req, res) => {
+  const content = await MarketingContent.find({ isActive: true }).sort({ createdAt: -1 });
+  res.status(200).json({ success: true, count: content.length, data: content });
+});
+
 module.exports = {
   getCampaigns,
   createCampaign,
@@ -73,5 +79,6 @@ module.exports = {
   deleteMarketingContent,
   toggleContentStatus,
   getSegments,
-  createSegment
+  createSegment,
+  getActiveMarketingContent
 };
