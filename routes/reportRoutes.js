@@ -1,5 +1,5 @@
 const express = require('express');
-const { createReport, getReports, getReport, updateReport } = require('../controllers/reportController');
+const { createReport, getReports, getReport, updateReport, getPublicStats, getPublicReports } = require('../controllers/reportController');
 const { reportValidation } = require('../middleware/validation');
 const { upload } = require('../services/cloudinaryService');
 const { protect } = require('../middleware/auth');
@@ -16,6 +16,8 @@ const uploadFields = upload.fields([
 
 // Public routes
 router.post('/', uploadFields, reportValidation, createReport);
+router.get('/public/stats', getPublicStats);
+router.get('/public/list', getPublicReports);
 
 // Admin routes (protected)
 router.get('/', protect, getReports);

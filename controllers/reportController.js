@@ -222,9 +222,75 @@ const updateReport = async (req, res) => {
   }
 };
 
+// @desc    Get public stats for transparency dashboard
+// @route   GET /api/reports/public/stats
+// @access  Public
+const getPublicStats = async (req, res) => {
+  try {
+    const [resolved, pending, inProgress] = await Promise.all([
+      Report.countDocuments({ status: 'resolved' }),
+      Report.countDocuments({ status: 'pending' }),
+      Report.countDocuments({ status: 'in_progress' })
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        resolved,
+        pending: pending + inProgress,
+        total: resolved + pending + inProgress
+      }
+    });
+  } catch (error) {
+    console.error('❌ Get public stats failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch public statistics'
+    });
+  }
+};
+
+// @desc    Get public reports (resolved only)
+// @route   GET /api/reports/public/list
+// @access  Public
+const getPublicReports = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const skip = (page - 1) * limit;
+
+    const reports = await Report.find({ status: 'resolved' })
+      .sort({ resolvedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .select('caseNumber exactLocation dateFound resolvedAt area city state policeStationName');
+
+    const total = await Report.countDocuments({ status: 'resolved' });
+
+    res.status(200).json({
+      success: true,
+      data: reports,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('❌ Get public reports failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch public reports'
+    });
+  }
+};
+
 module.exports = {
   createReport,
   getReports,
   getReport,
-  updateReport
+  updateReport,
+  getPublicStats,
+  getPublicReports
 };
