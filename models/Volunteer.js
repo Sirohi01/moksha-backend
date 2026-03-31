@@ -7,6 +7,7 @@ const volunteerSchema = new mongoose.Schema({
     required: [true, 'Registration type is required'],
     enum: ['individual', 'group']
   },
+  photo: String,
 
   // Personal Details
   name: {
@@ -114,6 +115,12 @@ const volunteerSchema = new mongoose.Schema({
   groupLeaderName: String,
   groupLeaderPhone: String,
   groupLeaderEmail: String,
+  groupMembers: [{
+    name: String,
+    role: String,
+    contact: String,
+    photo: String
+  }],
 
   // Emergency Contact
   emergencyContactName: String,
