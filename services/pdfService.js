@@ -495,9 +495,9 @@ const generateReceiptPDF = async (donation) => {
                     <h4>Organization Details</h4>
                     <p><strong>Moksha Sewa Foundation</strong></p>
                     <p>Registered Address: [Your Organization Address]</p>
-                    <p>Phone: [Your Phone Number]</p>
-                    <p>Email: info@moksha-seva.org</p>
-                    <p>Website: www.moksha-seva.org</p>
+                    <p>Phone: 9220147229</p>
+                    <p>Email: info@mokshasewa.org</p>
+                    <p>Website: www.mokshasewa.org</p>
                   </div>
                   
                   <div class="org-section">

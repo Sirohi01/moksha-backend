@@ -489,7 +489,7 @@ const emailTemplates = {
         <div style="background: #eff6ff; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #93c5fd;">
           <p style="margin: 0; color: #1e40af;"><strong>📞 Contact Information:</strong></p>
           <p style="margin: 5px 0;">Phone: ${process.env.ADMIN_PHONE || '+91-XXXXXXXXXX'}</p>
-          <p style="margin: 5px 0;">Email: ${process.env.ADMIN_EMAIL || 'info@moksha-seva.org'}</p>
+          <p style="margin: 5px 0;">Email: ${process.env.ADMIN_EMAIL || 'info@mokshasewa.org'}</p>
         </div>
         
         <p style="margin-top: 20px;">Your kindness will bring dignity to someone's final journey.</p>
@@ -576,9 +576,9 @@ const emailTemplates = {
             </div>
             
             <div style="color: #6b7280; font-size: 14px; line-height: 1.6;">
-              <p style="margin: 5px 0;">📧 Email: info@moksha-seva.org</p>
-              <p style="margin: 5px 0;">🌐 Website: www.moksha-seva.org</p>
-              <p style="margin: 5px 0;">📞 Phone: [Your Phone Number]</p>
+              <p style="margin: 5px 0;">📧 Email: info@mokshasewa.org</p>
+              <p style="margin: 5px 0;">🌐 Website: www.mokshasewa.org</p>
+              <p style="margin: 5px 0;">📞 Phone: 9220147229</p>
             </div>
             
             <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb;">

@@ -77,7 +77,7 @@ app.use(cors({
       'http://127.0.0.1:3000',
       'https://mokshafrontend.netlify.app',
       'https://moksha-seva.org',
-      'https://www.moksha-seva.org'
+      'https://www.mokshasewa.org'
     ];
 
     if (allowedOrigins.indexOf(origin) !== -1) {

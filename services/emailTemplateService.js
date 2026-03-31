@@ -96,7 +96,7 @@ const emailTemplates = {
           
           <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 30px; text-align: center; color: #6b7280; font-size: 14px;">
             <p><strong>Moksha Sewa Foundation</strong></p>
-            <p>Email: info@moksha-seva.org | Website: www.moksha-seva.org</p>
+            <p>Email: info@mokshasewa.org | Website: www.mokshasewa.org</p>
             <p>This is a computer-generated receipt.</p>
           </div>
         </div>
@@ -148,7 +148,7 @@ const emailTemplates = {
           
           <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 30px; text-align: center; color: #6b7280; font-size: 14px;">
             <p><strong>Moksha Sewa Foundation</strong></p>
-            <p>Email: info@moksha-seva.org | Website: www.moksha-seva.org</p>
+            <p>Email: info@mokshasewa.org | Website: www.mokshasewa.org</p>
           </div>
         </div>
       </div>
