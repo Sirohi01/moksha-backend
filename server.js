@@ -13,6 +13,15 @@ const notificationService = require('./services/notificationService');
 const sitemapService = require('./services/sitemapService');
 const { specs, swaggerUi } = require('./swagger');
 
+const fs = require('fs');
+const path = require('path');
+
+// Ensure upload directories exist
+const uploadDir = path.join(__dirname, 'uploads/temp');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
