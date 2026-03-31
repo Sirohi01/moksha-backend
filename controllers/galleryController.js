@@ -79,7 +79,11 @@ const uploadImage = asyncHandler(async (req, res) => {
     });
   }
 
-  const { title, description, category, alt } = req.body;
+  const { title, description, category, alt, isPublic: isPublicBody } = req.body;
+  let isPublic = isPublicBody === 'true' || isPublicBody === true;
+  if (isPublicBody === undefined) {
+    isPublic = category === 'gallery' || !category;
+  }
   const result = await uploadToCloudinary(req.file, `moksha-seva/gallery/${category || 'general'}`);
   const newAsset = await MediaAsset.create({
     title: title || 'Untitled',
@@ -100,7 +104,7 @@ const uploadImage = asyncHandler(async (req, res) => {
     altText: alt || title || 'Gallery Image',
     uploadedBy: req.admin._id,
     status: 'approved', // Auto-approve gallery uploads from admin
-    isPublic: true      // Default to public for gallery uploads
+    isPublic: isPublic
   });
 
   const formattedImage = {

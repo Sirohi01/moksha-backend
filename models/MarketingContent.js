@@ -44,7 +44,8 @@ const marketingContentSchema = new mongoose.Schema({
   },
   appearance: {
     theme: { type: String, enum: ['navy-gold', 'light', 'dark', 'emergency-red'], default: 'navy-gold' },
-    showCloseButton: { type: Boolean, default: true }
+    showCloseButton: { type: Boolean, default: true },
+    maxWidth: { type: String, default: '450px' }
   },
   metadata: {
     type: mongoose.Schema.Types.Mixed
