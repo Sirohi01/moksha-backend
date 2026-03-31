@@ -42,6 +42,7 @@ const register = async (req, res) => {
         tempPassword: password
       });
     } catch (emailError) {
+      console.error('⚠️ Welcome email failed to send:', emailError.message);
       // Email failed but registration successful - continue
     }
 
