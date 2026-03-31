@@ -71,7 +71,9 @@ const uploadToCloudinary = async (file, folder = 'moksha-seva') => {
               url: result.secure_url,
               publicId: result.public_id,
               format: result.format,
-              size: result.bytes
+              size: result.bytes,
+              width: result.width,
+              height: result.height
             });
           }
         }

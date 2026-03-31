@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
 const { protect, authorize } = require('../middleware/auth');
 const {
   getGalleryImages,
@@ -9,10 +11,30 @@ const {
   getGalleryStats
 } = require('../controllers/galleryController');
 
+// Multer Configuration (Memory storage for direct Cloudinary upload)
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Check if it's an image by mimetype OR extension
+    const isImageMime = file.mimetype.startsWith('image/');
+    const isImageExt = /\.(jpg|jpeg|png|gif|webp|avif|tiff|bmp)$/i.test(file.originalname);
+
+    if (isImageMime || isImageExt) {
+      return cb(null, true);
+    } else {
+      cb(new Error(`File type rejected: ${file.mimetype}. Only image files are allowed (JPG, PNG, WEBP, etc.).`));
+    }
+  }
+});
+
 // @route   GET /api/gallery
 // @desc    Get all gallery images
-// @access  Private
-router.get('/', protect, getGalleryImages);
+// @access  Public
+router.get('/', getGalleryImages);
 
 // @route   GET /api/gallery/stats
 // @desc    Get gallery statistics
@@ -22,7 +44,7 @@ router.get('/stats', protect, authorize(['super_admin', 'manager', 'media_team']
 // @route   POST /api/gallery
 // @desc    Upload new image
 // @access  Private
-router.post('/', protect, authorize(['super_admin', 'manager', 'media_team']), uploadImage);
+router.post('/', protect, authorize(['super_admin', 'manager', 'media_team']), upload.single('image'), uploadImage);
 
 // @route   PUT /api/gallery/:id
 // @desc    Update image details
@@ -34,4 +56,4 @@ router.put('/:id', protect, authorize(['super_admin', 'manager', 'media_team']),
 // @access  Private
 router.delete('/:id', protect, authorize(['super_admin', 'manager', 'media_team']), deleteImage);
 
-module.exports = router;
+module.exports = router;
