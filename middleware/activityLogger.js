@@ -17,16 +17,26 @@ const logActivity = (action, targetType = null, description = null) => {
       // Log the activity after response
       setImmediate(async () => {
         try {
-          if (req.admin && req.activityInfo) {
+          // Identify user either from req.admin (if logged in) or from successful login response
+          let currentUser = req.admin;
+          if (!currentUser && data && data.success && data.data && data.data.admin) {
+            currentUser = {
+              _id: data.data.admin.id || data.data.admin._id,
+              email: data.data.admin.email,
+              role: data.data.admin.role
+            };
+          }
+
+          if (currentUser && req.activityInfo) {
             const duration = Date.now() - req.activityInfo.startTime;
             
             const logData = {
-              userId: req.admin._id,
-              userEmail: req.admin.email,
-              userRole: req.admin.role,
+              userId: currentUser._id,
+              userEmail: currentUser.email,
+              userRole: currentUser.role,
               action: req.activityInfo.action,
               targetType: req.activityInfo.targetType,
-              targetId: req.params.id || req.body.id || null,
+              targetId: req.params.id || req.body.id || (data && data.data && data.data.id ? data.data.id : null),
               targetName: req.body.name || req.body.title || null,
               ipAddress: req.ip || req.connection.remoteAddress,
               userAgent: req.get('User-Agent'),
@@ -49,7 +59,11 @@ const logActivity = (action, targetType = null, description = null) => {
               logData.status = 'error';
             }
 
-            await ActivityLog.create(logData);
+            console.log(`[ActivityLogger] Attempting to log: ${logData.action} by ${logData.userEmail}`);
+            const newLog = await ActivityLog.create(logData);
+            console.log(`[ActivityLogger] Log saved successfully: ${newLog._id}`);
+          } else {
+            console.log(`[ActivityLogger] Skipping log: No user or activityInfo found.`);
           }
         } catch (error) {
           console.error('❌ Activity logging failed:', error);

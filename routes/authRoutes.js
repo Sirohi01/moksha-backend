@@ -2,6 +2,7 @@ const express = require('express');
 const {
   register,
   login,
+  verify2FALogin,
   logout,
   getMe,
   updateProfile,
@@ -14,13 +15,13 @@ const {
   sendMobileOTP,
   verifyMobileOTP,
   sendLoginOTP,
-  loginWithOTP,
-  verify2FALogin
+  loginWithOTP
 } = require('../controllers/authController');
 const { protect, authorize, authRateLimit } = require('../middleware/auth');
 const { body } = require('express-validator');
 const { validate } = require('../middleware/validation');
 const { getAvailableIPs, getClientIP, formatIPForDisplay } = require('../utils/networkUtils');
+const { logActivity } = require('../middleware/activityLogger');
 
 const router = express.Router();
 
@@ -57,7 +58,7 @@ const resetPasswordValidation = [
 ];
 
 // Public routes
-router.post('/login', authRateLimit, loginValidation, login);
+router.post('/login', authRateLimit, loginValidation, logActivity('login', 'system', 'Admin login attempt'), login);
 router.post('/forgot-password', authRateLimit, forgotPasswordValidation, forgotPassword);
 router.put('/reset-password/:resettoken', resetPasswordValidation, resetPassword);
 router.post('/refresh-token', refreshToken);
@@ -67,7 +68,7 @@ router.post('/send-mobile-otp', authRateLimit, sendMobileOTP);
 router.post('/verify-mobile-otp', authRateLimit, verifyMobileOTP);
 router.post('/send-login-otp', authRateLimit, sendLoginOTP);
 router.post('/login-with-otp', authRateLimit, loginWithOTP);
-router.post('/verify-2fa', authRateLimit, verify2FALogin);
+router.post('/verify-2fa', authRateLimit, logActivity('login', 'system', 'Completed 2FA authentication'), verify2FALogin);
 
 // Protected routes
 router.post('/register', protect, authorize('super_admin', 'manager'), registerValidation, register);
@@ -81,7 +82,7 @@ router.get('/available-ips', protect, authorize('super_admin', 'manager'), (req,
   try {
     const availableIPs = getAvailableIPs();
     const currentIP = formatIPForDisplay(getClientIP(req));
-    
+
     res.json({
       success: true,
       data: {
@@ -89,10 +90,10 @@ router.get('/available-ips', protect, authorize('super_admin', 'manager'), (req,
         availableIPs,
         suggestions: [
           currentIP,
-          '127.0.0.1', // localhost
-          '0.0.0.0',   // all interfaces
+          '127.0.0.1',
+          '0.0.0.0',
           ...availableIPs.map(ip => ip.address)
-        ].filter((ip, index, arr) => arr.indexOf(ip) === index) // remove duplicates
+        ].filter((ip, index, arr) => arr.indexOf(ip) === index)
       }
     });
   } catch (error) {

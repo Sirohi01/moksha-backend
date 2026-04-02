@@ -10,6 +10,7 @@ const {
   deleteImage,
   getGalleryStats
 } = require('../controllers/galleryController');
+const { logActivity } = require('../middleware/activityLogger');
 
 // Multer Configuration (Memory storage for direct Cloudinary upload)
 const storage = multer.memoryStorage();
@@ -44,16 +45,16 @@ router.get('/stats', protect, authorize('super_admin', 'admin', 'manager', 'medi
 // @route   POST /api/gallery
 // @desc    Upload new image
 // @access  Private
-router.post('/', protect, authorize('super_admin', 'admin', 'manager', 'media_team', 'content_team', 'seo_team'), upload.single('image'), uploadImage);
+router.post('/', protect, authorize('super_admin', 'admin', 'manager', 'media_team', 'content_team', 'seo_team'), upload.single('image'), logActivity('upload_media', 'gallery', 'Uploaded new image'), uploadImage);
 
 // @route   PUT /api/gallery/:id
 // @desc    Update image details
 // @access  Private
-router.put('/:id', protect, authorize('super_admin', 'admin', 'manager', 'media_team', 'content_team', 'seo_team'), updateImage);
+router.put('/:id', protect, authorize('super_admin', 'admin', 'manager', 'media_team', 'content_team', 'seo_team'), logActivity('update_content', 'gallery', 'Updated image details'), updateImage);
 
 // @route   DELETE /api/gallery/:id
 // @desc    Delete image
 // @access  Private
-router.delete('/:id', protect, authorize('super_admin', 'admin', 'manager', 'media_team', 'content_team', 'seo_team'), deleteImage);
+router.delete('/:id', protect, authorize('super_admin', 'admin', 'manager', 'media_team', 'content_team', 'seo_team'), logActivity('delete_media', 'gallery', 'Deleted image'), deleteImage);
 
-module.exports = router;
+module.exports = router;
