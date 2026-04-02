@@ -10,7 +10,7 @@ const getGalleryImages = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 20;
   const skip = (page - 1) * limit;
-  const { category, search, isAdmin } = req.query;
+  const { category, search, isAdmin, isPublic } = req.query;
 
   // Build filter
   // If not admin request, only show approved and public images
@@ -28,7 +28,9 @@ const getGalleryImages = asyncHandler(async (req, res) => {
   } else {
     filter.category = { $in: ['gallery', 'events', 'services', 'community', 'volunteers', 'content_assets', 'general'] };
   }
-  if (isAdmin !== 'true') {
+  if (isAdmin === 'true' && isPublic !== undefined) {
+    filter.isPublic = isPublic === 'true';
+  } else if (isAdmin !== 'true') {
     filter.status = 'approved';
     filter.isPublic = true;
   }

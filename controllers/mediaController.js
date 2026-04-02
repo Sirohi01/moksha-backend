@@ -12,6 +12,9 @@ const getMediaAssets = asyncHandler(async (req, res) => {
   if (req.query.type) filter.type = req.query.type;
   if (req.query.category) filter.category = req.query.category;
   if (req.query.status) filter.status = req.query.status;
+  if (req.query.isPublic !== undefined) {
+    filter.isPublic = req.query.isPublic === 'true';
+  }
   
   if (req.query.search) {
     filter.$or = [
