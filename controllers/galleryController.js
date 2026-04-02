@@ -22,8 +22,11 @@ const getGalleryImages = asyncHandler(async (req, res) => {
   // If category is provided but it's one of the gallery categories, we use it
   if (category && category !== 'all') {
     filter.category = category;
+  } else if (isAdmin === 'true') {
+    // Admins see everything by default
+    delete filter.category;
   } else {
-    filter.category = { $in: ['gallery', 'events', 'services', 'community', 'volunteers'] };
+    filter.category = { $in: ['gallery', 'events', 'services', 'community', 'volunteers', 'content_assets', 'general'] };
   }
   if (isAdmin !== 'true') {
     filter.status = 'approved';
@@ -58,7 +61,8 @@ const getGalleryImages = asyncHandler(async (req, res) => {
     dimensions: img.dimensions ? `${img.dimensions.width}x${img.dimensions.height}` : 'N/A',
     cloudinaryId: img.cloudinaryId,
     status: img.status,
-    isPublic: img.isPublic
+    isPublic: img.isPublic,
+    tags: img.tags || []
   }));
 
   res.status(200).json({
@@ -117,7 +121,8 @@ const uploadImage = asyncHandler(async (req, res) => {
     uploadDate: newAsset.createdAt,
     size: (newAsset.fileSize / (1024 * 1024)).toFixed(2) + ' MB',
     dimensions: `${newAsset.dimensions.width}x${newAsset.dimensions.height}`,
-    cloudinaryId: newAsset.cloudinaryId
+    cloudinaryId: newAsset.cloudinaryId,
+    tags: newAsset.tags || []
   };
 
   res.status(201).json({
@@ -165,7 +170,8 @@ const updateImage = asyncHandler(async (req, res) => {
     dimensions: asset.dimensions ? `${asset.dimensions.width}x${asset.dimensions.height}` : 'N/A',
     cloudinaryId: asset.cloudinaryId,
     status: asset.status,
-    isPublic: asset.isPublic
+    isPublic: asset.isPublic,
+    tags: asset.tags || []
   };
 
   res.status(200).json({

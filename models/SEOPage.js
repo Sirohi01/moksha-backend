@@ -24,13 +24,13 @@ const seoPageSchema = new mongoose.Schema({
   metaTitle: {
     type: String,
     required: [true, 'Meta title is required'],
-    maxlength: [60, 'Meta title should not exceed 60 characters'],
+    maxlength: [150, 'Meta title is too long'],
     trim: true
   },
   metaDescription: {
     type: String,
     required: [true, 'Meta description is required'],
-    maxlength: [160, 'Meta description should not exceed 160 characters'],
+    maxlength: [500, 'Meta description is too long'],
     trim: true
   },
   metaKeywords: {
@@ -100,6 +100,42 @@ const seoPageSchema = new mongoose.Schema({
     lang: String,
     url: String
   }],
+  h1Tag: {
+    type: String,
+    trim: true
+  },
+  breadcrumb: {
+    type: String,
+    trim: true
+  },
+  internalLinks: {
+    type: String,
+    trim: true
+  },
+  
+  // Analytics and Scripts
+  gtmCode: {
+    type: String,
+    trim: true
+  },
+  analyticsCode: {
+    type: String,
+    trim: true
+  },
+  headCode: {
+    type: String,
+    trim: true
+  },
+  bodyCode: {
+    type: String,
+    trim: true
+  },
+  
+  // Image SEO
+  imageAltMappings: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
   
   // Content Information
   content: {

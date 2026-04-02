@@ -16,7 +16,7 @@ const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: 1024 * 1024, // 1MB limit for images
   },
   fileFilter: (req, file, cb) => {
     // Check if it's an image by mimetype OR extension
@@ -39,21 +39,21 @@ router.get('/', getGalleryImages);
 // @route   GET /api/gallery/stats
 // @desc    Get gallery statistics
 // @access  Private
-router.get('/stats', protect, authorize(['super_admin', 'manager', 'media_team']), getGalleryStats);
+router.get('/stats', protect, authorize('super_admin', 'admin', 'manager', 'media_team', 'content_team', 'seo_team'), getGalleryStats);
 
 // @route   POST /api/gallery
 // @desc    Upload new image
 // @access  Private
-router.post('/', protect, authorize(['super_admin', 'manager', 'media_team']), upload.single('image'), uploadImage);
+router.post('/', protect, authorize('super_admin', 'admin', 'manager', 'media_team', 'content_team', 'seo_team'), upload.single('image'), uploadImage);
 
 // @route   PUT /api/gallery/:id
 // @desc    Update image details
 // @access  Private
-router.put('/:id', protect, authorize(['super_admin', 'manager', 'media_team']), updateImage);
+router.put('/:id', protect, authorize('super_admin', 'admin', 'manager', 'media_team', 'content_team', 'seo_team'), updateImage);
 
 // @route   DELETE /api/gallery/:id
 // @desc    Delete image
 // @access  Private
-router.delete('/:id', protect, authorize(['super_admin', 'manager', 'media_team']), deleteImage);
+router.delete('/:id', protect, authorize('super_admin', 'admin', 'manager', 'media_team', 'content_team', 'seo_team'), deleteImage);
 
 module.exports = router;

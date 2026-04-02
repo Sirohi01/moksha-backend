@@ -12,13 +12,17 @@ const {
   generateSitemap,
   analyzeKeywords,
   getSEOReport,
-  bulkUpdateMetaTags
+  bulkUpdateMetaTags,
+  getGlobalRedirects
 } = require('../controllers/seoController');
 const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
-// All SEO routes require authentication and SEO team permission
+// Public routes for SEO tools
+router.get('/public/redirects', getGlobalRedirects);
+
+// All other SEO routes require authentication and SEO team permission
 router.use(protect);
 router.use(authorize('super_admin', 'admin', 'manager', 'seo_team'));
 

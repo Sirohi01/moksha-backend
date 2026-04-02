@@ -122,7 +122,7 @@ const updatePageConfig = async (req, res) => {
 };
 const getAllPageConfigs = async (req, res) => {
   try {
-    const { page = 1, limit = 20, search } = req.query;
+    const { page = 1, limit = 100, search, hydrate = 'false' } = req.query;
     const skip = (page - 1) * limit;
     const filter = { type: 'page_config' };
     if (search) {
@@ -132,8 +132,12 @@ const getAllPageConfigs = async (req, res) => {
       ];
     }
 
+    const selection = hydrate === 'true' 
+      ? 'title slug content status updatedAt version author lastEditedBy'
+      : 'title slug status updatedAt version author lastEditedBy';
+
     const pageConfigs = await Content.find(filter)
-      .select('title slug status updatedAt version author lastEditedBy')
+      .select(selection)
       .populate('author', 'name email')
       .populate('lastEditedBy', 'name email')
       .sort({ updatedAt: -1 })
@@ -142,10 +146,24 @@ const getAllPageConfigs = async (req, res) => {
 
     const total = await Content.countDocuments(filter);
 
+    // If hydrated, parse the content string into JSON
+    const processedConfigs = hydrate === 'true' 
+      ? pageConfigs.map(config => {
+          const configObj = config.toObject();
+          try {
+            configObj.config = JSON.parse(configObj.content || '{}');
+            delete configObj.content; // Use 'config' key for consistency with frontend
+          } catch (e) {
+            configObj.config = {};
+          }
+          return configObj;
+        })
+      : pageConfigs;
+
     res.status(200).json({
       success: true,
       data: {
-        configs: pageConfigs,
+        configs: processedConfigs,
         pagination: {
           page: parseInt(page),
           limit: parseInt(limit),

@@ -3,18 +3,20 @@ const Content = require('../models/Content');
 const Analytics = require('../models/Analytics');
 const SEOService = require('../services/seoService');
 const SitemapService = require('../services/sitemapService');
-
-// @desc    Get all SEO pages
-// @route   GET /api/seo
-// @access  Private/SEO Team
 const getSEOData = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 100; // Increased limit for full cross-reference
     const skip = (page - 1) * limit;
 
-    // Build filter
-    const filter = {};
+    // 1. Get all valid page config slugs as the source of truth
+    const validConfigs = await Content.find({ type: 'page_config' }).select('slug');
+    const validSlugs = validConfigs.map(c => c.slug);
+
+    const filter = {
+      slug: { $in: validSlugs }
+    };
+    
     if (req.query.status) filter.status = req.query.status;
     if (req.query.priority) filter.priority = req.query.priority;
     if (req.query.search) {
@@ -51,15 +53,9 @@ const getSEOData = async (req, res) => {
     });
   }
 };
-
-// @desc    Get single SEO page by page name
-// @route   GET /api/seo/page/:pageName
-// @access  Private/SEO Team
 const getSEOPageByName = async (req, res) => {
   try {
     const { pageName } = req.params;
-
-    // Try to find SEO page by page name or URL
     let seoPage = await SEOPage.findOne({
       $or: [
         { slug: pageName },
@@ -68,8 +64,6 @@ const getSEOPageByName = async (req, res) => {
         { title: new RegExp(pageName, 'i') }
       ]
     });
-
-    // If no SEO page found, create a default one
     if (!seoPage) {
       seoPage = new SEOPage({
         title: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page`,
@@ -87,8 +81,6 @@ const getSEOPageByName = async (req, res) => {
         assignedTo: req.admin._id,
         priority: 'medium'
       });
-
-      // Calculate initial SEO score
       seoPage.calculateSEOScore();
       await seoPage.save();
     }
@@ -106,16 +98,10 @@ const getSEOPageByName = async (req, res) => {
     });
   }
 };
-
-// @desc    Update SEO page by page name
-// @route   PUT /api/seo/page/:pageName
-// @access  Private/SEO Team
 const updateSEOPageByName = async (req, res) => {
   try {
     const { pageName } = req.params;
     const updateData = req.body;
-
-    // Try to find existing SEO page
     let seoPage = await SEOPage.findOne({
       $or: [
         { slug: pageName },
@@ -125,14 +111,12 @@ const updateSEOPageByName = async (req, res) => {
     });
 
     if (seoPage) {
-      // Update existing page
       Object.assign(seoPage, {
         ...updateData,
         lastOptimized: new Date(),
         status: updateData.status || 'published'
       });
     } else {
-      // Create new SEO page
       seoPage = new SEOPage({
         title: updateData.title || `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page`,
         slug: pageName,
@@ -152,25 +136,30 @@ const updateSEOPageByName = async (req, res) => {
         lastOptimized: new Date()
       });
     }
-
-    // Calculate SEO score
     if (seoPage.calculateSEOScore) {
       seoPage.calculateSEOScore();
+    }
+
+    if (updateData.imageAltMappings) {
+       seoPage.markModified('imageAltMappings');
+    }
+    if (updateData.schemaMarkup) {
+       seoPage.markModified('schemaMarkup');
     }
 
     await seoPage.save();
 
     res.status(200).json({
       success: true,
-      message: `SEO page for '${pageName}' ${seoPage.isNew ? 'created' : 'updated'} successfully`,
+      message: `SEO Protocol Synchronized: '${pageName}' optimized successfully`,
       data: seoPage
     });
 
   } catch (error) {
-    console.error('❌ Update SEO page by name failed:', error);
-    res.status(500).json({
+    console.error('❌ SEO Sync Error:', error);
+    res.status(400).json({
       success: false,
-      message: 'Failed to update SEO page'
+      message: error.message || 'SEO Synchronization Failed'
     });
   }
 };
@@ -198,18 +187,12 @@ const getSEOPage = async (req, res) => {
     });
   }
 };
-
-// @desc    Create new SEO page
-// @route   POST /api/seo
-// @access  Private/SEO Team
 const createSEOPage = async (req, res) => {
   try {
     const seoPage = await SEOPage.create({
       ...req.body,
       assignedTo: req.user?.id
     });
-
-    // Calculate initial SEO score
     seoPage.calculateSEOScore();
     await seoPage.save();
 
@@ -227,10 +210,6 @@ const createSEOPage = async (req, res) => {
     });
   }
 };
-
-// @desc    Update SEO page
-// @route   PUT /api/seo/:id
-// @access  Private/SEO Team
 const updateSEOPage = async (req, res) => {
   try {
     const seoPage = await SEOPage.findByIdAndUpdate(
@@ -248,8 +227,6 @@ const updateSEOPage = async (req, res) => {
         message: 'SEO page not found'
       });
     }
-
-    // Recalculate SEO score
     seoPage.calculateSEOScore();
     await seoPage.save();
 
@@ -267,10 +244,6 @@ const updateSEOPage = async (req, res) => {
     });
   }
 };
-
-// @desc    Delete SEO page
-// @route   DELETE /api/seo/:id
-// @access  Private/SEO Team
 const deleteSEOPage = async (req, res) => {
   try {
     const seoPage = await SEOPage.findByIdAndDelete(req.params.id);
@@ -295,10 +268,6 @@ const deleteSEOPage = async (req, res) => {
     });
   }
 };
-
-// @desc    Run SEO audit on page
-// @route   POST /api/seo/:id/audit
-// @access  Private/SEO Team
 const runSEOAudit = async (req, res) => {
   try {
     const result = await SEOService.auditPage(req.params.id);
@@ -321,33 +290,21 @@ const runSEOAudit = async (req, res) => {
     });
   }
 };
-
-// @desc    Get SEO statistics
-// @route   GET /api/seo/stats
-// @access  Private/SEO Team
 const getSEOStats = async (req, res) => {
   try {
     const totalPages = await SEOPage.countDocuments();
     const publishedPages = await SEOPage.countDocuments({ status: 'published' });
     const draftPages = await SEOPage.countDocuments({ status: 'draft' });
-
-    // Get average SEO score
     const avgScoreResult = await SEOPage.aggregate([
       { $group: { _id: null, avgScore: { $avg: '$seoScore' } } }
     ]);
     const avgSEOScore = avgScoreResult[0]?.avgScore || 0;
-
-    // Get pages with issues
     const pagesWithIssues = await SEOPage.countDocuments({
       'seoIssues.0': { $exists: true }
     });
-
-    // Get high priority issues
     const highPriorityIssues = await SEOPage.countDocuments({
       'seoIssues.priority': 'high'
     });
-
-    // Get recent optimizations
     const recentOptimizations = await SEOPage.find({
       lastOptimized: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
     }).countDocuments();
@@ -373,10 +330,6 @@ const getSEOStats = async (req, res) => {
     });
   }
 };
-
-// @desc    Generate sitemap
-// @route   POST /api/seo/sitemap
-// @access  Private/SEO Team
 const generateSitemap = async (req, res) => {
   try {
     const result = await SitemapService.generateSitemap();
@@ -403,10 +356,6 @@ const generateSitemap = async (req, res) => {
     });
   }
 };
-
-// @desc    Analyze keywords
-// @route   POST /api/seo/keywords/analyze
-// @access  Private/SEO Team
 const analyzeKeywords = async (req, res) => {
   try {
     const { keywords } = req.body;
@@ -438,10 +387,6 @@ const analyzeKeywords = async (req, res) => {
     });
   }
 };
-
-// @desc    Get SEO report
-// @route   GET /api/seo/report
-// @access  Private/SEO Team
 const getSEOReport = async (req, res) => {
   try {
     const dateRange = parseInt(req.query.days) || 30;
@@ -500,6 +445,38 @@ const bulkUpdateMetaTags = async (req, res) => {
     });
   }
 };
+const getGlobalRedirects = async (req, res) => {
+  try {
+    const seoPages = await SEOPage.find({
+      $and: [
+        { redirects: { $exists: true } },
+        { redirects: { $ne: '' } }
+      ]
+    }).select('redirects');
+
+    let allRedirects = [];
+    seoPages.forEach(p => {
+      const lines = p.redirects.split('\n').filter(l => l.includes('>'));
+      lines.forEach(line => {
+        const [source, target] = line.split('>').map(s => s.trim());
+        if (source && target) {
+          allRedirects.push({ source, target });
+        }
+      });
+    });
+
+    res.status(200).json({
+      success: true,
+      data: allRedirects
+    });
+  } catch (error) {
+    console.error('❌ Get redirects failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch global redirects'
+    });
+  }
+};
 
 module.exports = {
   getSEOData,
@@ -514,5 +491,6 @@ module.exports = {
   generateSitemap,
   analyzeKeywords,
   getSEOReport,
-  bulkUpdateMetaTags
+  bulkUpdateMetaTags,
+  getGlobalRedirects
 };

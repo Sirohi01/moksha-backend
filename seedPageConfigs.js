@@ -3425,11 +3425,11 @@ const seedPageConfigs = async () => {
 
     console.log('🌱 Seeding page configurations...');
 
-    // Clear existing configs to ensure latest data (overwrite mode)
+    // Skip seeding if configs already exist to preserve user updates
     const existingConfigs = await Content.countDocuments({ type: 'page_config' });
     if (existingConfigs > 0) {
-      console.log(`♻️  Updating ${existingConfigs} existing page configurations...`);
-      await Content.deleteMany({ type: 'page_config' });
+      console.log(`♻️ Skipping seeding: ${existingConfigs} configurations already exist in the system.`);
+      return { success: true, message: 'Seeding skipped (data exists)', count: 0 };
     }
 
     let seededCount = 0;

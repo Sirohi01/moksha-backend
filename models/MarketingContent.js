@@ -15,6 +15,7 @@ const marketingContentSchema = new mongoose.Schema({
     required: true
   },
   imageUrl: String,
+  altText: String,
   targetUrl: String, // Where the user goes when they click
   isActive: {
     type: Boolean,
