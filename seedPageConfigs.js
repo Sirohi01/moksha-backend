@@ -21,8 +21,8 @@ const readConfigFile = (filePath) => {
       let configStr = configMatch[1];
       configStr = configStr
         .replace(/(\w+):/g, '"$1":')
-        .replace(/'/g, '"')           // Replace single quotes with double quotes
-        .replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
+        .replace(/'/g, '"')
+        .replace(/,(\s*[}\]])/g, '$1');
 
       return JSON.parse(configStr);
     }
@@ -3457,22 +3457,25 @@ const seedPageConfigs = async () => {
           config.socialFloating.whatsapp = "919220147229";
         }
 
-        const pageConfig = new Content({
-          title: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page Configuration`,
-          slug: pageName,
-          content: JSON.stringify(config, null, 2),
-          type: 'page_config',
-          category: 'configuration',
-          status: 'published',
-          author: new mongoose.Types.ObjectId(),
-          metaTitle: `${pageName} Page Config`,
-          metaDescription: `Configuration data for ${pageName} page`,
-          version: 1
-        });
-
-        await pageConfig.save();
-        seededCount++;
-        console.log(`✅ Created configuration for: ${pageName}`);
+        // Safety Protocol: Only create if missing to prevent overwriting user edits
+        const existingConfig = await Content.findOne({ slug: pageName, type: 'page_config' });
+        
+        if (!existingConfig) {
+          await Content.create({
+            title: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page Configuration`,
+            slug: pageName,
+            content: JSON.stringify(config, null, 2),
+            type: 'page_config',
+            status: 'published',
+            category: 'configuration',
+            author: new mongoose.Types.ObjectId(),
+            metaTitle: `${pageName} Page Config`,
+            metaDescription: `Configuration data for ${pageName} page`,
+            version: 1
+          });
+          seededCount++;
+          console.log(`✅ Initialized new configuration: ${pageName}`);
+        }
 
       } catch (error) {
         console.error(`❌ Failed to create config for ${pageName}:`, error.message);

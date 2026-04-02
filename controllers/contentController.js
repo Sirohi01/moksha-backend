@@ -302,10 +302,14 @@ const deleteContentItem = async (req, res) => {
 // @access  Private
 const getContentStats = async (req, res) => {
   try {
-    const totalContent = await Content.countDocuments();
-    const published = await Content.countDocuments({ status: 'published' });
-    const draft = await Content.countDocuments({ status: 'draft' });
-    const archived = await Content.countDocuments({ status: 'archived' });
+    const { type } = req.query;
+    const baseQuery = {};
+    if (type && type !== 'all') baseQuery.type = type;
+
+    const totalContent = await Content.countDocuments(baseQuery);
+    const published = await Content.countDocuments({ ...baseQuery, status: 'published' });
+    const draft = await Content.countDocuments({ ...baseQuery, status: 'draft' });
+    const archived = await Content.countDocuments({ ...baseQuery, status: 'archived' });
 
     const types = ['page', 'blog', 'campaign', 'press'];
     const byType = {};
@@ -314,10 +318,11 @@ const getContentStats = async (req, res) => {
     }
 
     const viewsResult = await Content.aggregate([
+      { $match: baseQuery },
       { $group: { _id: null, totalViews: { $sum: "$views" } } }
     ]);
 
-    const recentContent = await Content.find()
+    const recentContent = await Content.find(baseQuery)
       .sort({ updatedAt: -1 })
       .limit(5);
 
