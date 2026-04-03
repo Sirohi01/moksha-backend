@@ -503,41 +503,92 @@ const getRealTimeAnalytics = async (req, res) => {
         }
       }
     ]);
+    const trafficStats = await VisitorActivity.aggregate([
+      { $match: { createdAt: { $gte: startDate } } },
+      {
+        $project: {
+          source: {
+            $cond: [
+              { $or: [{ $not: ['$referer'] }, { $eq: ['$referer', ''] }] },
+              'Direct',
+              {
+                $cond: [
+                  { $regexMatch: { input: '$referer', pattern: /google|bing|yahoo|duckduckgo/i } },
+                  'Organic Search',
+                  {
+                    $cond: [
+                      { $regexMatch: { input: '$referer', pattern: /facebook|twitter|instagram|linkedin|t\.co|lnkd\.in/i } },
+                      'Social Media',
+                      'Referral'
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      { $group: { _id: '$source', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    // 3. Popular Pages & Behavioral Depth
     const popularPages = await VisitorActivity.aggregate([
       { $match: { createdAt: { $gte: startDate } } },
       {
         $group: {
           _id: '$path',
           views: { $sum: 1 },
-          uniqueVisitors: { $addToSet: '$ipAddress' }
+          uniqueVisitors: { $addToSet: '$ipAddress' },
+          avgTime: { $avg: '$duration' }
         }
       },
       { $sort: { views: -1 } },
       { $limit: 10 }
     ]);
+
+    // 4. Multi-Layered Geography Intelligence
     const geoStats = await VisitorActivity.aggregate([
       { $match: { createdAt: { $gte: startDate }, 'location.country': { $exists: true } } },
       {
-        $group: {
-          _id: '$location.country',
-          count: { $sum: 1 }
+        $facet: {
+          countries: [
+            { $group: { _id: '$location.country', count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 10 }
+          ],
+          cities: [
+            { $group: { _id: { city: '$location.city', country: '$location.country' }, count: { $sum: 1 } } },
+            { $match: { '_id.city': { $ne: 'Unknown' } } },
+            { $sort: { count: -1 } },
+            { $limit: 10 }
+          ]
         }
-      },
-      { $sort: { count: -1 } },
-      { $limit: 5 }
+      }
     ]);
+
+    // 5. Technical Telemetry (Devices & OS)
     const activities = await VisitorActivity.find({ createdAt: { $gte: startDate } }).select('userAgent');
-    const deviceStats = {
-      mobile: 0,
-      desktop: 0,
-      tablet: 0
+    const technicalStats = {
+      devices: { mobile: 0, desktop: 0, tablet: 0 },
+      os: { ios: 0, android: 0, windows: 0, mac: 0, linux: 0, other: 0 }
     };
 
     activities.forEach(a => {
       const ua = (a.userAgent || '').toLowerCase();
-      if (ua.includes('mobile')) deviceStats.mobile++;
-      else if (ua.includes('tablet')) deviceStats.tablet++;
-      else deviceStats.desktop++;
+
+      // Device Parsing
+      if (ua.includes('mobile')) technicalStats.devices.mobile++;
+      else if (ua.includes('tablet')) technicalStats.devices.tablet++;
+      else technicalStats.devices.desktop++;
+
+      // OS Parsing
+      if (ua.includes('iphone') || ua.includes('ipad')) technicalStats.os.ios++;
+      else if (ua.includes('android')) technicalStats.os.android++;
+      else if (ua.includes('windows')) technicalStats.os.windows++;
+      else if (ua.includes('macintosh')) technicalStats.os.mac++;
+      else if (ua.includes('linux')) technicalStats.os.linux++;
+      else technicalStats.os.other++;
     });
 
     res.status(200).json({
@@ -548,22 +599,30 @@ const getRealTimeAnalytics = async (req, res) => {
           uniqueVisitors: totalStats[0]?.uniqueVisitors?.length || 0,
           avgDuration: Math.round(totalStats[0]?.avgDuration || 0)
         },
+        trafficSources: trafficStats.map(s => ({
+          name: s._id,
+          value: s.count
+        })),
         popularPages: popularPages.map(p => ({
           path: p._id,
           views: p.views,
-          uniqueVisitors: p.uniqueVisitors.length
+          uniqueVisitors: p.uniqueVisitors.length,
+          avgEngagement: Math.round(p.avgTime || 0)
         })),
-        geoStats: geoStats.map(g => ({
-          country: g._id,
-          count: g.count
-        })),
-        deviceStats
+        geoIntensity: {
+          countries: geoStats[0].countries.map(g => ({ name: g._id, count: g.count })),
+          cities: geoStats[0].cities.map(g => ({ name: `${g._id.city}, ${g._id.country}`, count: g.count }))
+        },
+        technicalStats
       }
     });
 
   } catch (error) {
-    console.error('❌ Analytics Fetch Failed:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch real-time intelligence' });
+    console.error('❌ Real-Time Analytics Breach:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Critical analytics pipeline failure'
+    });
   }
 };
 const bulkUpdateMetaTags = async (req, res) => {
