@@ -1,13 +1,8 @@
 const express = require('express');
 const Razorpay = require('razorpay');
+const { getConfig } = require('../services/configService');
 
 const router = express.Router();
-
-// Initialize Razorpay
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
 
 // @desc    Create Razorpay order
 // @route   POST /api/payments/create-order
@@ -15,6 +10,19 @@ const razorpay = new Razorpay({
 const createOrder = async (req, res) => {
   try {
     const { amount, currency = 'INR' } = req.body;
+
+    // Fetch dynamic config
+    const globalConfig = await getConfig();
+    const razorConfig = globalConfig.razorpay;
+
+    if (!razorConfig.keyId || !razorConfig.keySecret) {
+      throw new Error('Razorpay credentials not configured');
+    }
+
+    const razorpay = new Razorpay({
+      key_id: razorConfig.keyId,
+      key_secret: razorConfig.keySecret,
+    });
 
     if (!amount || amount < 100) {
       return res.status(400).json({
