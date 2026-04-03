@@ -44,7 +44,7 @@ const activityLogSchema = new mongoose.Schema({
       'create_user', 'update_user', 'delete_user', 'change_user_role',
 
       // System
-      'view_dashboard', 'view_analytics', 'system_settings', 'export_data'
+      'view_dashboard', 'view_analytics', 'system_settings', 'export_data', 'system_maintenance'
     ]
   },
 

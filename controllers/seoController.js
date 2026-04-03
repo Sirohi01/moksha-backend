@@ -6,33 +6,36 @@ const SitemapService = require('../services/sitemapService');
 const getSEOData = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 100; // Increased limit for full cross-reference
+    const limit = parseInt(req.query.limit) || 100;
     const skip = (page - 1) * limit;
+    const validContent = await Content.find({
+      type: { $in: ['page_config', 'blog', 'press', 'documentary', 'page'] }
+    }).select('slug title type');
 
-    // 1. Get all valid page config slugs as the source of truth
-    const validConfigs = await Content.find({ type: 'page_config' }).select('slug');
-    const validSlugs = validConfigs.map(c => c.slug);
+    const validSlugs = validContent.map(c => c.slug);
+    const existingSEO = await SEOPage.find({ slug: { $in: validSlugs } });
+    const existingSlugs = existingSEO.map(s => s.slug);
+    const missingContent = validContent.filter(c => !existingSlugs.includes(c.slug));
 
-    const filter = {
-      slug: { $in: validSlugs }
-    };
-    
-    if (req.query.status) filter.status = req.query.status;
-    if (req.query.priority) filter.priority = req.query.priority;
-    if (req.query.search) {
-      filter.$or = [
-        { title: new RegExp(req.query.search, 'i') },
-        { metaTitle: new RegExp(req.query.search, 'i') },
-        { url: new RegExp(req.query.search, 'i') }
-      ];
+    if (missingContent.length > 0) {
+      const newSEOPages = missingContent.map(c => ({
+        title: c.title,
+        slug: c.slug,
+        url: `/${c.slug}`,
+        metaTitle: `${c.title} | Moksha Sewa`,
+        metaDescription: `Discover ${c.title} at Moksha Sewa - Dignity in Departure.`,
+        status: 'draft',
+        contentType: c.type === 'page_config' ? 'page' : c.type
+      }));
+      await SEOPage.insertMany(newSEOPages);
     }
 
-    const seoPages = await SEOPage.find(filter)
+    const seoPages = await SEOPage.find({ slug: { $in: validSlugs } })
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const total = await SEOPage.countDocuments(filter);
+    const total = await SEOPage.countDocuments({ slug: { $in: validSlugs } });
 
     res.status(200).json({
       success: true,
@@ -78,7 +81,7 @@ const getSEOPageByName = async (req, res) => {
         schemaType: 'WebPage',
         robots: 'index, follow',
         status: 'draft',
-        assignedTo: req.admin._id,
+        assignedTo: req.admin ? req.admin._id : null,
         priority: 'medium'
       });
       seoPage.calculateSEOScore();
@@ -141,10 +144,10 @@ const updateSEOPageByName = async (req, res) => {
     }
 
     if (updateData.imageAltMappings) {
-       seoPage.markModified('imageAltMappings');
+      seoPage.markModified('imageAltMappings');
     }
     if (updateData.schemaMarkup) {
-       seoPage.markModified('schemaMarkup');
+      seoPage.markModified('schemaMarkup');
     }
 
     await seoPage.save();
@@ -212,13 +215,15 @@ const createSEOPage = async (req, res) => {
 };
 const updateSEOPage = async (req, res) => {
   try {
+    const { _id, __v, ...updateFields } = req.body;
+    
     const seoPage = await SEOPage.findByIdAndUpdate(
       req.params.id,
       {
-        ...req.body,
+        ...updateFields,
         lastOptimized: new Date()
       },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     if (!seoPage) {
@@ -410,10 +415,6 @@ const getSEOReport = async (req, res) => {
     });
   }
 };
-
-// @desc    Bulk update meta tags
-// @route   PUT /api/seo/bulk/meta-tags
-// @access  Private/SEO Team
 const bulkUpdateMetaTags = async (req, res) => {
   try {
     const { pageIds, metaData } = req.body;
@@ -478,6 +479,44 @@ const getGlobalRedirects = async (req, res) => {
   }
 };
 
+const GlobalSEO = require('../models/GlobalSEO');
+const getGlobalSEO = async (req, res) => {
+  try {
+    let settings = await GlobalSEO.findOne();
+    if (!settings) {
+      settings = await GlobalSEO.create({
+        headerScripts: '',
+        footerScripts: '',
+        lastUpdated: new Date()
+      });
+    }
+    res.status(200).json({ success: true, data: settings });
+  } catch (error) {
+    console.error('❌ Get global SEO failed:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch global SEO' });
+  }
+};
+
+const updateGlobalSEO = async (req, res) => {
+  try {
+    const updateData = req.body;
+    let settings = await GlobalSEO.findOne();
+    if (!settings) {
+      settings = new GlobalSEO({});
+    }
+
+    Object.assign(settings, updateData);
+    settings.lastUpdated = new Date();
+    settings.updatedBy = req.admin ? req.admin.name : 'Unknown Admin';
+    await settings.save();
+
+    res.status(200).json({ success: true, message: 'Global SEO parameters synchronized', data: settings });
+  } catch (error) {
+    console.error('❌ Update global SEO failed:', error);
+    res.status(500).json({ success: false, message: 'Failed to update global SEO' });
+  }
+};
+
 module.exports = {
   getSEOData,
   getSEOPage,
@@ -492,5 +531,7 @@ module.exports = {
   analyzeKeywords,
   getSEOReport,
   bulkUpdateMetaTags,
+  getGlobalSEO,
+  updateGlobalSEO,
   getGlobalRedirects
 };

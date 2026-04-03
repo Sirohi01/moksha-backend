@@ -60,7 +60,7 @@ const adminSchema = new mongoose.Schema({
       'page_settings', 'page_blogs', 'page_editorial', 'page_gallery', 
       'page_galleryhub', 'page_documentaries', 'page_press', 'page_whatsapp',
       'page_banners', 'page_pageconfig', 'page_system', 'page_email_logs',
-      'page_comm_logs',
+      'page_comm_logs', 'page_maintenance',
 
       // Content Management
       'manage_content', 'manage_seo', 'manage_media',

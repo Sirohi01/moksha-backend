@@ -15,11 +15,9 @@ const { specs, swaggerUi } = require('./swagger');
 
 const fs = require('fs');
 const path = require('path');
-
-// Ensure upload directories exist
 const uploadDir = path.join(__dirname, 'uploads/temp');
 if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 // Import Routes
@@ -85,7 +83,7 @@ app.use(cors({
       'http://localhost:3000',
       'http://127.0.0.1:3000',
       'https://mokshafrontend.netlify.app',
-      'https://moksha-seva.org',
+      'https://mokshasewa.org',
       'https://www.mokshasewa.org'
     ];
 
