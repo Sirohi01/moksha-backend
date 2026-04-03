@@ -15,7 +15,8 @@ const {
   bulkUpdateMetaTags,
   getGlobalSEO,
   updateGlobalSEO,
-  getGlobalRedirects
+  getGlobalRedirects,
+  getRealTimeAnalytics
 } = require('../controllers/seoController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -30,8 +31,9 @@ router.get('/', getSEOData);
 router.post('/', createSEOPage);
 router.get('/stats', getSEOStats);
 router.get('/report', getSEOReport);
-router.get('/:id', getSEOPage);
 router.put('/page/:pageName', updateSEOPageByName);
+router.get('/analytics/real-time', getRealTimeAnalytics);
+router.get('/:id', getSEOPage);
 router.put('/:id', updateSEOPage);
 router.delete('/:id', deleteSEOPage);
 router.post('/:id/audit', runSEOAudit);

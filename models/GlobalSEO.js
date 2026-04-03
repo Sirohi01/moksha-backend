@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const globalSEOSchema = new mongoose.Schema({
+  googleAnalyticsId: {
+    type: String,
+    default: ''
+  },
   headerScripts: {
     type: String,
     default: ''
