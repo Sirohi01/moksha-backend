@@ -83,6 +83,18 @@ const pageConfigs = [
   {
     pageName: 'layout',
     configPath: '../frontend/config/layout.config.ts'
+  },
+  {
+    pageName: 'documentaries',
+    configPath: '../frontend/config/documentaries.config.ts'
+  },
+  {
+    pageName: 'press',
+    configPath: '../frontend/config/press.config.ts'
+  },
+  {
+    pageName: 'gallery',
+    configPath: '../frontend/config/gallery.config.ts'
   }
 ];
 // Sample configurations (since reading TS files is complex, we'll use JSON directly)
