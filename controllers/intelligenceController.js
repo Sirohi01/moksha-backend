@@ -58,12 +58,35 @@ const getErrorLogs = asyncHandler(async (req, res) => {
   const limit = parseInt(req.query.limit) || 20;
   const skip = (page - 1) * limit;
 
-  const logs = await SystemErrorLog.find()
+  const { startDate, endDate, search } = req.query;
+  const filter = {};
+  
+  if (search && search.trim()) {
+    filter.errorMessage = new RegExp(search.trim(), 'i');
+  }
+
+  if ((startDate && startDate.trim()) || (endDate && endDate.trim())) {
+    const dateFilter = {};
+    if (startDate && startDate.trim()) {
+      const start = new Date(startDate);
+      if (!isNaN(start.getTime())) dateFilter.$gte = start;
+    }
+    if (endDate && endDate.trim()) {
+      const end = new Date(endDate);
+      if (!isNaN(end.getTime())) {
+        end.setUTCHours(23, 59, 59, 999);
+        dateFilter.$lte = end;
+      }
+    }
+    if (Object.keys(dateFilter).length > 0) filter.createdAt = dateFilter;
+  }
+
+  const logs = await SystemErrorLog.find(filter)
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
 
-  const total = await SystemErrorLog.countDocuments();
+  const total = await SystemErrorLog.countDocuments(filter);
 
   res.status(200).json({
     success: true,
@@ -84,15 +107,36 @@ const getCommunicationLogs = asyncHandler(async (req, res) => {
   const limit = parseInt(req.query.limit) || 20;
   const skip = (page - 1) * limit;
 
-  const mode = req.query.mode || 'alerts'; // alerts (traditional) or interactions
+  const { startDate, endDate, type, status, mode = 'alerts', search } = req.query;
+  const filter = {};
+
+  if (search && search.trim()) {
+    filter.content = new RegExp(search.trim(), 'i');
+  }
+
+  if ((startDate && startDate.trim()) || (endDate && endDate.trim())) {
+    const dateFilter = {};
+    if (startDate && startDate.trim()) {
+      const start = new Date(startDate);
+      if (!isNaN(start.getTime())) dateFilter.$gte = start;
+    }
+    if (endDate && endDate.trim()) {
+      const end = new Date(endDate);
+      if (!isNaN(end.getTime())) {
+        end.setUTCHours(23, 59, 59, 999);
+        dateFilter.$lte = end;
+      }
+    }
+    if (Object.keys(dateFilter).length > 0) filter.createdAt = dateFilter;
+  }
 
   if (mode === 'interactions') {
-    const logs = await PublicInteraction.find()
+    const logs = await PublicInteraction.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const total = await PublicInteraction.countDocuments();
+    const total = await PublicInteraction.countDocuments(filter);
 
     return res.status(200).json({
       success: true,
@@ -101,9 +145,8 @@ const getCommunicationLogs = asyncHandler(async (req, res) => {
     });
   }
 
-  const filter = {};
-  if (req.query.type) filter.type = req.query.type;
-  if (req.query.status) filter.status = req.query.status;
+  if (type) filter.type = type;
+  if (status) filter.status = status;
 
   const logs = await CommunicationLog.find(filter)
     .sort({ createdAt: -1 })

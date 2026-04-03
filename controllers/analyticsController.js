@@ -82,12 +82,15 @@ exports.getVisitorStats = async (req, res) => {
     let startDate = new Date();
     let endDate = new Date();
 
-    if (customStart && customEnd) {
-      startDate = new Date(customStart);
-      endDate = new Date(customEnd);
-      // Ensure time covers full day
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(23, 59, 59, 999);
+    if ((customStart && customStart.trim()) || (customEnd && customEnd.trim())) {
+      if (customStart && customStart.trim()) {
+        startDate = new Date(customStart);
+        startDate.setUTCHours(0, 0, 0, 0);
+      }
+      if (customEnd && customEnd.trim()) {
+        endDate = new Date(customEnd);
+        endDate.setUTCHours(23, 59, 59, 999);
+      }
     } else {
       if (timeRange === '24h') startDate.setHours(startDate.getHours() - 24);
       else if (timeRange === '7d') startDate.setDate(startDate.getDate() - 7);

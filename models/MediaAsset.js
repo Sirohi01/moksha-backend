@@ -16,9 +16,8 @@ const mediaAssetSchema = new mongoose.Schema({
   category: {
     type: String,
     required: [true, 'Category is required'],
-    enum: ['gallery', 'press', 'social', 'brand', 'events', 'campaigns', 'testimonials', 'other', 'services', 'community', 'volunteers', 'compliance', 'content_assets', 'general', 'blog', 'documentary']
+    enum: ['gallery', 'press', 'social', 'brand', 'events', 'campaigns', 'testimonials', 'other', 'services', 'community', 'volunteers', 'compliance', 'content_assets', 'general', 'blog', 'documentary', 'whatsapp']
   },
-
 
   // File Details
   filename: {

@@ -8,8 +8,6 @@ const volunteerSchema = new mongoose.Schema({
     enum: ['individual', 'group']
   },
   photo: String,
-
-  // Personal Details
   name: {
     type: String,
     required: [true, 'Name is required'],
@@ -189,7 +187,7 @@ const volunteerSchema = new mongoose.Schema({
 });
 
 // Generate volunteer ID before saving
-volunteerSchema.pre('save', async function(next) {
+volunteerSchema.pre('save', async function (next) {
   if (!this.volunteerId) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments();

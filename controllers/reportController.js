@@ -40,6 +40,20 @@ const createReport = async (req, res) => {
     // Create report
     const report = await Report.create(reportData);
 
+    const { sendWhatsAppMessage } = require('../services/whatsappService');
+
+    // 1. WhatsApp to User (Reporter)
+    if (report.reporterPhone) {
+      const userMsg = `MOKSHA SEWA: Hi ${report.reporterName || 'there'}, your report for a case at ${report.city} has been received. Our team will verify it shortly. Case ID: ${report.caseNumber}. Thank you for your compassion.`;
+      await sendWhatsAppMessage(report.reporterPhone, userMsg);
+    }
+
+    // 2. WhatsApp to ADMIN_MOBILE (Alert)
+    if (process.env.ADMIN_MOBILE_WHATSAPP) {
+      const adminMsg = `🚨 NEW CASE ALERT: ${report.caseNumber}\nLocation: ${report.exactLocation}, ${report.city}\nReporter: ${report.reporterName || 'Anonymous'} (${report.reporterPhone})\nPriority: ${report.priority}`;
+      await sendWhatsAppMessage(process.env.ADMIN_MOBILE_WHATSAPP, adminMsg);
+    }
+
     // Send confirmation email
     if (report.reporterEmail) {
       await sendEmail(report.reporterEmail, 'reportConfirmation', {
@@ -205,6 +219,13 @@ const updateReport = async (req, res) => {
       } catch (emailError) {
         console.error('❌ Failed to send status update email:', emailError);
       }
+    }
+
+    // WhatsApp Update to Reporter
+    if (status && report.reporterPhone) {
+      const { sendWhatsAppMessage } = require('../services/whatsappService');
+      const statusMsg = `MOKSHA SEWA: Your report ${report.caseNumber} status has been updated to: ${status.toUpperCase().replace('_', ' ')}. Check more details on our website.`;
+      await sendWhatsAppMessage(report.reporterPhone, statusMsg);
     }
 
     res.status(200).json({

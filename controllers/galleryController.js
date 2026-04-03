@@ -2,21 +2,13 @@ const { uploadToCloudinary, deleteFromCloudinary, cloudinary } = require('../ser
 const MediaAsset = require('../models/MediaAsset');
 const asyncHandler = require('express-async-handler');
 const path = require('path');
-
-// @desc    Get all gallery images
-// @route   GET /api/gallery
-// @access  Public (filtered by approved/public status for public, all for admin)
 const getGalleryImages = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 20;
   const skip = (page - 1) * limit;
   const { category, search, isAdmin, isPublic } = req.query;
-
-  // Build filter
-  // If not admin request, only show approved and public images
   const filter = {
-    category: category && category !== 'all' ? category : 'gallery',
-    type: 'image'
+    category: category && category !== 'all' ? category : 'gallery'
   };
 
   // If category is provided but it's one of the gallery categories, we use it
@@ -30,9 +22,19 @@ const getGalleryImages = asyncHandler(async (req, res) => {
   }
   if (isAdmin === 'true' && isPublic !== undefined) {
     filter.isPublic = isPublic === 'true';
+    if (filter.isPublic) {
+      filter.status = 'approved';
+      // If categories aren't explicitly requested, limit to standard gallery categories to match public view
+      if (!category || category === 'all') {
+        filter.category = { $in: ['gallery', 'events', 'services', 'community', 'volunteers'] };
+      }
+    }
   } else if (isAdmin !== 'true') {
     filter.status = 'approved';
     filter.isPublic = true;
+    if (!category || category === 'all') {
+      filter.category = { $in: ['gallery', 'events', 'services', 'community', 'volunteers'] };
+    }
   }
 
   if (search) {
@@ -91,23 +93,26 @@ const uploadImage = asyncHandler(async (req, res) => {
     isPublic = category === 'gallery' || !category;
   }
   const result = await uploadToCloudinary(req.file, `moksha-seva/gallery/${category || 'general'}`);
+
+  const isImage = req.file.mimetype.startsWith('image/');
+
   const newAsset = await MediaAsset.create({
     title: title || 'Untitled',
     description: description || '',
-    type: 'image',
+    type: isImage ? 'image' : 'document',
     category: category || 'gallery',
     filename: result.publicId,
     originalName: req.file.originalname,
     mimeType: req.file.mimetype,
     fileSize: result.size,
-    dimensions: {
+    dimensions: isImage ? {
       width: result.width,
       height: result.height
-    },
+    } : undefined,
     url: result.url,
     thumbnailUrl: result.url, // For now use same URL, Cloudinary handles scaling
     cloudinaryId: result.publicId,
-    altText: alt || title || 'Gallery Image',
+    altText: alt || title || (isImage ? 'Gallery Image' : 'Gallery Document'),
     uploadedBy: req.admin._id,
     status: 'approved', // Auto-approve gallery uploads from admin
     isPublic: isPublic

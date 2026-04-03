@@ -185,6 +185,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/page-config', pageConfigRoutes);
+app.use('/api/admin/contacts', require('./routes/adminContactRoutes'));
 app.use('/api/chat', chatRoutes);
 app.use('/api/intelligence', intelligenceRoutes);
 app.use('/api/marketing', marketingRoutes);
