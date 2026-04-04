@@ -31,6 +31,7 @@ const getPageConfig = async (req, res) => {
       data: {
         pageName,
         config: configData,
+        seo: pageConfig.seoTechnical?.schemaMarkup || {},
         lastModified: pageConfig.updatedAt,
         version: pageConfig.version || 1
       }
@@ -81,9 +82,19 @@ const updatePageConfig = async (req, res) => {
         pageConfig.version = (pageConfig.version || 1) + 1;
       }
       pageConfig.content = configString;
+
+      if (req.body.seo) {
+        if (!pageConfig.seoTechnical) pageConfig.seoTechnical = {};
+        pageConfig.seoTechnical.schemaMarkup = {
+          ...(pageConfig.seoTechnical.schemaMarkup || {}),
+          ...req.body.seo
+        };
+        pageConfig.markModified('seoTechnical.schemaMarkup');
+      }
+
       pageConfig.lastEditedBy = req.admin._id;
       pageConfig.status = 'published';
-      
+
     } else {
       pageConfig = new Content({
         title: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page Configuration`,
@@ -132,9 +143,9 @@ const getAllPageConfigs = async (req, res) => {
       ];
     }
 
-    const selection = hydrate === 'true' 
-      ? 'title slug content status updatedAt version author lastEditedBy'
-      : 'title slug status updatedAt version author lastEditedBy';
+    const selection = hydrate === 'true'
+      ? 'title slug content status updatedAt version author lastEditedBy seoTechnical'
+      : 'title slug status updatedAt version author lastEditedBy seoTechnical';
 
     const pageConfigs = await Content.find(filter)
       .select(selection)
@@ -147,17 +158,18 @@ const getAllPageConfigs = async (req, res) => {
     const total = await Content.countDocuments(filter);
 
     // If hydrated, parse the content string into JSON
-    const processedConfigs = hydrate === 'true' 
+    const processedConfigs = hydrate === 'true'
       ? pageConfigs.map(config => {
-          const configObj = config.toObject();
-          try {
-            configObj.config = JSON.parse(configObj.content || '{}');
-            delete configObj.content; // Use 'config' key for consistency with frontend
-          } catch (e) {
-            configObj.config = {};
-          }
-          return configObj;
-        })
+        const configObj = config.toObject();
+        try {
+          configObj.config = JSON.parse(configObj.content || '{}');
+          configObj.seo = configObj.seoTechnical?.schemaMarkup || {};
+          delete configObj.content; // Use 'config' key for consistency with frontend
+        } catch (e) {
+          configObj.config = {};
+        }
+        return configObj;
+      })
       : pageConfigs;
 
     res.status(200).json({
@@ -315,7 +327,7 @@ const restorePageConfigVersion = async (req, res) => {
 const getPageConfigSchema = async (req, res) => {
   try {
     const { pageName } = req.params;
-    
+
     // For now, return a simple response indicating schema generation should be done client-side
     // In the future, this could return predefined schemas for different page types
     res.status(200).json({
@@ -336,9 +348,65 @@ const getPageConfigSchema = async (req, res) => {
   }
 };
 
+const updatePageSEO = async (req, res) => {
+  try {
+    const { pageName } = req.params;
+    const { seo } = req.body;
+    const imageAltMappings = req.body.imageAltMappings || seo?.imageAltMappings;
+
+    let pageConfig = await Content.findOne({
+      type: 'page_config',
+      slug: pageName
+    });
+
+    if (!pageConfig) {
+      return res.status(404).json({
+        success: false,
+        message: `Configuration for page '${pageName}' not found`
+      });
+    }
+    if (imageAltMappings) {
+      if (!pageConfig.seoTechnical) pageConfig.seoTechnical = {};
+      if (!pageConfig.seoTechnical.schemaMarkup) pageConfig.seoTechnical.schemaMarkup = {};
+      pageConfig.seoTechnical.schemaMarkup.imageAltMappings = {
+        ...(pageConfig.seoTechnical.schemaMarkup.imageAltMappings || {}),
+        ...imageAltMappings
+      };
+      pageConfig.markModified('seoTechnical.schemaMarkup');
+    }
+    if (seo) {
+      if (seo.metaTitle) pageConfig.metaTitle = seo.metaTitle;
+      if (seo.metaDescription) pageConfig.metaDescription = seo.metaDescription;
+      if (seo.robots) {
+        if (!pageConfig.seoTechnical) pageConfig.seoTechnical = {};
+        pageConfig.seoTechnical.robots = seo.robots;
+      }
+      if (seo.twitterCard) {
+        if (!pageConfig.seoTechnical) pageConfig.seoTechnical = {};
+        pageConfig.seoTechnical.twitterCard = seo.twitterCard;
+      }
+    }
+
+    await pageConfig.save();
+
+    res.status(200).json({
+      success: true,
+      message: `SEO for '${pageName}' updated successfully`
+    });
+
+  } catch (error) {
+    console.error('❌ Update page SEO failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update page SEO configuration'
+    });
+  }
+};
+
 module.exports = {
   getPageConfig,
   updatePageConfig,
+  updatePageSEO,
   getAllPageConfigs,
   deletePageConfig,
   getPageConfigHistory,

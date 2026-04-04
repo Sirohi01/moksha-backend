@@ -42,7 +42,10 @@ const mediaAssetSchema = new mongoose.Schema({
   cloudinaryId: String,
 
   // SEO & Metadata
-  altText: String,
+  altText: {
+    type: String,
+    required: [function() { return this.type === 'image'; }, 'Alt text is required for image SEO compliance']
+  },
   caption: String,
   tags: [String],
   keywords: [String],

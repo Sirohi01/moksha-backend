@@ -112,7 +112,7 @@ const uploadImage = asyncHandler(async (req, res) => {
     url: result.url,
     thumbnailUrl: result.url, // For now use same URL, Cloudinary handles scaling
     cloudinaryId: result.publicId,
-    altText: alt || title || (isImage ? 'Gallery Image' : 'Gallery Document'),
+    altText: alt, // Removed fallbacks (altText is now required in model)
     uploadedBy: req.admin._id,
     status: 'approved', // Auto-approve gallery uploads from admin
     isPublic: isPublic
@@ -159,7 +159,7 @@ const updateImage = asyncHandler(async (req, res) => {
   if (title) asset.title = title;
   if (description) asset.description = description;
   if (category) asset.category = category;
-  if (alt) asset.altText = alt;
+  if (alt !== undefined) asset.altText = alt;
   if (isPublic !== undefined) asset.isPublic = isPublic;
   if (status) asset.status = status;
 

@@ -47,14 +47,26 @@ const contentSchema = new mongoose.Schema({
   // Media
   featuredImage: {
     url: String,
-    alt: String,
+    alt: { 
+      type: String, 
+      required: [
+        function() { return ['blog', 'news', 'press', 'documentary'].includes(this.type); }, 
+        'Featured image alt text is required'
+      ] 
+    },
     caption: String
   },
   youtubeUrl: String,
   reelUrl: String,
   gallery: [{
     url: String,
-    alt: String,
+    alt: { 
+      type: String, 
+      required: [
+        function() { return ['blog', 'news', 'press', 'documentary'].includes(this.type); }, 
+        'Gallery image alt text is required'
+      ] 
+    },
     caption: String
   }],
 

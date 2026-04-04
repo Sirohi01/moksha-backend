@@ -6,6 +6,8 @@ const {
   uploadMediaAsset,
   updateMediaAsset,
   deleteMediaAsset,
+  downloadMediaAsset,
+  viewMediaAsset,
   bulkUploadAssets,
   updateApprovalStatus,
   getMediaAnalytics
@@ -14,6 +16,10 @@ const {
 const { protect, authorize, checkPermission } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Public Download & View Routes (Before Protect)
+router.get('/download/:id', downloadMediaAsset);
+router.get('/view/:id', viewMediaAsset);
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
