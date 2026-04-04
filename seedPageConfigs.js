@@ -95,6 +95,14 @@ const pageConfigs = [
   {
     pageName: 'gallery',
     configPath: '../frontend/config/gallery.config.ts'
+  },
+  {
+    pageName: 'testimonials',
+    configPath: '../frontend/config/testimonials.config.ts'
+  },
+  {
+    pageName: 'feedback',
+    configPath: '../frontend/config/feedback.config.ts'
   }
 ];
 // Sample configurations (since reading TS files is complex, we'll use JSON directly)

@@ -1,5 +1,11 @@
 const express = require('express');
-const { createFeedback, getFeedback, getSingleFeedback, updateFeedbackStatus } = require('../controllers/feedbackController');
+const { 
+  createFeedback, 
+  getFeedback, 
+  getSingleFeedback, 
+  updateFeedbackStatus,
+  getPublicTestimonials 
+} = require('../controllers/feedbackController');
 const { feedbackValidation } = require('../middleware/validation');
 const { protect } = require('../middleware/auth');
 
@@ -7,6 +13,7 @@ const router = express.Router();
 
 // Public routes
 router.post('/', feedbackValidation, createFeedback);
+router.get('/testimonials', getPublicTestimonials);
 
 // Admin routes (protected)
 router.get('/', protect, getFeedback);

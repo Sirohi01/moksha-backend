@@ -121,9 +121,9 @@ const getSingleFeedback = async (req, res) => {
 const updateFeedbackStatus = async (req, res) => {
   try {
     const { status, responseMessage, priority, tags, isPublic } = req.body;
-    
+
     const feedback = await Feedback.findById(req.params.id);
-    
+
     if (!feedback) {
       return res.status(404).json({
         success: false,
@@ -136,7 +136,7 @@ const updateFeedbackStatus = async (req, res) => {
     if (priority) feedback.priority = priority;
     if (tags) feedback.tags = tags;
     if (typeof isPublic === 'boolean') feedback.isPublic = isPublic;
-    
+
     // Add response if provided
     if (responseMessage) {
       feedback.responseMessage = responseMessage;
@@ -148,7 +148,7 @@ const updateFeedbackStatus = async (req, res) => {
     if (status === 'reviewed' && req.admin) {
       feedback.assignedTo = req.admin._id;
     }
-    
+
     await feedback.save();
 
     // Send response email to user if response message is provided OR status is changed
@@ -158,7 +158,7 @@ const updateFeedbackStatus = async (req, res) => {
         console.log('Email:', feedback.email);
         console.log('Status:', status);
         console.log('Response Message:', responseMessage);
-        
+
         if (responseMessage) {
           // Send detailed response email if response message is provided
           console.log('📧 Sending detailed response email...');
@@ -205,10 +205,30 @@ const updateFeedbackStatus = async (req, res) => {
     });
   }
 };
+const getPublicTestimonials = async (req, res) => {
+  try {
+    const feedback = await Feedback.find({ isPublic: true })
+      .sort({ createdAt: -1 })
+      .limit(20);
+
+    res.status(200).json({
+      success: true,
+      data: feedback
+    });
+
+  } catch (error) {
+    console.error('❌ Get public testimonials failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch testimonials'
+    });
+  }
+};
 
 module.exports = {
   createFeedback,
   getFeedback,
   getSingleFeedback,
-  updateFeedbackStatus
+  updateFeedbackStatus,
+  getPublicTestimonials
 };
