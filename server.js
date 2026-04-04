@@ -45,19 +45,14 @@ const analyticsRoutes = require('./routes/analyticsRoutes');
 const mediaRoutes = require('./routes/mediaRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const pageConfigRoutes = require('./routes/pageConfigRoutes');
+const sopRoutes = require('./routes/sopRoutes');
 
 const app = express();
 if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
-
-// Connect to Database
 connectDB();
-
-// Performance Monitoring (Latency tracking)
 app.use(monitorPerformance);
-
-// Security Middleware
 app.use(helmet());
 app.use(compression());
 
@@ -187,6 +182,7 @@ app.use('/api/admin/contacts', require('./routes/adminContactRoutes'));
 app.use('/api/chat', chatRoutes);
 app.use('/api/intelligence', intelligenceRoutes);
 app.use('/api/marketing', marketingRoutes);
+app.use('/api/sops', sopRoutes);
 
 // 404 Handler
 app.use('*', (req, res) => {

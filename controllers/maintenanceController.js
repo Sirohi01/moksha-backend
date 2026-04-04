@@ -6,13 +6,13 @@ const ALLOWED_SCRIPTS = {
     'reset_configs': {
         path: 'scripts/reset_configs.js',
         type: 'data',
-        label: 'Reset Gallery Configs',
+        label: 'Reset Gallery Configs (IMP)',
         description: 'Purges legacy JSON bloat from Gallery/Press/Docu pages and resets to modern schema.'
     },
     'reset_blogs': {
         path: 'scripts/reset_blog_config.js',
         type: 'data',
-        label: 'Reset Blog Config',
+        label: 'Reset Blog Config (IMP)',
         description: 'Synchronizes blog editorial structure with the latest frontend design tokens.'
     },
     'seed_page_configs': {
@@ -27,8 +27,18 @@ const ALLOWED_SCRIPTS = {
         label: 'Seed SEO Registry',
         description: 'Populates meta tags and indexing protocols across the public site.'
     },
-
-    // SECURITY & OPTIMIZATION
+    'seed_sops': {
+        path: 'seedSOP.js',
+        type: 'data',
+        label: 'Sync SOP Protocols (IMP)',
+        description: 'Synchronizes mission-critical operational manuals (MCD, Ambulance, Transit) with the production registry.'
+    },
+    'sync_sop_navbar': {
+        path: 'addSOPToNavbar.js',
+        type: 'data',
+        label: 'Sync SOP to Navbar (IMP)',
+        description: 'Patches the public-side navigation and footer manifold to include the mission-critical SOP Manuals link.'
+    },
     'clean_activity_logs': {
         path: 'utils/cleanupLogs.js',
         type: 'security',
@@ -87,8 +97,8 @@ exports.runMaintenanceScript = async (req, res) => {
 
         const scriptValue = scriptDef.path;
         const isSystemCommand = scriptValue.startsWith('npm') || scriptValue.startsWith('jest');
-        const command = isSystemCommand 
-            ? scriptValue 
+        const command = isSystemCommand
+            ? scriptValue
             : `node ${path.join(__dirname, '../', scriptValue)}`;
 
         console.log(`🚀 RUNNING MAINTENANCE SCRIPT: ${scriptKey} via [${command}]`);
