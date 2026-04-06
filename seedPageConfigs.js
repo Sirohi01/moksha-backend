@@ -3445,13 +3445,6 @@ const seedPageConfigs = async () => {
 
     console.log('🌱 Seeding page configurations...');
 
-    // Skip seeding if configs already exist to preserve user updates
-    const existingConfigs = await Content.countDocuments({ type: 'page_config' });
-    if (existingConfigs > 0) {
-      console.log(`♻️ Skipping seeding: ${existingConfigs} configurations already exist in the system.`);
-      return { success: true, message: 'Seeding skipped (data exists)', count: 0 };
-    }
-
     let seededCount = 0;
     const allPageNames = Array.from(new Set([...Object.keys(sampleConfigs), ...pageConfigs.map(p => p.pageName)]));
 
@@ -3470,31 +3463,34 @@ const seedPageConfigs = async () => {
             config = { ...config, ...fileConfig };
           }
         }
-
-        // Ensure WhatsApp is explicitly preserved for layout
         if (pageName === 'layout') {
           if (!config.socialFloating) config.socialFloating = {};
           config.socialFloating.whatsapp = "919220147229";
         }
 
-        // Safety Protocol: Only create if missing to prevent overwriting user edits
-        const existingConfig = await Content.findOne({ slug: pageName, type: 'page_config' });
-        
-        if (!existingConfig) {
-          await Content.create({
-            title: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page Configuration`,
-            slug: pageName,
-            content: JSON.stringify(config, null, 2),
-            type: 'page_config',
-            status: 'published',
-            category: 'configuration',
-            author: new mongoose.Types.ObjectId(),
-            metaTitle: `${pageName} Page Config`,
-            metaDescription: `Configuration data for ${pageName} page`,
-            version: 1
-          });
+        // Upsert to sync changes from script to DB
+        const result = await Content.findOneAndUpdate(
+          { slug: pageName, type: 'page_config' },
+          {
+            $set: {
+              title: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page Configuration`,
+              content: JSON.stringify(config, null, 2),
+              type: 'page_config',
+              status: 'published',
+              category: 'configuration',
+              author: new mongoose.Types.ObjectId(),
+              metaTitle: `${pageName} Page Config`,
+              metaDescription: `Configuration data for ${pageName} page`,
+              version: 1,
+              updatedAt: new Date()
+            }
+          },
+          { upsert: true, new: true }
+        );
+
+        if (result) {
           seededCount++;
-          console.log(`✅ Initialized new configuration: ${pageName}`);
+          console.log(`✅ ${pageName} configuration synchronized`);
         }
 
       } catch (error) {
