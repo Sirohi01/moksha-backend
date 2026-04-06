@@ -15,8 +15,6 @@ const connectDB = async () => {
     process.exit(1);
   }
 };
-
-// SEO data for all pages
 const seoPages = [
   {
     title: 'Homepage',
@@ -29,7 +27,7 @@ const seoPages = [
     ogDescription: 'Providing dignified cremation services for unclaimed bodies and poor families across India.',
     ogType: 'website',
     ogImage: '/og-image.png',
-    canonicalUrl: 'https://moksha-seva.org/',
+    canonicalUrl: 'https://mokshasewa.org/',
     schemaType: 'Organization',
     robots: 'index, follow',
     status: 'published',

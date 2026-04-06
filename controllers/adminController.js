@@ -267,13 +267,39 @@ const getSystemHealth = async (req, res) => {
 // @access  Private/Admin
 const getEmailLogs = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
-    const skip = (page - 1) * limit;
+    const { page = 1, limit = 20, startDate, endDate, search } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const filter = {};
+
+    if (search && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      filter.$or = [
+        { recipientEmail: searchRegex },
+        { subject: searchRegex },
+        { body: searchRegex }
+      ];
+    }
+
+    if ((startDate && startDate.trim()) || (endDate && endDate.trim())) {
+      const dateFilter = {};
+      if (startDate && startDate.trim()) {
+        const start = new Date(startDate);
+        if (!isNaN(start.getTime())) dateFilter.$gte = start;
+      }
+      if (endDate && endDate.trim()) {
+        const end = new Date(endDate);
+        if (!isNaN(end.getTime())) {
+          end.setUTCHours(23, 59, 59, 999);
+          dateFilter.$lte = end;
+        }
+      }
+      if (Object.keys(dateFilter).length > 0) filter.createdAt = dateFilter;
+    }
 
     const [logs, total] = await Promise.all([
-      EmailLog.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
-      EmailLog.countDocuments()
+      EmailLog.find(filter).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)),
+      EmailLog.countDocuments(filter)
     ]);
 
     res.status(200).json({

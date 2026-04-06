@@ -75,7 +75,7 @@ const getUser = async (req, res) => {
 // @access  Private/Manager
 const updateUser = async (req, res) => {
   try {
-    const { name, email, phone, role, allowedIPs, isActive } = req.body;
+    const { name, email, phone, role, allowedIPs, isActive, permissions } = req.body;
     
     const user = await Admin.findById(req.params.id);
     if (!user) {
@@ -92,6 +92,7 @@ const updateUser = async (req, res) => {
     if (role) user.role = role;
     if (allowedIPs) user.allowedIPs = allowedIPs;
     if (isActive !== undefined) user.isActive = isActive;
+    if (permissions) user.permissions = permissions;
 
     await user.save();
 

@@ -6,6 +6,8 @@ const {
   uploadMediaAsset,
   updateMediaAsset,
   deleteMediaAsset,
+  downloadMediaAsset,
+  viewMediaAsset,
   bulkUploadAssets,
   updateApprovalStatus,
   getMediaAnalytics
@@ -14,6 +16,10 @@ const {
 const { protect, authorize, checkPermission } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Public Download & View Routes (Before Protect)
+router.get('/download/:id', downloadMediaAsset);
+router.get('/view/:id', viewMediaAsset);
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -25,27 +31,22 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 50 * 1024 * 1024 // 50MB limit
+    fileSize: 50 * 1024 * 1024
   },
   fileFilter: function (req, file, cb) {
-    // Allow images, videos, documents
-    if (file.mimetype.startsWith('image/') || 
-        file.mimetype.startsWith('video/') || 
-        file.mimetype.startsWith('application/')) {
+    if (file.mimetype.startsWith('image/') ||
+      file.mimetype.startsWith('video/') ||
+      file.mimetype.startsWith('application/')) {
       cb(null, true);
     } else {
       cb(new Error('Invalid file type'), false);
     }
   }
 });
-
-// All routes require authentication
 router.use(protect);
-
-// Analytics route (accessible to all media team)
 router.get('/analytics', checkPermission('media_read'), getMediaAnalytics);
 
 // CRUD routes
@@ -54,9 +55,9 @@ router.route('/')
   .post(checkPermission('media_write'), upload.single('file'), uploadMediaAsset);
 
 // Bulk upload
-router.post('/bulk', 
-  checkPermission('media_write'), 
-  upload.array('files', 20), 
+router.post('/bulk',
+  checkPermission('media_write'),
+  upload.array('files', 20),
   bulkUploadAssets
 );
 
@@ -67,8 +68,8 @@ router.route('/:id')
   .delete(checkPermission('media_delete'), deleteMediaAsset);
 
 // Approval workflow (Manager only)
-router.put('/:id/approval', 
-  checkPermission('media_approve'), 
+router.put('/:id/approval',
+  checkPermission('media_approve'),
   updateApprovalStatus
 );
 

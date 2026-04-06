@@ -10,23 +10,25 @@ const {
   deleteImage,
   getGalleryStats
 } = require('../controllers/galleryController');
+const { logActivity } = require('../middleware/activityLogger');
 
 // Multer Configuration (Memory storage for direct Cloudinary upload)
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: 5 * 1024 * 1024, // 5MB limit for images and documents
   },
   fileFilter: (req, file, cb) => {
-    // Check if it's an image by mimetype OR extension
-    const isImageMime = file.mimetype.startsWith('image/');
-    const isImageExt = /\.(jpg|jpeg|png|gif|webp|avif|tiff|bmp)$/i.test(file.originalname);
+    // Check if it's an image or PDF
+    const isImage = file.mimetype.startsWith('image/');
+    const isPDF = file.mimetype === 'application/pdf';
+    const isAllowedExt = /\.(jpg|jpeg|png|gif|webp|pdf)$/i.test(file.originalname);
 
-    if (isImageMime || isImageExt) {
+    if (isImage || isPDF || isAllowedExt) {
       return cb(null, true);
     } else {
-      cb(new Error(`File type rejected: ${file.mimetype}. Only image files are allowed (JPG, PNG, WEBP, etc.).`));
+      cb(new Error(`File type rejected: ${file.mimetype}. Only images and PDFs are allowed.`));
     }
   }
 });
@@ -39,21 +41,21 @@ router.get('/', getGalleryImages);
 // @route   GET /api/gallery/stats
 // @desc    Get gallery statistics
 // @access  Private
-router.get('/stats', protect, authorize(['super_admin', 'manager', 'media_team']), getGalleryStats);
+router.get('/stats', protect, authorize('super_admin', 'admin', 'manager', 'media_team', 'content_team', 'seo_team'), getGalleryStats);
 
 // @route   POST /api/gallery
 // @desc    Upload new image
 // @access  Private
-router.post('/', protect, authorize(['super_admin', 'manager', 'media_team']), upload.single('image'), uploadImage);
+router.post('/', protect, authorize('super_admin', 'admin', 'manager', 'media_team', 'content_team', 'seo_team'), upload.single('image'), logActivity('upload_media', 'gallery', 'Uploaded new image'), uploadImage);
 
 // @route   PUT /api/gallery/:id
 // @desc    Update image details
 // @access  Private
-router.put('/:id', protect, authorize(['super_admin', 'manager', 'media_team']), updateImage);
+router.put('/:id', protect, authorize('super_admin', 'admin', 'manager', 'media_team', 'content_team', 'seo_team'), logActivity('update_content', 'gallery', 'Updated image details'), updateImage);
 
 // @route   DELETE /api/gallery/:id
 // @desc    Delete image
 // @access  Private
-router.delete('/:id', protect, authorize(['super_admin', 'manager', 'media_team']), deleteImage);
+router.delete('/:id', protect, authorize('super_admin', 'admin', 'manager', 'media_team', 'content_team', 'seo_team'), logActivity('delete_media', 'gallery', 'Deleted image'), deleteImage);
 
-module.exports = router;
+module.exports = router;

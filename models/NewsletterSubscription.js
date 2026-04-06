@@ -9,6 +9,16 @@ const NewsletterSubscriptionSchema = new mongoose.Schema({
     lowercase: true,
     match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email address']
   },
+  phone: {
+    type: String,
+    trim: true,
+    match: [/^\d{10,15}$/, 'Please provide a valid phone number (without + prefix)']
+  },
+  communicationPreference: {
+    type: String,
+    enum: ['email', 'whatsapp', 'both'],
+    default: 'email'
+  },
   status: {
     type: String,
     enum: ['active', 'unsubscribed'],

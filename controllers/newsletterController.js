@@ -1,7 +1,7 @@
 const NewsletterSubscription = require('../models/NewsletterSubscription');
 exports.subscribe = async (req, res) => {
   try {
-    const { email, source } = req.body;
+    const { email, phone, communicationPreference, source } = req.body;
 
     if (!email) {
       return res.status(400).json({
@@ -17,6 +17,8 @@ exports.subscribe = async (req, res) => {
       if (subscriber.status === 'unsubscribed') {
         subscriber.status = 'active';
         subscriber.subscribedAt = Date.now();
+        if (phone) subscriber.phone = phone;
+        if (communicationPreference) subscriber.communicationPreference = communicationPreference;
         await subscriber.save();
         return res.status(200).json({
           success: true,
@@ -31,8 +33,17 @@ exports.subscribe = async (req, res) => {
 
     subscriber = await NewsletterSubscription.create({
       email,
+      phone,
+      communicationPreference: communicationPreference || 'email',
       source: source || 'blog_page'
     });
+
+    // Send WhatsApp Welcome if opted in
+    if (phone && (communicationPreference === 'whatsapp' || communicationPreference === 'both')) {
+      const { sendWhatsAppMessage } = require('../services/whatsappService');
+      const welcomeMsg = `MOKSHA SEWA: Thank you for subscribing to our updates! We'll keep you posted on our mission and impact stories. - Team Moksha`;
+      await sendWhatsAppMessage(phone, welcomeMsg);
+    }
 
     // Send admin notification
     const { sendEmail } = require('../services/emailService');
@@ -57,15 +68,27 @@ exports.subscribe = async (req, res) => {
 
 exports.getSubscribers = async (req, res) => {
   try {
-    const subscribers = await NewsletterSubscription.find().sort('-createdAt');
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const [subscribers, total] = await Promise.all([
+      NewsletterSubscription.find().sort('-subscribedAt').skip(skip).limit(limit),
+      NewsletterSubscription.countDocuments()
+    ]);
 
     res.status(200).json({
       success: true,
-      count: subscribers.length,
-      data: subscribers
+      data: subscribers,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
-    console.error('❌ Failed to fetch subscribers:', error);
+    console.error('Failed to fetch subscribers:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch subscribers'

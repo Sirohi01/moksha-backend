@@ -1,26 +1,38 @@
 const ActivityLog = require('../models/ActivityLog');
-
-// @desc    Get activity logs
-// @route   GET /api/admin/activities
-// @access  Private/Manager
 const getActivities = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
-
-    // Build filter
     const filter = {};
-    if (req.query.userId) filter.userId = req.query.userId;
-    if (req.query.action) filter.action = req.query.action;
-    if (req.query.targetType) filter.targetType = req.query.targetType;
-    if (req.query.status) filter.status = req.query.status;
-    
-    // Date range filter
-    if (req.query.startDate || req.query.endDate) {
-      filter.createdAt = {};
-      if (req.query.startDate) filter.createdAt.$gte = new Date(req.query.startDate);
-      if (req.query.endDate) filter.createdAt.$lte = new Date(req.query.endDate);
+    const { userId, action, targetType, status, startDate, endDate, search } = req.query;
+
+    if (userId) filter.userId = userId;
+    if (action) filter.action = action;
+    if (targetType) filter.targetType = targetType;
+    if (status) filter.status = status;
+    if (search && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      filter.$or = [
+        { description: searchRegex },
+        { action: searchRegex },
+        { targetType: searchRegex }
+      ];
+    }
+    if ((startDate && startDate.trim()) || (endDate && endDate.trim())) {
+      const dateFilter = {};
+      if (startDate && startDate.trim()) {
+        const start = new Date(startDate);
+        if (!isNaN(start.getTime())) dateFilter.$gte = start;
+      }
+      if (endDate && endDate.trim()) {
+        const end = new Date(endDate);
+        if (!isNaN(end.getTime())) {
+          end.setUTCHours(23, 59, 59, 999);
+          dateFilter.$lte = end;
+        }
+      }
+      if (Object.keys(dateFilter).length > 0) filter.createdAt = dateFilter;
     }
 
     const activities = await ActivityLog.find(filter)
@@ -30,8 +42,6 @@ const getActivities = async (req, res) => {
       .limit(limit);
 
     const total = await ActivityLog.countDocuments(filter);
-
-    // Map the data to match frontend expectations
     const mappedActivities = activities.map(activity => ({
       _id: activity._id,
       adminId: activity.userId?._id || activity.userId,
@@ -65,14 +75,10 @@ const getActivities = async (req, res) => {
     });
   }
 };
-
-// @desc    Get activity statistics
-// @route   GET /api/admin/activities/stats
-// @access  Private/Manager
 const getActivityStats = async (req, res) => {
   try {
-    const timeRange = req.query.range || '7d'; // 1d, 7d, 30d, 90d
-    
+    const timeRange = req.query.range || '7d';
+
     let startDate;
     switch (timeRange) {
       case '1d':
@@ -149,10 +155,6 @@ const getActivityStats = async (req, res) => {
     });
   }
 };
-
-// @desc    Get activity by ID
-// @route   GET /api/admin/activities/:id
-// @access  Private/Manager
 const getActivityById = async (req, res) => {
   try {
     const activity = await ActivityLog.findById(req.params.id)
@@ -164,8 +166,6 @@ const getActivityById = async (req, res) => {
         message: 'Activity not found'
       });
     }
-
-    // Map the data to match frontend expectations
     const mappedActivity = {
       _id: activity._id,
       adminId: activity.userId?._id || activity.userId,

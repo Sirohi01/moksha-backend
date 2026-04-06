@@ -1,14 +1,13 @@
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
 
-// Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true
 });
 
-// Multer configuration for memory storage
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
@@ -22,12 +21,12 @@ const fileFilter = (req, file, cb) => {
   // Allow images and PDFs
   const allowedTypes = [
     'image/jpeg',
-    'image/jpg', 
+    'image/jpg',
     'image/png',
     'image/gif',
     'image/webp',
     'application/pdf',
-    'application/msword', 
+    'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'audio/mpeg',
     'audio/wav',
@@ -78,7 +77,7 @@ const uploadToCloudinary = async (file, folder = 'moksha-seva') => {
           }
         }
       );
-      
+
       uploadStream.end(file.buffer);
     });
   } catch (error) {

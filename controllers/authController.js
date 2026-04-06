@@ -7,7 +7,7 @@ const { sendWhatsAppOTP } = require('../services/whatsappService');
 
 const register = async (req, res) => {
   try {
-    const { name, email, phone, password, role, allowedIPs } = req.body;
+    const { name, email, phone, password, role, allowedIPs, permissions } = req.body;
 
     // Check if admin already exists
     const existingAdmin = await Admin.findOne({ email });
@@ -25,7 +25,8 @@ const register = async (req, res) => {
       phone,
       password,
       role: role || 'technical_support',
-      allowedIPs: allowedIPs || []
+      allowedIPs: allowedIPs || [],
+      permissions: permissions || []
     });
 
     // Generate token
@@ -180,12 +181,6 @@ const login = async (req, res) => {
     });
   }
 };
-
-/**
- * @desc    Login Phase 2: Verify WhatsApp OTP and issue tokens
- * @route   POST /api/auth/verify-2fa
- * @access  Public
- */
 const verify2FALogin = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -208,10 +203,7 @@ const verify2FALogin = async (req, res) => {
         message: 'Admin account not found'
       });
     }
-
-    // 2. Verify OTP using BOTH email and mobile as a fail-safe
-    // This handles any dot or case mismatches by relying on the unique WhatsApp ID
-    const otpRecord = await OTP.findOne({ 
+    const otpRecord = await OTP.findOne({
       $or: [
         { email: normalizedEmail },
         { mobile: admin.phone }
@@ -233,19 +225,11 @@ const verify2FALogin = async (req, res) => {
         message: 'Invalid OTP code'
       });
     }
-
-    // Success - Finalize login
-
-    // Success - Finalize login
     admin.lastLogin = new Date();
-    
-    // Generate tokens
     const token = admin.generateAuthToken();
     const refreshToken = admin.generateRefreshToken();
-    
-    await admin.save();
 
-    // Delete OTP record
+    await admin.save();
     await OTP.deleteMany({ email });
 
     res.status(200).json({
@@ -273,16 +257,11 @@ const verify2FALogin = async (req, res) => {
     });
   }
 };
-
-// @desc    Logout admin
-// @route   POST /api/auth/logout
-// @access  Private
 const logout = async (req, res) => {
   try {
     const { refreshToken } = req.body;
 
     if (refreshToken) {
-      // Remove refresh token from database
       await Admin.findByIdAndUpdate(req.admin.id, {
         $pull: { refreshTokens: { token: refreshToken } }
       });
@@ -301,10 +280,6 @@ const logout = async (req, res) => {
     });
   }
 };
-
-// @desc    Get current logged in admin
-// @route   GET /api/auth/me
-// @access  Private
 const getMe = async (req, res) => {
   try {
     const admin = await Admin.findById(req.admin.id);
@@ -337,10 +312,6 @@ const getMe = async (req, res) => {
     });
   }
 };
-
-// @desc    Update admin profile
-// @route   PUT /api/auth/profile
-// @access  Private
 const updateProfile = async (req, res) => {
   try {
     const { name, phone, avatar, department } = req.body;
@@ -906,11 +877,11 @@ const loginWithOTP = async (req, res) => {
     // Success - Update admin info
     admin.lastLogin = new Date();
     await admin.resetLoginAttempts();
-    
+
     // Generate tokens
     const token = admin.generateAuthToken();
     const refreshToken = admin.generateRefreshToken();
-    
+
     await admin.save();
 
     // Delete OTP record

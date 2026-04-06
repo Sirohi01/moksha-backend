@@ -19,25 +19,25 @@ const seoPageSchema = new mongoose.Schema({
     required: [true, 'Page URL is required'],
     trim: true
   },
-  
+
   // SEO Meta Tags
   metaTitle: {
     type: String,
     required: [true, 'Meta title is required'],
-    maxlength: [60, 'Meta title should not exceed 60 characters'],
+    maxlength: [150, 'Meta title is too long'],
     trim: true
   },
   metaDescription: {
     type: String,
     required: [true, 'Meta description is required'],
-    maxlength: [160, 'Meta description should not exceed 160 characters'],
+    maxlength: [500, 'Meta description is too long'],
     trim: true
   },
   metaKeywords: {
     type: String,
     trim: true
   },
-  
+
   // Open Graph Tags
   ogTitle: {
     type: String,
@@ -56,7 +56,7 @@ const seoPageSchema = new mongoose.Schema({
     default: 'website',
     enum: ['website', 'article', 'product', 'profile']
   },
-  
+
   // Twitter Card Tags
   twitterCard: {
     type: String,
@@ -75,7 +75,7 @@ const seoPageSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  
+
   // Schema Markup
   schemaType: {
     type: String,
@@ -85,7 +85,7 @@ const seoPageSchema = new mongoose.Schema({
   schemaMarkup: {
     type: mongoose.Schema.Types.Mixed
   },
-  
+
   // Technical SEO
   canonicalUrl: {
     type: String,
@@ -100,22 +100,56 @@ const seoPageSchema = new mongoose.Schema({
     lang: String,
     url: String
   }],
-  
-  // Content Information
+  h1Tag: {
+    type: String,
+    trim: true
+  },
+  breadcrumb: {
+    type: String,
+    trim: true
+  },
+  internalLinks: {
+    type: String,
+    trim: true
+  },
+
+  // Analytics and Scripts
+  gtmCode: {
+    type: String,
+    trim: true
+  },
+  analyticsCode: {
+    type: String,
+    trim: true
+  },
+  headCode: {
+    type: String,
+    trim: true
+  },
+  bodyCode: {
+    type: String,
+    trim: true
+  },
+
+  // Image SEO
+  imageAltMappings: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
   content: {
     type: String,
     trim: true
   },
   contentType: {
     type: String,
-    enum: ['page', 'blog', 'service', 'product', 'about', 'contact'],
+    enum: ['page', 'blog', 'news', 'service', 'about', 'faq', 'testimonial', 'case_study', 'documentary', 'press'],
     default: 'page'
   },
   wordCount: {
     type: Number,
     default: 0
   },
-  
+
   // SEO Performance
   targetKeywords: [{
     keyword: String,
@@ -128,7 +162,7 @@ const seoPageSchema = new mongoose.Schema({
     currentRank: Number,
     targetRank: Number
   }],
-  
+
   // Analytics Data
   pageViews: {
     type: Number,
@@ -146,7 +180,7 @@ const seoPageSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  
+
   // Core Web Vitals
   coreWebVitals: {
     lcp: Number, // Largest Contentful Paint
@@ -155,7 +189,7 @@ const seoPageSchema = new mongoose.Schema({
     fcp: Number, // First Contentful Paint
     ttfb: Number // Time to First Byte
   },
-  
+
   // SEO Score
   seoScore: {
     type: Number,
@@ -178,7 +212,7 @@ const seoPageSchema = new mongoose.Schema({
       default: false
     }
   }],
-  
+
   // Status and Management
   status: {
     type: String,
@@ -187,13 +221,13 @@ const seoPageSchema = new mongoose.Schema({
   },
   publishedAt: Date,
   lastOptimized: Date,
-  
+
   // Audit Information
   lastAuditDate: Date,
   auditResults: {
     type: mongoose.Schema.Types.Mixed
   },
-  
+
   // Management
   assignedTo: {
     type: mongoose.Schema.Types.ObjectId,
@@ -204,7 +238,7 @@ const seoPageSchema = new mongoose.Schema({
     enum: ['low', 'medium', 'high', 'urgent'],
     default: 'medium'
   },
-  
+
   // Notes and Comments
   notes: [{
     note: String,
@@ -230,7 +264,7 @@ seoPageSchema.index({ lastOptimized: -1 });
 seoPageSchema.index({ 'targetKeywords.keyword': 1 });
 
 // Pre-save middleware to calculate word count
-seoPageSchema.pre('save', function(next) {
+seoPageSchema.pre('save', function (next) {
   if (this.content) {
     this.wordCount = this.content.split(/\s+/).length;
   }
@@ -238,55 +272,55 @@ seoPageSchema.pre('save', function(next) {
 });
 
 // Method to calculate SEO score
-seoPageSchema.methods.calculateSEOScore = function() {
+seoPageSchema.methods.calculateSEOScore = function () {
   let score = 0;
-  
+
   // Meta title (20 points)
   if (this.metaTitle && this.metaTitle.length >= 30 && this.metaTitle.length <= 60) {
     score += 20;
   } else if (this.metaTitle) {
     score += 10;
   }
-  
+
   // Meta description (20 points)
   if (this.metaDescription && this.metaDescription.length >= 120 && this.metaDescription.length <= 160) {
     score += 20;
   } else if (this.metaDescription) {
     score += 10;
   }
-  
+
   // Content length (15 points)
   if (this.wordCount >= 300) {
     score += 15;
   } else if (this.wordCount >= 150) {
     score += 8;
   }
-  
+
   // Keywords (15 points)
   if (this.targetKeywords && this.targetKeywords.length > 0) {
     score += 15;
   }
-  
+
   // Open Graph tags (10 points)
   if (this.ogTitle && this.ogDescription && this.ogImage) {
     score += 10;
   }
-  
+
   // Schema markup (10 points)
   if (this.schemaMarkup) {
     score += 10;
   }
-  
+
   // Canonical URL (5 points)
   if (this.canonicalUrl) {
     score += 5;
   }
-  
+
   // Core Web Vitals (5 points)
   if (this.coreWebVitals && this.coreWebVitals.lcp && this.coreWebVitals.fid && this.coreWebVitals.cls) {
     score += 5;
   }
-  
+
   this.seoScore = Math.min(score, 100);
   return this.seoScore;
 };

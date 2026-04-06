@@ -1,4 +1,5 @@
 const ComplianceDocument = require('../models/ComplianceDocument');
+const DocumentLead = require('../models/DocumentLead');
 
 const getDocuments = async (req, res) => {
   try {
@@ -98,9 +99,60 @@ const deleteDocument = async (req, res) => {
   }
 };
 
+// @desc    Register a new lead who accessed a document
+// @route   POST /api/compliance/register
+// @access  Public
+const registerLead = async (req, res) => {
+  try {
+    const { documentId, name, email, phone, pincode } = req.body;
+    
+    // Get document details
+    const doc = await ComplianceDocument.findById(documentId);
+    if (!doc) return res.status(404).json({ success: false, message: 'Document not found' });
+
+    const lead = await DocumentLead.create({
+      documentId,
+      documentTitle: doc.title,
+      name,
+      email,
+      phone,
+      pincode
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Access granted',
+      data: lead
+    });
+  } catch (error) {
+    console.error('❌ Lead registration failed:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Get all document leads (for admin)
+// @route   GET /api/compliance/leads
+// @access  Private/Admin
+const getLeads = async (req, res) => {
+  try {
+    const leads = await DocumentLead.find().sort({ accessedAt: -1 });
+    res.status(200).json({
+      success: true,
+      data: leads
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch leads' });
+  }
+};
+
 module.exports = {
   getDocuments,
   addDocument,
   updateDocument,
-  deleteDocument
+  deleteDocument,
+  registerLead,
+  getLeads
 };

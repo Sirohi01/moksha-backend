@@ -6,7 +6,22 @@ const { sendEmail } = require('../services/emailService');
 // @access  Public
 const createVolunteer = async (req, res) => {
   try {
+    // Create volunteer
     const volunteer = await Volunteer.create(req.body);
+
+    const { sendWhatsAppMessage } = require('../services/whatsappService');
+
+    // 1. WhatsApp to Volunteer
+    if (volunteer.phone) {
+      const userMsg = `MOKSHA SEWA: Hi ${volunteer.name}, thank you for registering as a volunteer! Your Volunteer ID is ${volunteer.volunteerId}. Our team will contact you soon.`;
+      await sendWhatsAppMessage(volunteer.phone, userMsg);
+    }
+
+    // 2. WhatsApp to ADMIN_MOBILE
+    if (process.env.ADMIN_MOBILE_WHATSAPP) {
+      const adminMsg = `✦ NEW VOLUNTEER: ${volunteer.name} from ${volunteer.city}. ID: ${volunteer.volunteerId}`;
+      await sendWhatsAppMessage(process.env.ADMIN_MOBILE_WHATSAPP, adminMsg);
+    }
 
     // Send welcome email to volunteer
     await sendEmail(volunteer.email, 'volunteerWelcome', {
@@ -154,6 +169,13 @@ const updateVolunteerStatus = async (req, res) => {
       volunteerId: volunteer.volunteerId,
       rejectionReason: req.body.rejectionReason
     });
+
+    // WhatsApp Update to Volunteer
+    if (volunteer.phone) {
+      const { sendWhatsAppMessage } = require('../services/whatsappService');
+      const waMsg = `MOKSHA SEWA: Hi ${volunteer.name}, your volunteer status has been updated to: ${status.toUpperCase()}. Check your email for more details.`;
+      await sendWhatsAppMessage(volunteer.phone, waMsg);
+    }
 
     res.status(200).json({
       success: true,

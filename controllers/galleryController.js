@@ -2,32 +2,39 @@ const { uploadToCloudinary, deleteFromCloudinary, cloudinary } = require('../ser
 const MediaAsset = require('../models/MediaAsset');
 const asyncHandler = require('express-async-handler');
 const path = require('path');
-
-// @desc    Get all gallery images
-// @route   GET /api/gallery
-// @access  Public (filtered by approved/public status for public, all for admin)
 const getGalleryImages = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 20;
   const skip = (page - 1) * limit;
-  const { category, search, isAdmin } = req.query;
-
-  // Build filter
-  // If not admin request, only show approved and public images
+  const { category, search, isAdmin, isPublic } = req.query;
   const filter = {
-    category: category && category !== 'all' ? category : 'gallery',
-    type: 'image'
+    category: category && category !== 'all' ? category : 'gallery'
   };
 
   // If category is provided but it's one of the gallery categories, we use it
   if (category && category !== 'all') {
     filter.category = category;
+  } else if (isAdmin === 'true') {
+    // Admins see everything by default
+    delete filter.category;
   } else {
-    filter.category = { $in: ['gallery', 'events', 'services', 'community', 'volunteers'] };
+    filter.category = { $in: ['gallery', 'events', 'services', 'community', 'volunteers', 'content_assets', 'general'] };
   }
-  if (isAdmin !== 'true') {
+  if (isAdmin === 'true' && isPublic !== undefined) {
+    filter.isPublic = isPublic === 'true';
+    if (filter.isPublic) {
+      filter.status = 'approved';
+      // If categories aren't explicitly requested, limit to standard gallery categories to match public view
+      if (!category || category === 'all') {
+        filter.category = { $in: ['gallery', 'events', 'services', 'community', 'volunteers'] };
+      }
+    }
+  } else if (isAdmin !== 'true') {
     filter.status = 'approved';
     filter.isPublic = true;
+    if (!category || category === 'all') {
+      filter.category = { $in: ['gallery', 'events', 'services', 'community', 'volunteers'] };
+    }
   }
 
   if (search) {
@@ -58,7 +65,8 @@ const getGalleryImages = asyncHandler(async (req, res) => {
     dimensions: img.dimensions ? `${img.dimensions.width}x${img.dimensions.height}` : 'N/A',
     cloudinaryId: img.cloudinaryId,
     status: img.status,
-    isPublic: img.isPublic
+    isPublic: img.isPublic,
+    tags: img.tags || []
   }));
 
   res.status(200).json({
@@ -85,23 +93,26 @@ const uploadImage = asyncHandler(async (req, res) => {
     isPublic = category === 'gallery' || !category;
   }
   const result = await uploadToCloudinary(req.file, `moksha-seva/gallery/${category || 'general'}`);
+
+  const isImage = req.file.mimetype.startsWith('image/');
+
   const newAsset = await MediaAsset.create({
     title: title || 'Untitled',
     description: description || '',
-    type: 'image',
+    type: isImage ? 'image' : 'document',
     category: category || 'gallery',
     filename: result.publicId,
     originalName: req.file.originalname,
     mimeType: req.file.mimetype,
     fileSize: result.size,
-    dimensions: {
+    dimensions: isImage ? {
       width: result.width,
       height: result.height
-    },
+    } : undefined,
     url: result.url,
     thumbnailUrl: result.url, // For now use same URL, Cloudinary handles scaling
     cloudinaryId: result.publicId,
-    altText: alt || title || 'Gallery Image',
+    altText: alt, // Removed fallbacks (altText is now required in model)
     uploadedBy: req.admin._id,
     status: 'approved', // Auto-approve gallery uploads from admin
     isPublic: isPublic
@@ -117,7 +128,8 @@ const uploadImage = asyncHandler(async (req, res) => {
     uploadDate: newAsset.createdAt,
     size: (newAsset.fileSize / (1024 * 1024)).toFixed(2) + ' MB',
     dimensions: `${newAsset.dimensions.width}x${newAsset.dimensions.height}`,
-    cloudinaryId: newAsset.cloudinaryId
+    cloudinaryId: newAsset.cloudinaryId,
+    tags: newAsset.tags || []
   };
 
   res.status(201).json({
@@ -147,7 +159,7 @@ const updateImage = asyncHandler(async (req, res) => {
   if (title) asset.title = title;
   if (description) asset.description = description;
   if (category) asset.category = category;
-  if (alt) asset.altText = alt;
+  if (alt !== undefined) asset.altText = alt;
   if (isPublic !== undefined) asset.isPublic = isPublic;
   if (status) asset.status = status;
 
@@ -165,7 +177,8 @@ const updateImage = asyncHandler(async (req, res) => {
     dimensions: asset.dimensions ? `${asset.dimensions.width}x${asset.dimensions.height}` : 'N/A',
     cloudinaryId: asset.cloudinaryId,
     status: asset.status,
-    isPublic: asset.isPublic
+    isPublic: asset.isPublic,
+    tags: asset.tags || []
   };
 
   res.status(200).json({

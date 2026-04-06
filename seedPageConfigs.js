@@ -21,8 +21,8 @@ const readConfigFile = (filePath) => {
       let configStr = configMatch[1];
       configStr = configStr
         .replace(/(\w+):/g, '"$1":')
-        .replace(/'/g, '"')           // Replace single quotes with double quotes
-        .replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
+        .replace(/'/g, '"')
+        .replace(/,(\s*[}\]])/g, '$1');
 
       return JSON.parse(configStr);
     }
@@ -83,6 +83,26 @@ const pageConfigs = [
   {
     pageName: 'layout',
     configPath: '../frontend/config/layout.config.ts'
+  },
+  {
+    pageName: 'documentaries',
+    configPath: '../frontend/config/documentaries.config.ts'
+  },
+  {
+    pageName: 'press',
+    configPath: '../frontend/config/press.config.ts'
+  },
+  {
+    pageName: 'gallery',
+    configPath: '../frontend/config/gallery.config.ts'
+  },
+  {
+    pageName: 'testimonials',
+    configPath: '../frontend/config/testimonials.config.ts'
+  },
+  {
+    pageName: 'feedback',
+    configPath: '../frontend/config/feedback.config.ts'
   }
 ];
 // Sample configurations (since reading TS files is complex, we'll use JSON directly)
@@ -3425,11 +3445,11 @@ const seedPageConfigs = async () => {
 
     console.log('🌱 Seeding page configurations...');
 
-    // Clear existing configs to ensure latest data (overwrite mode)
+    // Skip seeding if configs already exist to preserve user updates
     const existingConfigs = await Content.countDocuments({ type: 'page_config' });
     if (existingConfigs > 0) {
-      console.log(`♻️  Updating ${existingConfigs} existing page configurations...`);
-      await Content.deleteMany({ type: 'page_config' });
+      console.log(`♻️ Skipping seeding: ${existingConfigs} configurations already exist in the system.`);
+      return { success: true, message: 'Seeding skipped (data exists)', count: 0 };
     }
 
     let seededCount = 0;
@@ -3457,22 +3477,25 @@ const seedPageConfigs = async () => {
           config.socialFloating.whatsapp = "919220147229";
         }
 
-        const pageConfig = new Content({
-          title: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page Configuration`,
-          slug: pageName,
-          content: JSON.stringify(config, null, 2),
-          type: 'page_config',
-          category: 'configuration',
-          status: 'published',
-          author: new mongoose.Types.ObjectId(),
-          metaTitle: `${pageName} Page Config`,
-          metaDescription: `Configuration data for ${pageName} page`,
-          version: 1
-        });
-
-        await pageConfig.save();
-        seededCount++;
-        console.log(`✅ Created configuration for: ${pageName}`);
+        // Safety Protocol: Only create if missing to prevent overwriting user edits
+        const existingConfig = await Content.findOne({ slug: pageName, type: 'page_config' });
+        
+        if (!existingConfig) {
+          await Content.create({
+            title: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page Configuration`,
+            slug: pageName,
+            content: JSON.stringify(config, null, 2),
+            type: 'page_config',
+            status: 'published',
+            category: 'configuration',
+            author: new mongoose.Types.ObjectId(),
+            metaTitle: `${pageName} Page Config`,
+            metaDescription: `Configuration data for ${pageName} page`,
+            version: 1
+          });
+          seededCount++;
+          console.log(`✅ Initialized new configuration: ${pageName}`);
+        }
 
       } catch (error) {
         console.error(`❌ Failed to create config for ${pageName}:`, error.message);

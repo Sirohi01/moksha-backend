@@ -1,17 +1,17 @@
 const nodemailer = require('nodemailer');
 const EmailLog = require('../models/EmailLog');
+const { getConfig } = require('./configService');
 
-const createTransporter = () => {
-  console.log(`📧 Creating email transporter...`);
+const createTransporter = (emailConfig) => {
+  console.log(`📧 Creating email transporter with dynamic config...`);
 
-  // Use Gmail SMTP for both development and production
   const config = {
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_PORT === '465',
+    host: emailConfig.host,
+    port: emailConfig.port,
+    secure: emailConfig.port === 465,
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
+      user: emailConfig.user,
+      pass: emailConfig.pass
     },
     tls: {
       rejectUnauthorized: false
@@ -20,20 +20,6 @@ const createTransporter = () => {
     greetingTimeout: 5000,
     socketTimeout: 15000
   };
-
-  console.log(`📧 Transporter config:`, {
-    environment: process.env.NODE_ENV || 'development',
-    host: config.host,
-    port: config.port,
-    secure: config.secure,
-    user: config.auth.user,
-    provider: 'Gmail SMTP',
-    timeouts: {
-      connection: config.connectionTimeout,
-      greeting: config.greetingTimeout,
-      socket: config.socketTimeout
-    }
-  });
 
   return nodemailer.createTransport(config);
 };
@@ -1711,24 +1697,13 @@ const sendEmail = async (to, template, data, attachment = null) => {
       return { success: true, messageId: 'dev-skip-' + Date.now() };
     }
 
-    // Check if email template exists
-    if (!emailTemplates[template]) {
-      console.error(`❌ Email template '${template}' not found`);
-      return { success: false, error: `Template '${template}' not found` };
-    }
-
-    // Check SMTP configuration
-    console.log(`📧 SMTP Config check:`);
-    console.log(`📧 SMTP_HOST: ${process.env.SMTP_HOST ? 'Set' : 'Missing'}`);
-    console.log(`📧 SMTP_PORT: ${process.env.SMTP_PORT ? 'Set' : 'Missing'}`);
-    console.log(`📧 SMTP_USER: ${process.env.SMTP_USER ? 'Set' : 'Missing'}`);
-    console.log(`📧 SMTP_PASS: ${process.env.SMTP_PASS ? 'Set' : 'Missing'}`);
-    console.log(`📧 FROM_NAME: ${process.env.FROM_NAME ? 'Set' : 'Missing'}`);
-    console.log(`📧 FROM_EMAIL: ${process.env.FROM_EMAIL ? 'Set' : 'Missing'}`);
+    // Fetch Dynamic Config
+    const globalConfig = await getConfig();
+    const emailConfig = globalConfig.email;
 
     // Check if SMTP is configured
-    if (!process.env.SMTP_PASS) {
-      console.log(`⚠️ SMTP config missing - returning success to prevent blocking`);
+    if (!emailConfig.pass) {
+      console.log(`⚠️ SMTP password missing - returning success to prevent blocking`);
       return {
         success: true,
         messageId: 'smtp-bypass-' + Date.now(),
@@ -1736,7 +1711,7 @@ const sendEmail = async (to, template, data, attachment = null) => {
       };
     }
 
-    const transporter = createTransporter();
+    const transporter = createTransporter(emailConfig);
     console.log(`📧 Transporter created`);
 
     const emailContent = emailTemplates[template](data);
@@ -1744,7 +1719,7 @@ const sendEmail = async (to, template, data, attachment = null) => {
     console.log(`📧 Subject: ${emailContent.subject}`);
 
     const mailOptions = {
-      from: `${process.env.FROM_NAME || 'Moksha Sewa'} <${process.env.FROM_EMAIL || process.env.SMTP_USER}>`,
+      from: `${emailConfig.fromName} <${emailConfig.fromEmail}>`,
       to,
       subject: emailContent.subject,
       html: emailContent.html

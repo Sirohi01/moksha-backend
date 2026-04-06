@@ -14,7 +14,7 @@ const contentSchema = new mongoose.Schema({
     trim: true,
     lowercase: true
   },
-  
+
   // Content Details
   content: {
     type: String,
@@ -25,41 +25,81 @@ const contentSchema = new mongoose.Schema({
     maxlength: [300, 'Excerpt should not exceed 300 characters'],
     trim: true
   },
-  
+
   // Content Type and Category
   type: {
     type: String,
     required: [true, 'Content type is required'],
-    enum: ['page', 'blog', 'news', 'service', 'about', 'faq', 'testimonial', 'case_study', 'page_config'],
+    enum: ['page', 'blog', 'news', 'service', 'about', 'faq', 'testimonial', 'case_study', 'page_config', 'documentary', 'press'],
     default: 'page'
   },
   category: {
     type: String,
-    enum: ['general', 'services', 'about', 'news', 'resources', 'help', 'configuration'],
+    enum: [
+      'general', 'services', 'about', 'news', 'resources', 
+      'help', 'configuration', 'official', 'mission', 
+      'impact', 'legislative', 'behind-the-scenes',
+      'media-kit', 'statutory', 'mission-log', 'clarification'
+    ],
     default: 'general'
   },
-  
+
   // Media
   featuredImage: {
     url: String,
-    alt: String,
+    alt: { 
+      type: String, 
+      required: [
+        function() { return ['blog', 'news', 'press', 'documentary'].includes(this.type); }, 
+        'Featured image alt text is required'
+      ] 
+    },
     caption: String
   },
+  youtubeUrl: String,
+  reelUrl: String,
   gallery: [{
     url: String,
-    alt: String,
+    alt: { 
+      type: String, 
+      required: [
+        function() { return ['blog', 'news', 'press', 'documentary'].includes(this.type); }, 
+        'Gallery image alt text is required'
+      ] 
+    },
     caption: String
   }],
-  
-  // SEO Fields
+
+  seoRanking: {
+    targetKeywords: [String],
+    currentRank: Number,
+    competitorKeywords: [String],
+    searchVolume: Number,
+    rankingDifficulty: Number
+  },
+
+  seoTechnical: {
+    ogTitle: String,
+    ogDescription: String,
+    ogImage: String,
+    twitterCard: { type: String, default: 'summary_large_image' },
+    schemaMarkup: mongoose.Schema.Types.Mixed,
+    canonicalUrl: String,
+    robots: { type: String, default: 'index, follow' },
+    h1Tag: String,
+    breadcrumb: String,
+    redirectionUrl: String
+  },
+
+  // Basic Meta (Search Ranking Primary)
   metaTitle: {
     type: String,
-    maxlength: [60, 'Meta title should not exceed 60 characters'],
+    maxlength: [200, 'Meta title should not exceed 200 characters'],
     trim: true
   },
   metaDescription: {
     type: String,
-    maxlength: [160, 'Meta description should not exceed 160 characters'],
+    maxlength: [500, 'Meta description should not exceed 500 characters'],
     trim: true
   },
   focusKeyword: {
@@ -70,7 +110,7 @@ const contentSchema = new mongoose.Schema({
     type: String,
     trim: true
   }],
-  
+
   // Publishing
   status: {
     type: String,
@@ -79,7 +119,7 @@ const contentSchema = new mongoose.Schema({
   },
   publishedAt: Date,
   scheduledAt: Date,
-  
+
   // Author and Management
   author: {
     type: mongoose.Schema.Types.ObjectId,
@@ -94,7 +134,7 @@ const contentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Admin'
   },
-  
+
   // Content Structure
   sections: [{
     title: String,
@@ -106,7 +146,7 @@ const contentSchema = new mongoose.Schema({
       default: 'text'
     }
   }],
-  
+
   // Template and Layout
   template: {
     type: String,
@@ -118,7 +158,7 @@ const contentSchema = new mongoose.Schema({
     enum: ['full_width', 'sidebar_left', 'sidebar_right', 'two_column'],
     default: 'full_width'
   },
-  
+
   // Engagement
   views: {
     type: Number,
@@ -132,7 +172,7 @@ const contentSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  
+
   // Comments (if enabled)
   commentsEnabled: {
     type: Boolean,
@@ -151,7 +191,7 @@ const contentSchema = new mongoose.Schema({
       default: Date.now
     }
   }],
-  
+
   // Versioning
   version: {
     type: Number,
@@ -170,7 +210,7 @@ const contentSchema = new mongoose.Schema({
     },
     changeLog: String
   }],
-  
+
   // Localization
   language: {
     type: String,
@@ -188,7 +228,7 @@ const contentSchema = new mongoose.Schema({
       default: 'draft'
     }
   }],
-  
+
   // Analytics and Performance
   analytics: {
     pageViews: {
@@ -212,7 +252,7 @@ const contentSchema = new mongoose.Schema({
       default: 0
     }
   },
-  
+
   // Content Quality
   readabilityScore: {
     type: Number,
@@ -228,7 +268,7 @@ const contentSchema = new mongoose.Schema({
     type: Number, // in minutes
     default: 0
   },
-  
+
   // Workflow
   workflow: {
     currentStage: {
@@ -255,7 +295,7 @@ const contentSchema = new mongoose.Schema({
     },
     approvedAt: Date
   },
-  
+
   // Tags and Taxonomy
   tags: [{
     type: String,
@@ -264,7 +304,7 @@ const contentSchema = new mongoose.Schema({
   customFields: {
     type: mongoose.Schema.Types.Mixed
   },
-  
+
   // Notes and Comments
   internalNotes: [{
     note: String,
@@ -296,14 +336,14 @@ contentSchema.index({ tags: 1 });
 contentSchema.index({ language: 1 });
 
 // Pre-save middleware
-contentSchema.pre('save', function(next) {
+contentSchema.pre('save', function (next) {
   // Calculate word count
   if (this.content) {
     this.wordCount = this.content.split(/\s+/).filter(word => word.length > 0).length;
     // Calculate reading time (average 200 words per minute)
     this.readingTime = Math.ceil(this.wordCount / 200);
   }
-  
+
   // Auto-generate slug if not provided
   if (!this.slug && this.title) {
     this.slug = this.title
@@ -311,12 +351,12 @@ contentSchema.pre('save', function(next) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
   }
-  
+
   // Auto-generate meta title if not provided
   if (!this.metaTitle && this.title) {
     this.metaTitle = this.title.length > 60 ? this.title.substring(0, 57) + '...' : this.title;
   }
-  
+
   // Auto-generate meta description from excerpt or content
   if (!this.metaDescription) {
     const source = this.excerpt || this.content;
@@ -325,25 +365,25 @@ contentSchema.pre('save', function(next) {
       this.metaDescription = plainText.length > 160 ? plainText.substring(0, 157) + '...' : plainText;
     }
   }
-  
+
   next();
 });
 
 // Method to publish content
-contentSchema.methods.publish = function() {
+contentSchema.methods.publish = function () {
   this.status = 'published';
   this.publishedAt = new Date();
   return this.save();
 };
 
 // Method to archive content
-contentSchema.methods.archive = function() {
+contentSchema.methods.archive = function () {
   this.status = 'archived';
   return this.save();
 };
 
 // Method to create new version
-contentSchema.methods.createVersion = function(changeLog) {
+contentSchema.methods.createVersion = function (changeLog) {
   this.previousVersions.push({
     version: this.version,
     content: this.content,

@@ -6,7 +6,8 @@ const {
   deletePageConfig,
   getPageConfigHistory,
   restorePageConfigVersion,
-  getPageConfigSchema
+  getPageConfigSchema,
+  updatePageSEO
 } = require('../controllers/pageConfigController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -23,6 +24,7 @@ router.use(authorize('super_admin', 'admin', 'manager', 'seo_team', 'content_tea
 // Admin routes
 router.get('/', getAllPageConfigs);
 router.put('/:pageName', updatePageConfig);
+router.put('/:pageName/seo', updatePageSEO);
 router.delete('/:pageName', deletePageConfig);
 router.get('/:pageName/history', getPageConfigHistory);
 router.post('/:pageName/restore/:version', restorePageConfigVersion);

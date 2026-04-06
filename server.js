@@ -15,11 +15,9 @@ const { specs, swaggerUi } = require('./swagger');
 
 const fs = require('fs');
 const path = require('path');
-
-// Ensure upload directories exist
 const uploadDir = path.join(__dirname, 'uploads/temp');
 if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 // Import Routes
@@ -47,19 +45,14 @@ const analyticsRoutes = require('./routes/analyticsRoutes');
 const mediaRoutes = require('./routes/mediaRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const pageConfigRoutes = require('./routes/pageConfigRoutes');
+const sopRoutes = require('./routes/sopRoutes');
 
 const app = express();
 if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
-
-// Connect to Database
 connectDB();
-
-// Performance Monitoring (Latency tracking)
 app.use(monitorPerformance);
-
-// Security Middleware
 app.use(helmet());
 app.use(compression());
 
@@ -85,7 +78,7 @@ app.use(cors({
       'http://localhost:3000',
       'http://127.0.0.1:3000',
       'https://mokshafrontend.netlify.app',
-      'https://moksha-seva.org',
+      'https://mokshasewa.org',
       'https://www.mokshasewa.org'
     ];
 
@@ -102,7 +95,7 @@ app.use(cors({
     return callback(new Error(msg), false);
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
@@ -185,9 +178,11 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/page-config', pageConfigRoutes);
+app.use('/api/admin/contacts', require('./routes/adminContactRoutes'));
 app.use('/api/chat', chatRoutes);
 app.use('/api/intelligence', intelligenceRoutes);
 app.use('/api/marketing', marketingRoutes);
+app.use('/api/sops', sopRoutes);
 
 // 404 Handler
 app.use('*', (req, res) => {

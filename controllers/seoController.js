@@ -1,36 +1,43 @@
 const SEOPage = require('../models/SEOPage');
 const Content = require('../models/Content');
 const Analytics = require('../models/Analytics');
+const GlobalSEO = require('../models/GlobalSEO');
+const VisitorActivity = require('../models/VisitorActivity');
 const SEOService = require('../services/seoService');
 const SitemapService = require('../services/sitemapService');
-
-// @desc    Get all SEO pages
-// @route   GET /api/seo
-// @access  Private/SEO Team
 const getSEOData = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 100;
     const skip = (page - 1) * limit;
+    const validContent = await Content.find({
+      type: { $in: ['page_config', 'blog', 'press', 'documentary', 'page'] }
+    }).select('slug title type');
 
-    // Build filter
-    const filter = {};
-    if (req.query.status) filter.status = req.query.status;
-    if (req.query.priority) filter.priority = req.query.priority;
-    if (req.query.search) {
-      filter.$or = [
-        { title: new RegExp(req.query.search, 'i') },
-        { metaTitle: new RegExp(req.query.search, 'i') },
-        { url: new RegExp(req.query.search, 'i') }
-      ];
+    const validSlugs = validContent.map(c => c.slug);
+    const existingSEO = await SEOPage.find({ slug: { $in: validSlugs } });
+    const existingSlugs = existingSEO.map(s => s.slug);
+    const missingContent = validContent.filter(c => !existingSlugs.includes(c.slug));
+
+    if (missingContent.length > 0) {
+      const newSEOPages = missingContent.map(c => ({
+        title: c.title,
+        slug: c.slug,
+        url: `/${c.slug}`,
+        metaTitle: `${c.title} | Moksha Sewa`,
+        metaDescription: `Discover ${c.title} at Moksha Sewa - Dignity in Departure.`,
+        status: 'draft',
+        contentType: c.type === 'page_config' ? 'page' : c.type
+      }));
+      await SEOPage.insertMany(newSEOPages);
     }
 
-    const seoPages = await SEOPage.find(filter)
+    const seoPages = await SEOPage.find({ slug: { $in: validSlugs } })
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const total = await SEOPage.countDocuments(filter);
+    const total = await SEOPage.countDocuments({ slug: { $in: validSlugs } });
 
     res.status(200).json({
       success: true,
@@ -51,15 +58,9 @@ const getSEOData = async (req, res) => {
     });
   }
 };
-
-// @desc    Get single SEO page by page name
-// @route   GET /api/seo/page/:pageName
-// @access  Private/SEO Team
 const getSEOPageByName = async (req, res) => {
   try {
     const { pageName } = req.params;
-
-    // Try to find SEO page by page name or URL
     let seoPage = await SEOPage.findOne({
       $or: [
         { slug: pageName },
@@ -68,8 +69,6 @@ const getSEOPageByName = async (req, res) => {
         { title: new RegExp(pageName, 'i') }
       ]
     });
-
-    // If no SEO page found, create a default one
     if (!seoPage) {
       seoPage = new SEOPage({
         title: `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page`,
@@ -84,11 +83,9 @@ const getSEOPageByName = async (req, res) => {
         schemaType: 'WebPage',
         robots: 'index, follow',
         status: 'draft',
-        assignedTo: req.admin._id,
+        assignedTo: req.admin ? req.admin._id : null,
         priority: 'medium'
       });
-
-      // Calculate initial SEO score
       seoPage.calculateSEOScore();
       await seoPage.save();
     }
@@ -106,16 +103,10 @@ const getSEOPageByName = async (req, res) => {
     });
   }
 };
-
-// @desc    Update SEO page by page name
-// @route   PUT /api/seo/page/:pageName
-// @access  Private/SEO Team
 const updateSEOPageByName = async (req, res) => {
   try {
     const { pageName } = req.params;
     const updateData = req.body;
-
-    // Try to find existing SEO page
     let seoPage = await SEOPage.findOne({
       $or: [
         { slug: pageName },
@@ -124,15 +115,7 @@ const updateSEOPageByName = async (req, res) => {
       ]
     });
 
-    if (seoPage) {
-      // Update existing page
-      Object.assign(seoPage, {
-        ...updateData,
-        lastOptimized: new Date(),
-        status: updateData.status || 'published'
-      });
-    } else {
-      // Create new SEO page
+    if (!seoPage) {
       seoPage = new SEOPage({
         title: updateData.title || `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page`,
         slug: pageName,
@@ -152,25 +135,66 @@ const updateSEOPageByName = async (req, res) => {
         lastOptimized: new Date()
       });
     }
+    const changes = [];
+    console.log('🔍 [AUDIT DEBUG] Starting Diff Check for:', seoPage.metaTitle);
 
-    // Calculate SEO score
+    const safeCompare = (v1, v2) => {
+      const s1 = String(v1 || '').trim();
+      const s2 = String(v2 || '').trim();
+      return s1 !== s2;
+    };
+
+    if (updateData.metaTitle !== undefined && safeCompare(updateData.metaTitle, seoPage.metaTitle)) {
+      console.log(`✅ Change Detected: MetaTitle [DB: ${seoPage.metaTitle}] -> [NEW: ${updateData.metaTitle}]`);
+      changes.push("Meta Title");
+    }
+    if (updateData.metaDescription !== undefined && safeCompare(updateData.metaDescription, seoPage.metaDescription)) changes.push("Description");
+    if (updateData.metaKeywords !== undefined && safeCompare(updateData.metaKeywords, seoPage.metaKeywords)) changes.push("Keywords");
+    if (updateData.robots !== undefined && safeCompare(updateData.robots, seoPage.robots)) changes.push("Crawl Protocols");
+    if (updateData.status !== undefined && updateData.status !== seoPage.status) changes.push(`Status (${updateData.status})`);
+
+    if (changes.length > 0) {
+      if (!seoPage.notes) seoPage.notes = [];
+      const newNote = {
+        note: `Protocol Calibration: [${changes.join(', ')}] orchestrated by ${req.admin?.name || req.admin?.email || 'System Admin'}`,
+        addedBy: req.admin?._id,
+        addedAt: new Date()
+      };
+      seoPage.notes.unshift(newNote);
+      if (seoPage.notes.length > 50) seoPage.notes = seoPage.notes.slice(0, 50);
+      seoPage.markModified('notes');
+    }
+    const { notes: incomingNotes, ...sanitizedUpdateData } = updateData;
+    Object.assign(seoPage, {
+      ...sanitizedUpdateData,
+      lastOptimized: new Date(),
+      status: updateData.status || seoPage.status || 'published'
+    });
+
     if (seoPage.calculateSEOScore) {
       seoPage.calculateSEOScore();
+    }
+
+    if (updateData.imageAltMappings) {
+      seoPage.markModified('imageAltMappings');
+    }
+    if (updateData.schemaMarkup) {
+      seoPage.markModified('schemaMarkup');
     }
 
     await seoPage.save();
 
     res.status(200).json({
       success: true,
-      message: `SEO page for '${pageName}' ${seoPage.isNew ? 'created' : 'updated'} successfully`,
+      message: `SEO Protocol Synchronized: '${pageName}' optimized successfully`,
       data: seoPage
     });
 
   } catch (error) {
-    console.error('❌ Update SEO page by name failed:', error);
-    res.status(500).json({
+    console.error('❌ SEO Sync Error:', error);
+    res.status(400).json({
       success: false,
-      message: 'Failed to update SEO page'
+      message: error.message || 'SEO Synchronization Failed'
     });
   }
 };
@@ -198,18 +222,12 @@ const getSEOPage = async (req, res) => {
     });
   }
 };
-
-// @desc    Create new SEO page
-// @route   POST /api/seo
-// @access  Private/SEO Team
 const createSEOPage = async (req, res) => {
   try {
     const seoPage = await SEOPage.create({
       ...req.body,
       assignedTo: req.user?.id
     });
-
-    // Calculate initial SEO score
     seoPage.calculateSEOScore();
     await seoPage.save();
 
@@ -227,35 +245,71 @@ const createSEOPage = async (req, res) => {
     });
   }
 };
-
-// @desc    Update SEO page
-// @route   PUT /api/seo/:id
-// @access  Private/SEO Team
 const updateSEOPage = async (req, res) => {
   try {
-    const seoPage = await SEOPage.findByIdAndUpdate(
-      req.params.id,
-      {
-        ...req.body,
-        lastOptimized: new Date()
-      },
-      { new: true }
-    );
+    const { _id, __v, ...updateData } = req.body;
+    let seoPage = await SEOPage.findById(req.params.id);
 
     if (!seoPage) {
       return res.status(404).json({
         success: false,
-        message: 'SEO page not found'
+        message: 'Strategic Search Node not found in registry'
       });
     }
+    const changes = [];
+    console.log('🔍 [AUDIT DEBUG] Starting ID-Based Diff Check for:', seoPage.metaTitle);
 
-    // Recalculate SEO score
-    seoPage.calculateSEOScore();
+    const safeCompare = (v1, v2) => {
+      const s1 = String(v1 || '').trim();
+      const s2 = String(v2 || '').trim();
+      return s1 !== s2;
+    };
+
+    if (updateData.metaTitle !== undefined && safeCompare(updateData.metaTitle, seoPage.metaTitle)) {
+      console.log(`✅ Change Detected: MetaTitle [DB: ${seoPage.metaTitle}] -> [NEW: ${updateData.metaTitle}]`);
+      changes.push("Meta Title");
+    }
+    if (updateData.metaDescription !== undefined && safeCompare(updateData.metaDescription, seoPage.metaDescription)) changes.push("Description");
+    if (updateData.metaKeywords !== undefined && safeCompare(updateData.metaKeywords, seoPage.metaKeywords)) changes.push("Keywords");
+    if (updateData.robots !== undefined && safeCompare(updateData.robots, seoPage.robots)) changes.push("Crawl Protocols");
+    if (updateData.status !== undefined && updateData.status !== seoPage.status) changes.push(`Status (${updateData.status})`);
+
+    console.log('📊 [AUDIT DEBUG] Total Changes Found:', changes.length);
+
+    if (changes.length > 0) {
+      if (!seoPage.notes) seoPage.notes = [];
+      const newNote = {
+        note: `Protocol Calibration: [${changes.join(', ')}] orchestrated by ${req.admin?.name || req.admin?.email || 'System Admin'}`,
+        addedBy: req.admin?._id,
+        addedAt: new Date()
+      };
+      seoPage.notes.unshift(newNote);
+      if (seoPage.notes.length > 50) seoPage.notes = seoPage.notes.slice(0, 50);
+      seoPage.markModified('notes');
+      console.log('📝 [AUDIT DEBUG] Note Pushed to Array');
+    }
+
+    // Perform state mutation
+    // EXCLUDE 'notes' to prevent overwriting server-generated audit logs
+    const { notes: incomingNotes, ...sanitizedUpdateData } = updateData;
+    Object.assign(seoPage, {
+      ...sanitizedUpdateData,
+      lastOptimized: new Date(),
+      status: updateData.status || seoPage.status || 'published'
+    });
+
+    if (seoPage.calculateSEOScore) {
+      seoPage.calculateSEOScore();
+    }
+
+    if (updateData.imageAltMappings) seoPage.markModified('imageAltMappings');
+    if (updateData.schemaMarkup) seoPage.markModified('schemaMarkup');
+
     await seoPage.save();
 
     res.status(200).json({
       success: true,
-      message: 'SEO page updated successfully',
+      message: 'Evolutionary Audit Logged: Search Node synchronized successfully',
       data: seoPage
     });
 
@@ -267,10 +321,6 @@ const updateSEOPage = async (req, res) => {
     });
   }
 };
-
-// @desc    Delete SEO page
-// @route   DELETE /api/seo/:id
-// @access  Private/SEO Team
 const deleteSEOPage = async (req, res) => {
   try {
     const seoPage = await SEOPage.findByIdAndDelete(req.params.id);
@@ -295,10 +345,6 @@ const deleteSEOPage = async (req, res) => {
     });
   }
 };
-
-// @desc    Run SEO audit on page
-// @route   POST /api/seo/:id/audit
-// @access  Private/SEO Team
 const runSEOAudit = async (req, res) => {
   try {
     const result = await SEOService.auditPage(req.params.id);
@@ -321,33 +367,21 @@ const runSEOAudit = async (req, res) => {
     });
   }
 };
-
-// @desc    Get SEO statistics
-// @route   GET /api/seo/stats
-// @access  Private/SEO Team
 const getSEOStats = async (req, res) => {
   try {
     const totalPages = await SEOPage.countDocuments();
     const publishedPages = await SEOPage.countDocuments({ status: 'published' });
     const draftPages = await SEOPage.countDocuments({ status: 'draft' });
-
-    // Get average SEO score
     const avgScoreResult = await SEOPage.aggregate([
       { $group: { _id: null, avgScore: { $avg: '$seoScore' } } }
     ]);
     const avgSEOScore = avgScoreResult[0]?.avgScore || 0;
-
-    // Get pages with issues
     const pagesWithIssues = await SEOPage.countDocuments({
       'seoIssues.0': { $exists: true }
     });
-
-    // Get high priority issues
     const highPriorityIssues = await SEOPage.countDocuments({
       'seoIssues.priority': 'high'
     });
-
-    // Get recent optimizations
     const recentOptimizations = await SEOPage.find({
       lastOptimized: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
     }).countDocuments();
@@ -373,10 +407,6 @@ const getSEOStats = async (req, res) => {
     });
   }
 };
-
-// @desc    Generate sitemap
-// @route   POST /api/seo/sitemap
-// @access  Private/SEO Team
 const generateSitemap = async (req, res) => {
   try {
     const result = await SitemapService.generateSitemap();
@@ -403,10 +433,6 @@ const generateSitemap = async (req, res) => {
     });
   }
 };
-
-// @desc    Analyze keywords
-// @route   POST /api/seo/keywords/analyze
-// @access  Private/SEO Team
 const analyzeKeywords = async (req, res) => {
   try {
     const { keywords } = req.body;
@@ -438,10 +464,6 @@ const analyzeKeywords = async (req, res) => {
     });
   }
 };
-
-// @desc    Get SEO report
-// @route   GET /api/seo/report
-// @access  Private/SEO Team
 const getSEOReport = async (req, res) => {
   try {
     const dateRange = parseInt(req.query.days) || 30;
@@ -465,10 +487,144 @@ const getSEOReport = async (req, res) => {
     });
   }
 };
+const getRealTimeAnalytics = async (req, res) => {
+  try {
+    const days = parseInt(req.query.days) || 7;
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+    const totalStats = await VisitorActivity.aggregate([
+      { $match: { createdAt: { $gte: startDate } } },
+      {
+        $group: {
+          _id: null,
+          totalPageviews: { $sum: 1 },
+          uniqueVisitors: { $addToSet: '$ipAddress' },
+          avgDuration: { $avg: '$duration' }
+        }
+      }
+    ]);
+    const trafficStats = await VisitorActivity.aggregate([
+      { $match: { createdAt: { $gte: startDate } } },
+      {
+        $project: {
+          source: {
+            $cond: [
+              { $or: [{ $not: ['$referer'] }, { $eq: ['$referer', ''] }] },
+              'Direct',
+              {
+                $cond: [
+                  { $regexMatch: { input: '$referer', pattern: /google|bing|yahoo|duckduckgo/i } },
+                  'Organic Search',
+                  {
+                    $cond: [
+                      { $regexMatch: { input: '$referer', pattern: /facebook|twitter|instagram|linkedin|t\.co|lnkd\.in/i } },
+                      'Social Media',
+                      'Referral'
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      { $group: { _id: '$source', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
 
-// @desc    Bulk update meta tags
-// @route   PUT /api/seo/bulk/meta-tags
-// @access  Private/SEO Team
+    // 3. Popular Pages & Behavioral Depth
+    const popularPages = await VisitorActivity.aggregate([
+      { $match: { createdAt: { $gte: startDate } } },
+      {
+        $group: {
+          _id: '$path',
+          views: { $sum: 1 },
+          uniqueVisitors: { $addToSet: '$ipAddress' },
+          avgTime: { $avg: '$duration' }
+        }
+      },
+      { $sort: { views: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // 4. Multi-Layered Geography Intelligence
+    const geoStats = await VisitorActivity.aggregate([
+      { $match: { createdAt: { $gte: startDate }, 'location.country': { $exists: true } } },
+      {
+        $facet: {
+          countries: [
+            { $group: { _id: '$location.country', count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 10 }
+          ],
+          cities: [
+            { $group: { _id: { city: '$location.city', country: '$location.country' }, count: { $sum: 1 } } },
+            { $match: { '_id.city': { $ne: 'Unknown' } } },
+            { $sort: { count: -1 } },
+            { $limit: 10 }
+          ]
+        }
+      }
+    ]);
+
+    // 5. Technical Telemetry (Devices & OS)
+    const activities = await VisitorActivity.find({ createdAt: { $gte: startDate } }).select('userAgent');
+    const technicalStats = {
+      devices: { mobile: 0, desktop: 0, tablet: 0 },
+      os: { ios: 0, android: 0, windows: 0, mac: 0, linux: 0, other: 0 }
+    };
+
+    activities.forEach(a => {
+      const ua = (a.userAgent || '').toLowerCase();
+
+      // Device Parsing
+      if (ua.includes('mobile')) technicalStats.devices.mobile++;
+      else if (ua.includes('tablet')) technicalStats.devices.tablet++;
+      else technicalStats.devices.desktop++;
+
+      // OS Parsing
+      if (ua.includes('iphone') || ua.includes('ipad')) technicalStats.os.ios++;
+      else if (ua.includes('android')) technicalStats.os.android++;
+      else if (ua.includes('windows')) technicalStats.os.windows++;
+      else if (ua.includes('macintosh')) technicalStats.os.mac++;
+      else if (ua.includes('linux')) technicalStats.os.linux++;
+      else technicalStats.os.other++;
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        summary: {
+          totalPageviews: totalStats[0]?.totalPageviews || 0,
+          uniqueVisitors: totalStats[0]?.uniqueVisitors?.length || 0,
+          avgDuration: Math.round(totalStats[0]?.avgDuration || 0)
+        },
+        trafficSources: trafficStats.map(s => ({
+          name: s._id,
+          value: s.count
+        })),
+        popularPages: popularPages.map(p => ({
+          path: p._id,
+          views: p.views,
+          uniqueVisitors: p.uniqueVisitors.length,
+          avgEngagement: Math.round(p.avgTime || 0)
+        })),
+        geoIntensity: {
+          countries: geoStats[0].countries.map(g => ({ name: g._id, count: g.count })),
+          cities: geoStats[0].cities.map(g => ({ name: `${g._id.city}, ${g._id.country}`, count: g.count }))
+        },
+        technicalStats
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Real-Time Analytics Breach:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Critical analytics pipeline failure'
+    });
+  }
+};
 const bulkUpdateMetaTags = async (req, res) => {
   try {
     const { pageIds, metaData } = req.body;
@@ -500,6 +656,75 @@ const bulkUpdateMetaTags = async (req, res) => {
     });
   }
 };
+const getGlobalRedirects = async (req, res) => {
+  try {
+    const seoPages = await SEOPage.find({
+      $and: [
+        { redirects: { $exists: true } },
+        { redirects: { $ne: '' } }
+      ]
+    }).select('redirects');
+
+    let allRedirects = [];
+    seoPages.forEach(p => {
+      const lines = p.redirects.split('\n').filter(l => l.includes('>'));
+      lines.forEach(line => {
+        const [source, target] = line.split('>').map(s => s.trim());
+        if (source && target) {
+          allRedirects.push({ source, target });
+        }
+      });
+    });
+
+    res.status(200).json({
+      success: true,
+      data: allRedirects
+    });
+  } catch (error) {
+    console.error('❌ Get redirects failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch global redirects'
+    });
+  }
+};
+
+const getGlobalSEO = async (req, res) => {
+  try {
+    let settings = await GlobalSEO.findOne();
+    if (!settings) {
+      settings = await GlobalSEO.create({
+        headerScripts: '',
+        footerScripts: '',
+        lastUpdated: new Date()
+      });
+    }
+    res.status(200).json({ success: true, data: settings });
+  } catch (error) {
+    console.error('❌ Get global SEO failed:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch global SEO' });
+  }
+};
+
+const updateGlobalSEO = async (req, res) => {
+  try {
+    const updateData = req.body;
+    let settings = await GlobalSEO.findOne();
+    if (!settings) {
+      settings = new GlobalSEO({});
+    }
+
+    Object.assign(settings, updateData);
+    settings.lastUpdated = new Date();
+    settings.updatedBy = req.admin ? req.admin.name : 'Unknown Admin';
+    await settings.save();
+
+    res.status(200).json({ success: true, message: 'Global SEO parameters synchronized', data: settings });
+  } catch (error) {
+    console.error('❌ Update global SEO failed:', error);
+    res.status(500).json({ success: false, message: 'Failed to update global SEO' });
+  }
+};
 
 module.exports = {
   getSEOData,
@@ -514,5 +739,9 @@ module.exports = {
   generateSitemap,
   analyzeKeywords,
   getSEOReport,
-  bulkUpdateMetaTags
+  bulkUpdateMetaTags,
+  getGlobalSEO,
+  updateGlobalSEO,
+  getGlobalRedirects,
+  getRealTimeAnalytics
 };

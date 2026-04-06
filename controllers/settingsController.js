@@ -1,435 +1,156 @@
-// In-memory settings storage (replace with database in production)
-let systemSettings = {
-  general: {
-    siteName: 'Moksha Sewa',
-    siteDescription: 'Dignified Last Rites for All',
-    contactEmail: 'contact@MokshaSewa.org',
-    supportEmail: 'support@MokshaSewa.org',
-    maintenanceMode: false,
-    timezone: 'Asia/Kolkata',
-    language: 'en',
-    currency: 'INR'
-  },
-  security: {
-    sessionTimeout: 24, // hours
-    maxLoginAttempts: 5,
-    passwordMinLength: 8,
-    requireTwoFactor: false,
-    ipWhitelistEnabled: false,
-    allowedIPs: [],
-    passwordComplexity: true,
-    accountLockoutDuration: 30 // minutes
-  },
-  email: {
-    smtpHost: 'smtp.gmail.com',
-    smtpPort: 587,
-    smtpUser: 'noreply@MokshaSewa.org',
-    smtpPassword: '', // encrypted
-    fromName: 'Moksha Sewa',
-    fromEmail: 'noreply@MokshaSewa.org',
-    enableTLS: true,
-    enableSSL: false
-  },
-  notifications: {
-    emailNotifications: true,
-    smsNotifications: false,
-    pushNotifications: true,
-    adminAlerts: true,
-    reportNotifications: true,
-    donationNotifications: true,
-    volunteerNotifications: true
-  },
-  backup: {
-    autoBackup: true,
-    backupFrequency: 'daily', // hourly, daily, weekly, monthly
-    retentionDays: 30,
-    lastBackup: new Date('2024-01-15T10:30:00Z'),
-    backupLocation: 'cloud',
-    compressionEnabled: true
-  },
-  api: {
-    rateLimit: 100, // requests per 15 minutes
-    enableCORS: true,
-    allowedOrigins: ['http://localhost:3000', 'https://MokshaSewa.org'],
-    apiVersion: 'v1',
-    enableLogging: true
-  },
-  performance: {
-    cacheEnabled: true,
-    cacheDuration: 3600, // seconds
-    compressionEnabled: true,
-    minifyAssets: true,
-    enableCDN: false,
-    cdnUrl: ''
-  },
-  lastUpdated: new Date('2024-01-15T10:30:00Z'),
-  updatedBy: 'System Admin'
-};
-
-// @desc    Get system settings
-// @route   GET /api/settings
-// @access  Private
+const SystemSettings = require('../models/SystemSettings');
 const getSettings = async (req, res) => {
-  try {
-    // Remove sensitive information before sending
-    const safeSettings = {
-      ...systemSettings,
-      email: {
-        ...systemSettings.email,
-        smtpPassword: systemSettings.email.smtpPassword ? '***hidden***' : ''
-      }
-    };
-
-    res.status(200).json({
-      success: true,
-      data: safeSettings
-    });
-  } catch (error) {
-    console.error('❌ Get settings failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch system settings'
-    });
-  }
-};
-
-// @desc    Update system settings
-// @route   PUT /api/settings
-// @access  Private
-const updateSettings = async (req, res) => {
-  try {
-    const {
-      general,
-      security,
-      email,
-      notifications,
-      backup,
-      api,
-      performance
-    } = req.body;
-
-    // Update settings sections
-    if (general) {
-      systemSettings.general = { ...systemSettings.general, ...general };
-    }
-
-    if (security) {
-      systemSettings.security = { ...systemSettings.security, ...security };
-    }
-
-    if (email) {
-      // Don't update password if it's the hidden placeholder
-      const emailUpdate = { ...email };
-      if (emailUpdate.smtpPassword === '***hidden***') {
-        delete emailUpdate.smtpPassword;
-      }
-      systemSettings.email = { ...systemSettings.email, ...emailUpdate };
-    }
-
-    if (notifications) {
-      systemSettings.notifications = { ...systemSettings.notifications, ...notifications };
-    }
-
-    if (backup) {
-      systemSettings.backup = { ...systemSettings.backup, ...backup };
-    }
-
-    if (api) {
-      systemSettings.api = { ...systemSettings.api, ...api };
-    }
-
-    if (performance) {
-      systemSettings.performance = { ...systemSettings.performance, ...performance };
-    }
-
-    // Update metadata
-    systemSettings.lastUpdated = new Date();
-    systemSettings.updatedBy = req.admin.name;
-
-    // Return safe settings (without sensitive data)
-    const safeSettings = {
-      ...systemSettings,
-      email: {
-        ...systemSettings.email,
-        smtpPassword: systemSettings.email.smtpPassword ? '***hidden***' : ''
-      }
-    };
-
-    res.status(200).json({
-      success: true,
-      message: 'System settings updated successfully',
-      data: safeSettings
-    });
-  } catch (error) {
-    console.error('❌ Update settings failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update system settings'
-    });
-  }
-};
-
-// @desc    Get specific settings section
-// @route   GET /api/settings/:section
-// @access  Private
-const getSettingsSection = async (req, res) => {
-  try {
-    const { section } = req.params;
-
-    if (!systemSettings[section]) {
-      return res.status(404).json({
-        success: false,
-        message: 'Settings section not found'
-      });
-    }
-
-    let sectionData = systemSettings[section];
-
-    // Hide sensitive data for email section
-    if (section === 'email') {
-      sectionData = {
-        ...sectionData,
-        smtpPassword: sectionData.smtpPassword ? '***hidden***' : ''
-      };
-    }
-
-    res.status(200).json({
-      success: true,
-      data: sectionData
-    });
-  } catch (error) {
-    console.error('❌ Get settings section failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch settings section'
-    });
-  }
-};
-
-// @desc    Update specific settings section
-// @route   PUT /api/settings/:section
-// @access  Private
-const updateSettingsSection = async (req, res) => {
-  try {
-    const { section } = req.params;
-    const updateData = req.body;
-
-    if (!systemSettings[section]) {
-      return res.status(404).json({
-        success: false,
-        message: 'Settings section not found'
-      });
-    }
-
-    // Special handling for email section
-    if (section === 'email' && updateData.smtpPassword === '***hidden***') {
-      delete updateData.smtpPassword;
-    }
-
-    // Update the section
-    systemSettings[section] = { ...systemSettings[section], ...updateData };
-    systemSettings.lastUpdated = new Date();
-    systemSettings.updatedBy = req.admin.name;
-
-    // Return safe data
-    let responseData = systemSettings[section];
-    if (section === 'email') {
-      responseData = {
-        ...responseData,
-        smtpPassword: responseData.smtpPassword ? '***hidden***' : ''
-      };
-    }
-
-    res.status(200).json({
-      success: true,
-      message: `${section} settings updated successfully`,
-      data: responseData
-    });
-  } catch (error) {
-    console.error('❌ Update settings section failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update settings section'
-    });
-  }
-};
-
-// @desc    Reset settings to default
-// @route   POST /api/settings/reset
-// @access  Private
-const resetSettings = async (req, res) => {
-  try {
-    const { section } = req.body;
-
-    if (section && systemSettings[section]) {
-      // Reset specific section to defaults
-      const defaults = getDefaultSettings();
-      systemSettings[section] = defaults[section];
-    } else {
-      // Reset all settings to defaults
-      systemSettings = getDefaultSettings();
-    }
-
-    systemSettings.lastUpdated = new Date();
-    systemSettings.updatedBy = req.admin.name;
-
-    res.status(200).json({
-      success: true,
-      message: section ? `${section} settings reset to defaults` : 'All settings reset to defaults'
-    });
-  } catch (error) {
-    console.error('❌ Reset settings failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to reset settings'
-    });
-  }
-};
-
-// @desc    Backup current settings
-// @route   POST /api/settings/backup
-// @access  Private
-const backupSettings = async (req, res) => {
-  try {
-    const backup = {
-      settings: systemSettings,
-      backupDate: new Date(),
-      backupBy: req.admin.name,
-      version: '1.0'
-    };
-
-    // In a real implementation, this would save to a file or database
-    // For now, we'll just return the backup data
-    res.status(200).json({
-      success: true,
-      message: 'Settings backup created successfully',
-      data: backup
-    });
-  } catch (error) {
-    console.error('❌ Backup settings failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to backup settings'
-    });
-  }
-};
-
-// @desc    Test email configuration
-// @route   POST /api/settings/test-email
-// @access  Private
-const testEmailConfig = async (req, res) => {
-  try {
-    const { testEmail } = req.body;
-
-    // In a real implementation, this would actually send a test email
-    // For now, we'll simulate the test
-    const emailConfig = systemSettings.email;
-
-    if (!emailConfig.smtpHost || !emailConfig.smtpUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email configuration is incomplete'
-      });
-    }
-
-    // Simulate email test
-    setTimeout(() => {
-      res.status(200).json({
-        success: true,
-        message: `Test email sent successfully to ${testEmail || 'configured email'}`,
-        data: {
-          testDate: new Date(),
-          recipient: testEmail || emailConfig.fromEmail,
-          status: 'delivered'
+    try {
+        let settings = await SystemSettings.findOne();
+        if (!settings) {
+            settings = await SystemSettings.create({});
         }
-      });
-    }, 1000);
+        const rawSettings = settings.toObject();
+        const safeSettings = {
+            general: rawSettings.general || {},
+            security: rawSettings.security || {},
+            email: rawSettings.email || {},
+            razorpay: rawSettings.razorpay || {},
+            features: rawSettings.features || {},
+            updatedBy: rawSettings.updatedBy,
+            lastUpdated: rawSettings.lastUpdated,
+            _id: rawSettings._id
+        };
 
-  } catch (error) {
-    console.error('❌ Test email failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to test email configuration'
-    });
-  }
+        if (safeSettings.email.smtpPassword) safeSettings.email.smtpPassword = '***hidden***';
+        if (safeSettings.razorpay.keySecret) safeSettings.razorpay.keySecret = '***hidden***';
+        if (safeSettings.razorpay.webhookSecret) safeSettings.razorpay.webhookSecret = '***hidden***';
+
+        res.status(200).json({
+            success: true,
+            data: safeSettings
+        });
+    } catch (error) {
+        console.error('❌ Get settings failed:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch system settings'
+        });
+    }
 };
+const updateSettings = async (req, res) => {
+    try {
+        const updateData = req.body;
+        let settings = await SystemSettings.findOne();
+        if (!settings) {
+            settings = new SystemSettings({});
+        }
+        const sections = ['general', 'security', 'email', 'razorpay', 'features'];
+        sections.forEach(section => {
+            if (updateData[section]) {
+                const updatedSection = { ...settings[section].toObject ? settings[section].toObject() : settings[section], ...updateData[section] };
+                if (section === 'email' && updatedSection.smtpPassword === '***hidden***') {
+                    delete updatedSection.smtpPassword;
+                }
+                if (section === 'razorpay') {
+                    if (updatedSection.keySecret === '***hidden***') delete updatedSection.keySecret;
+                    if (updatedSection.webhookSecret === '***hidden***') delete updatedSection.webhookSecret;
+                }
 
-// Helper function to get default settings
-const getDefaultSettings = () => {
-  return {
-    general: {
-      siteName: 'Moksha Sewa',
-      siteDescription: 'Dignified Last Rites for All',
-      contactEmail: 'contact@MokshaSewa.org',
-      supportEmail: 'support@MokshaSewa.org',
-      maintenanceMode: false,
-      timezone: 'Asia/Kolkata',
-      language: 'en',
-      currency: 'INR'
-    },
-    security: {
-      sessionTimeout: 24,
-      maxLoginAttempts: 5,
-      passwordMinLength: 8,
-      requireTwoFactor: false,
-      ipWhitelistEnabled: false,
-      allowedIPs: [],
-      passwordComplexity: true,
-      accountLockoutDuration: 30
-    },
-    email: {
-      smtpHost: '',
-      smtpPort: 587,
-      smtpUser: '',
-      smtpPassword: '',
-      fromName: 'Moksha Sewa',
-      fromEmail: '',
-      enableTLS: true,
-      enableSSL: false
-    },
-    notifications: {
-      emailNotifications: true,
-      smsNotifications: false,
-      pushNotifications: true,
-      adminAlerts: true,
-      reportNotifications: true,
-      donationNotifications: true,
-      volunteerNotifications: true
-    },
-    backup: {
-      autoBackup: true,
-      backupFrequency: 'daily',
-      retentionDays: 30,
-      lastBackup: null,
-      backupLocation: 'local',
-      compressionEnabled: true
-    },
-    api: {
-      rateLimit: 100,
-      enableCORS: true,
-      allowedOrigins: ['http://localhost:3000'],
-      apiVersion: 'v1',
-      enableLogging: true
-    },
-    performance: {
-      cacheEnabled: true,
-      cacheDuration: 3600,
-      compressionEnabled: true,
-      minifyAssets: true,
-      enableCDN: false,
-      cdnUrl: ''
-    },
-    lastUpdated: new Date(),
-    updatedBy: 'System'
-  };
+                settings[section] = updatedSection;
+            }
+        });
+
+        settings.updatedBy = req.admin ? req.admin.name : 'Unknown Admin';
+        settings.lastUpdated = new Date();
+        await settings.save();
+
+        // Return safe settings
+        const safeSettings = settings.toObject();
+        if (safeSettings.email.smtpPassword) safeSettings.email.smtpPassword = '***hidden***';
+        if (safeSettings.razorpay.keySecret) safeSettings.razorpay.keySecret = '***hidden***';
+        if (safeSettings.razorpay.webhookSecret) safeSettings.razorpay.webhookSecret = '***hidden***';
+
+        res.status(200).json({
+            success: true,
+            message: 'System settings updated successfully',
+            data: safeSettings
+        });
+    } catch (error) {
+        console.error('❌ Update settings failed:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update system settings'
+        });
+    }
+};
+const getSettingsSection = async (req, res) => {
+    try {
+        const { section } = req.params;
+        const settings = await SystemSettings.findOne();
+        if (!settings || !settings[section]) {
+            return res.status(404).json({ success: false, message: 'Section not found' });
+        }
+
+        const sectionData = settings[section].toObject ? settings[section].toObject() : settings[section];
+        if (section === 'email' && sectionData.smtpPassword) sectionData.smtpPassword = '***hidden***';
+        if (section === 'razorpay') {
+            if (sectionData.keySecret) sectionData.keySecret = '***hidden***';
+            if (sectionData.webhookSecret) sectionData.webhookSecret = '***hidden***';
+        }
+
+        res.status(200).json({ success: true, data: sectionData });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to fetch section' });
+    }
+};
+const updateSettingsSection = async (req, res) => {
+    try {
+        const { section } = req.params;
+        const updateData = req.body;
+        let settings = await SystemSettings.findOne();
+        if (!settings) settings = new SystemSettings({});
+
+        const sectionData = { ...settings[section].toObject(), ...updateData };
+        if (section === 'email' && sectionData.smtpPassword === '***hidden***') delete sectionData.smtpPassword;
+        if (section === 'razorpay') {
+            if (sectionData.keySecret === '***hidden***') delete sectionData.keySecret;
+            if (sectionData.webhookSecret === '***hidden***') delete sectionData.webhookSecret;
+        }
+
+        settings[section] = sectionData;
+        settings.lastUpdated = new Date();
+        settings.updatedBy = req.admin ? req.admin.name : 'Unknown';
+        await settings.save();
+
+        res.status(200).json({ success: true, message: `${section} updated successfully` });
+    } catch (error) {
+        console.error('Update section error:', error);
+        res.status(500).json({ success: false, message: 'Failed to update section' });
+    }
+};
+const resetSettings = async (req, res) => {
+    try {
+        await SystemSettings.deleteOne({});
+        const defaults = await SystemSettings.create({});
+        res.status(200).json({ success: true, message: 'All settings reset to defaults', data: defaults });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Reset failed' });
+    }
+};
+const backupSettings = async (req, res) => {
+    try {
+        const settings = await SystemSettings.findOne();
+        res.status(200).json({ success: true, data: settings, backupDate: new Date() });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Backup failed' });
+    }
+};
+const testEmailConfig = async (req, res) => {
+    res.status(200).json({ success: true, message: 'Test email logic ready' });
 };
 
 module.exports = {
-  getSettings,
-  updateSettings,
-  getSettingsSection,
-  updateSettingsSection,
-  resetSettings,
-  backupSettings,
-  testEmailConfig
+    getSettings,
+    updateSettings,
+    getSettingsSection,
+    updateSettingsSection,
+    resetSettings,
+    backupSettings,
+    testEmailConfig
 };

@@ -4,7 +4,7 @@ const communicationLogSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ['sms', 'whatsapp', 'push', 'system']
+    enum: ['sms', 'whatsapp', 'push', 'system', 'broadcast', 'alert']
   },
   recipient: {
     type: String, // phone number or internal identifier
