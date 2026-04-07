@@ -46,6 +46,7 @@ const mediaRoutes = require('./routes/mediaRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const pageConfigRoutes = require('./routes/pageConfigRoutes');
 const sopRoutes = require('./routes/sopRoutes');
+const liveRoutes = require('./routes/liveRoutes');
 
 const app = express();
 if (process.env.NODE_ENV === 'production') {
@@ -183,6 +184,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/intelligence', intelligenceRoutes);
 app.use('/api/marketing', marketingRoutes);
 app.use('/api/sops', sopRoutes);
+app.use('/api/live', liveRoutes);
 
 // 404 Handler
 app.use('*', (req, res) => {
