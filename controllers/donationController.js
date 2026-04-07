@@ -1,21 +1,74 @@
 const Donation = require('../models/Donation');
 const { sendEmail } = require('../services/emailService');
 const { generateReceiptPDF } = require('../services/pdfService');
-
-// @desc    Create new donation
-// @route   POST /api/donations
-// @access  Public
-const createDonation = async (req, res) => {
+const razorpayService = require('../services/razorpayService');
+const crypto = require('crypto');
+const initiateDonation = async (req, res) => {
   try {
-    const donationData = {
-      ...req.body,
+    const { amount, currency = 'INR', ...donorInfo } = req.body;
+
+    if (!amount || amount < 1) {
+      return res.status(400).json({ success: false, message: 'Invalid amount' });
+    }
+    const donation = new Donation({
+      ...donorInfo,
+      amount,
+      currency,
+      paymentStatus: 'pending',
+      paymentGateway: 'razorpay',
       ipAddress: req.ip,
-      userAgent: req.get('User-Agent'),
-      paymentDate: new Date()
-    };
+      userAgent: req.get('User-Agent')
+    });
 
-    const donation = await Donation.create(donationData);
+    // Save to trigger pre-save hook for donationId
+    await donation.save();
 
+    // 2. Create Razorpay Order
+    const order = await razorpayService.createOrder(amount, donation.donationId);
+
+    // 3. Update donation with order details
+    donation.orderId = order.id;
+    await donation.save();
+
+    res.status(200).json({
+      success: true,
+      order,
+      donationId: donation.donationId
+    });
+  } catch (error) {
+    console.error('❌ Razorpay Order creation failed:', error);
+    res.status(500).json({ success: false, message: 'Payment initiation failed' });
+  }
+};
+
+// @desc    Verify payment and update donation
+// @route   POST /api/donations/verify
+// @access  Public
+const verifyDonation = async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, donationId } = req.body;
+
+    // 1. Verify logic
+    const isValid = razorpayService.verifySignature(razorpay_order_id, razorpay_payment_id, razorpay_signature);
+
+    if (!isValid) {
+      return res.status(400).json({ success: false, message: 'Invalid payment signature' });
+    }
+
+    // 2. Find and update donation record
+    const donation = await Donation.findOne({ donationId });
+    if (!donation) {
+      return res.status(404).json({ success: false, message: 'Donation record not found' });
+    }
+
+    donation.paymentStatus = 'completed';
+    donation.paymentId = razorpay_payment_id;
+    donation.razorpayOrderId = razorpay_order_id;
+    donation.razorpaySignature = razorpay_signature;
+    donation.paymentDate = new Date();
+    await donation.save();
+
+    // 3. Trigger receipt email logic (already in model pre-save, but let's be explicit if needed)
     // Send donation confirmation email
     await sendEmail(donation.email, 'donationConfirmation', {
       name: donation.name,
@@ -39,29 +92,19 @@ const createDonation = async (req, res) => {
       state: donation.state,
       pincode: donation.pincode,
       panNumber: donation.panNumber,
-      aadharNumber: donation.aadharNumber,
       purpose: donation.purpose,
       message: donation.message,
       needReceipt: donation.needReceipt
     });
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
-      message: 'Donation processed successfully',
-      data: {
-        donationId: donation.donationId,
-        receiptNumber: donation.receiptNumber,
-        status: donation.paymentStatus,
-        createdAt: donation.createdAt
-      }
+      message: 'Payment verified and donation completed',
+      receiptNumber: donation.receiptNumber
     });
-
   } catch (error) {
-    console.error('❌ Donation creation failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to process donation'
-    });
+    console.error('❌ Payment verification failed:', error);
+    res.status(500).json({ success: false, message: 'Payment verification failed' });
   }
 };
 
@@ -154,9 +197,9 @@ const getDonation = async (req, res) => {
 const updatePaymentStatus = async (req, res) => {
   try {
     const { paymentId, orderId, signature, status } = req.body;
-    
+
     const donation = await Donation.findOne({ donationId: req.params.id });
-    
+
     if (!donation) {
       return res.status(404).json({
         success: false,
@@ -170,7 +213,7 @@ const updatePaymentStatus = async (req, res) => {
     donation.razorpayOrderId = orderId;
     donation.razorpaySignature = signature;
     donation.paymentDate = new Date();
-    
+
     await donation.save();
 
     // Send payment confirmation email if completed
@@ -221,7 +264,7 @@ const emailReceipt = async (req, res) => {
     // Generate PDF receipt
     console.log('📄 Generating PDF receipt...');
     const pdfBuffer = await generateReceiptPDF(donation);
-    
+
     // Send receipt email with PDF attachment
     const emailResult = await sendEmail(donation.email, 'donationReceiptWithPDF', {
       name: donation.name,
@@ -298,7 +341,7 @@ const refundDonation = async (req, res) => {
     donation.paymentStatus = 'refunded';
     donation.refundDate = new Date();
     donation.refundReason = req.body.reason || 'Admin initiated refund';
-    
+
     await donation.save();
 
     // Send refund confirmation email
@@ -343,8 +386,8 @@ const refundDonation = async (req, res) => {
 // @access  Public
 const getDonationByReceipt = async (req, res) => {
   try {
-    const donation = await Donation.findOne({ 
-      receiptNumber: req.params.receiptNumber 
+    const donation = await Donation.findOne({
+      receiptNumber: req.params.receiptNumber
     }).select('-paymentId -razorpayOrderId -razorpaySignature -ipAddress -userAgent');
 
     if (!donation) {
@@ -369,11 +412,12 @@ const getDonationByReceipt = async (req, res) => {
 };
 
 module.exports = {
-  createDonation,
   getDonations,
   getDonation,
   updatePaymentStatus,
   emailReceipt,
   refundDonation,
-  getDonationByReceipt
+  getDonationByReceipt,
+  initiateDonation,
+  verifyDonation
 };

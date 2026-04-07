@@ -44,7 +44,7 @@ const donationSchema = new mongoose.Schema({
   },
   purpose: {
     type: String,
-    enum: ['general', 'cremation_services', 'volunteer_support', 'infrastructure', 'emergency_fund', 'specific_campaign'],
+    enum: ['general', 'cremation_services', 'volunteer_support', 'infrastructure', 'emergency_fund', 'specific_campaign', 'memorial', 'tribute', 'ambulance', 'cremation'],
     default: 'general'
   },
   campaignId: String, // If donation is for specific campaign

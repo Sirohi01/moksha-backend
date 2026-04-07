@@ -624,6 +624,8 @@ const sendMobileOTP = async (req, res) => {
       otp: otpCode
     });
 
+    console.log(`📲 Mobile OTP [${otpCode}] generated for [${mobile}]`);
+
     // Send WhatsApp OTP
     const waResponse = await sendWhatsAppOTP(mobile, otpCode);
 
@@ -633,10 +635,12 @@ const sendMobileOTP = async (req, res) => {
         message: 'OTP sent successfully to your WhatsApp'
       });
     } else {
-      // If WhatsApp fails, we still let the user know there was an issue
-      res.status(500).json({
-        success: false,
-        message: waResponse.message || 'Failed to send WhatsApp OTP. Please try again or check your number.'
+      console.warn(`⚠️ WhatsApp delivery failed for [${mobile}], but proceeding with 200 for local testing.`);
+      res.status(200).json({
+        success: true,
+        message: 'OTP generated, but WhatsApp delivery failed. Please check logs or contact support.',
+        isWarning: true,
+        error: waResponse.message
       });
     }
 
@@ -794,6 +798,8 @@ const sendLoginOTP = async (req, res) => {
       otp: otpCode
     });
 
+    console.log(`🔑 Login OTP [${otpCode}] generated for [${mobile}]`);
+
     // Send WhatsApp OTP
     const waResponse = await sendWhatsAppOTP(mobile, otpCode);
 
@@ -803,9 +809,12 @@ const sendLoginOTP = async (req, res) => {
         message: 'OTP sent successfully to your WhatsApp'
       });
     } else {
-      res.status(500).json({
-        success: false,
-        message: waResponse.message || 'Failed to send WhatsApp OTP. Please try again.'
+      console.warn(`⚠️ Login WhatsApp delivery failed for [${mobile}], but proceeding with 200 for local testing.`);
+      res.status(200).json({
+        success: true,
+        message: 'OTP generated, but WhatsApp delivery delayed. Please check logs.',
+        isWarning: true,
+        error: waResponse.message
       });
     }
 
