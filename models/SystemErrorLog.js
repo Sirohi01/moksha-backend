@@ -15,7 +15,7 @@ const systemErrorLogSchema = new mongoose.Schema({
   method: {
     type: String,
     required: true,
-    enum: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
+    enum: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD']
   },
   statusCode: {
     type: Number
