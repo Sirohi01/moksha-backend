@@ -218,41 +218,33 @@ const sampleConfigs = {
       ]
     },
     urgentCampaigns: {
-      badge: "Active Missions",
-      title: "Urgent Campaigns",
-      description: "Support our sacred missions across India",
+      badge: "Active SOPs",
+      title: "Our Procedures",
+      description: "Standard Operating Procedures for all mission protocols",
       campaigns: [
         {
-          title: "KASHI GHAT MISSION",
-          description: "Revitalizing the final rites facilities at the sacred Manikarnika Ghat.",
-          targeted: "₹5,00,000",
-          raised: "₹3,20,000",
-          percentage: "64%",
+          title: "FIELD RESPONSE PROTOCOL",
+          description: "Step-by-step guidance for emergency field response and case reporting.",
+          targeted: "Verified",
+          raised: "Active",
+          percentage: "100%",
           image: "/gallery/image1.png"
         },
         {
-          title: "NEW ANTIM YATRA VAN",
-          description: "Aiding the purchase of a specialized mobile unit for the Delhi-NCR hub.",
-          targeted: "₹12,00,000",
-          raised: "₹7,80,000",
-          percentage: "65%",
+          title: "LEGAL DOCUMENTATION",
+          description: "Complete procedure for FIR filing, NOC collection and legal compliance.",
+          targeted: "Verified",
+          raised: "Active",
+          percentage: "100%",
           image: "/gallery/hero_moksha_1.png"
-        },
-        {
-          title: "SACRED OIL FUND",
-          description: "Ensuring a steady supply of traditional oils and materials for unclaimed rites.",
-          targeted: "₹1,00,000",
-          raised: "₹85,000",
-          percentage: "85%",
-          image: "/gallery/gallery_peaceful_departure_1772861335733.png"
         }
       ],
       autoSlideInterval: 6000,
       labels: {
-        activeCampaign: "Active Campaign",
-        raised: "Raised: ",
-        donateNow: "Donate Now",
-        viewCampaign: "View Campaign"
+        activeCampaign: "Active Protocol",
+        raised: "Status: ",
+        donateNow: "View Details",
+        viewCampaign: "Download PDF"
       }
     },
     transparency: {
@@ -3137,14 +3129,13 @@ const sampleConfigs = {
           ]
         },
         {
-          label: "Campaigns",
-          icon: "Target",
+          label: "SOP",
+          icon: "FileText",
           subLinks: [
-            { href: "/campaigns", label: "All Campaigns", icon: "Target" },
-            { href: "/campaigns/dignity-for-all", label: "Dignity For All", icon: "Heart" },
-            { href: "/campaigns/adopt-a-city", label: "Adopt a City", icon: "Globe" },
-            { href: "/campaigns/sacred-river", label: "Sacred River Initiative", icon: "Anchor" },
-            { href: "/campaigns/home-for-saathis", label: "Saathi Shelter", icon: "Tent" }
+            { href: "/sops", label: "All SOPs", icon: "FileText" },
+            { href: "/sops/field-response", label: "Field Response", icon: "Phone" },
+            { href: "/sops/legal-process", label: "Legal Process", icon: "Shield" },
+            { href: "/sops/cremation-rites", label: "Cremation Rites", icon: "Flame" }
           ]
         },
         {

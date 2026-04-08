@@ -1,6 +1,38 @@
 const nodemailer = require('nodemailer');
 const EmailLog = require('../models/EmailLog');
+const EmailTemplate = require('../models/EmailTemplate');
 const { getConfig } = require('./configService');
+
+/**
+ * Compiles a template by replacing placeholders with data
+ * @param {Object} template - DB template object
+ * @param {Object} data - Data for placeholders
+ * @returns {Object} - Compiled subject and html
+ */
+const compileTemplate = (template, data) => {
+  let body = template.body;
+  let subject = template.subject;
+
+  // Combine data with system variables
+  const viewData = {
+    ...data,
+    year: new Date().getFullYear(),
+    date: new Date().toLocaleDateString('en-IN'),
+    datetime: new Date().toLocaleString('en-IN'),
+    foundation_name: 'Moksha Sewa Foundation',
+    admin_phone: process.env.ADMIN_PHONE || '9220147229',
+    admin_email: process.env.ADMIN_EMAIL || 'info@mokshasewa.org'
+  };
+
+  Object.keys(viewData).forEach(key => {
+    const placeholder = new RegExp(`{{${key}}}`, 'g');
+    const value = viewData[key] !== undefined ? String(viewData[key]) : '';
+    body = body.replace(placeholder, value);
+    subject = subject.replace(placeholder, value);
+  });
+
+  return { subject, html: body };
+};
 
 const createTransporter = (emailConfig) => {
   console.log(`📧 Creating email transporter with dynamic config...`);
@@ -1714,7 +1746,28 @@ const sendEmail = async (to, template, data, attachment = null) => {
     const transporter = createTransporter(emailConfig);
     console.log(`📧 Transporter created`);
 
-    const emailContent = emailTemplates[template](data);
+    // Dynamic Template Logic: Try fetching from DB first
+    let emailContent;
+    try {
+      const dbTemplate = await EmailTemplate.findOne({ name: template, isActive: true });
+      if (dbTemplate) {
+        emailContent = compileTemplate(dbTemplate, data);
+        console.log(`📧 Using dynamic template from DB: ${template}`);
+      }
+    } catch (dbError) {
+      console.warn(`⚠️ Error fetching DB template, falling back to local: ${dbError.message}`);
+    }
+
+    // Fallback to local hardcoded templates if DB template is missing
+    if (!emailContent) {
+      if (typeof emailTemplates[template] === 'function') {
+        emailContent = emailTemplates[template](data);
+        console.log(`📧 Using local hardcoded template: ${template}`);
+      } else {
+        throw new Error(`Template '${template}' not found in DB or local list`);
+      }
+    }
+
     console.log(`📧 Email content generated for template: ${template}`);
     console.log(`📧 Subject: ${emailContent.subject}`);
 

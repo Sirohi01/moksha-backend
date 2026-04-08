@@ -154,10 +154,28 @@ const createContentItem = async (req, res) => {
       author: authorId,
       views: 0,
       featured,
+      featuredImage,
+      gallery: req.body.gallery || [],
+      sections: req.body.sections || [],
       excerpt,
       category,
       youtubeUrl,
-      reelUrl
+      reelUrl,
+      tags: req.body.tags || [],
+      customFields: req.body.customFields || {},
+      seoTechnical: {
+        ogTitle: req.body.ogTitle || req.body.seoTechnical?.ogTitle,
+        ogDescription: req.body.ogDescription || req.body.seoTechnical?.ogDescription,
+        ogImage: req.body.ogImage || req.body.seoTechnical?.ogImage,
+        twitterCard: req.body.twitterCard || req.body.seoTechnical?.twitterCard || 'summary_large_image',
+        schemaMarkup: req.body.schemaMarkup || req.body.seoTechnical?.schemaMarkup,
+        canonicalUrl: req.body.canonicalUrl || req.body.seoTechnical?.canonicalUrl,
+        robots: req.body.robots || req.body.seoTechnical?.robots || 'index, follow',
+        h1Tag: req.body.h1Tag || req.body.seoTechnical?.h1Tag,
+        breadcrumb: req.body.breadcrumb || req.body.seoTechnical?.breadcrumb,
+        redirectionUrl: req.body.redirectionUrl || req.body.seoTechnical?.redirectionUrl
+      },
+      seoRanking: req.body.seoRanking || {}
     });
 
     res.status(201).json({
@@ -236,22 +254,32 @@ const updateContentItem = async (req, res) => {
     contentItem.author = authorId;
     contentItem.featuredImage = featuredImage || contentItem.featuredImage;
     contentItem.excerpt = excerpt || contentItem.excerpt;
+    contentItem.gallery = req.body.gallery || contentItem.gallery;
+    contentItem.sections = req.body.sections || contentItem.sections;
+    contentItem.tags = req.body.tags || contentItem.tags;
+    contentItem.customFields = req.body.customFields || contentItem.customFields;
+
     if (category !== undefined) contentItem.category = category;
     if (youtubeUrl !== undefined) contentItem.youtubeUrl = youtubeUrl;
     if (reelUrl !== undefined) contentItem.reelUrl = reelUrl;
 
-    if (req.body.ogTitle !== undefined) contentItem.ogTitle = req.body.ogTitle;
-    if (req.body.ogDescription !== undefined) contentItem.ogDescription = req.body.ogDescription;
-    if (req.body.ogImage !== undefined) contentItem.ogImage = req.body.ogImage;
-    if (req.body.twitterCard !== undefined) contentItem.twitterCard = req.body.twitterCard;
-    if (req.body.twitterTitle !== undefined) contentItem.twitterTitle = req.body.twitterTitle;
-    if (req.body.twitterDescription !== undefined) contentItem.twitterDescription = req.body.twitterDescription;
-    if (req.body.twitterImage !== undefined) contentItem.twitterImage = req.body.twitterImage;
-    if (req.body.schemaMarkup !== undefined) contentItem.schemaMarkup = req.body.schemaMarkup;
-    if (req.body.canonicalUrl !== undefined) contentItem.canonicalUrl = req.body.canonicalUrl;
-    if (req.body.robots !== undefined) contentItem.robots = req.body.robots;
-    if (req.body.h1Tag !== undefined) contentItem.h1Tag = req.body.h1Tag;
-    if (req.body.breadcrumb !== undefined) contentItem.breadcrumb = req.body.breadcrumb;
+    // SEO Technical updates
+    if (!contentItem.seoTechnical) contentItem.seoTechnical = {};
+    if (req.body.ogTitle !== undefined) contentItem.seoTechnical.ogTitle = req.body.ogTitle;
+    if (req.body.ogDescription !== undefined) contentItem.seoTechnical.ogDescription = req.body.ogDescription;
+    if (req.body.ogImage !== undefined) contentItem.seoTechnical.ogImage = req.body.ogImage;
+    if (req.body.twitterCard !== undefined) contentItem.seoTechnical.twitterCard = req.body.twitterCard;
+    if (req.body.schemaMarkup !== undefined) contentItem.seoTechnical.schemaMarkup = req.body.schemaMarkup;
+    if (req.body.canonicalUrl !== undefined) contentItem.seoTechnical.canonicalUrl = req.body.canonicalUrl;
+    if (req.body.robots !== undefined) contentItem.seoTechnical.robots = req.body.robots;
+    if (req.body.h1Tag !== undefined) contentItem.seoTechnical.h1Tag = req.body.h1Tag;
+    if (req.body.breadcrumb !== undefined) contentItem.seoTechnical.breadcrumb = req.body.breadcrumb;
+    if (req.body.redirectionUrl !== undefined) contentItem.seoTechnical.redirectionUrl = req.body.redirectionUrl;
+
+    // SEO Ranking updates
+    if (req.body.seoRanking !== undefined) {
+      contentItem.seoRanking = { ...contentItem.seoRanking, ...req.body.seoRanking };
+    }
 
     await contentItem.save();
 

@@ -185,6 +185,7 @@ app.use('/api/intelligence', intelligenceRoutes);
 app.use('/api/marketing', marketingRoutes);
 app.use('/api/sops', sopRoutes);
 app.use('/api/live', liveRoutes);
+app.use('/api/email-templates', require('./routes/emailTemplateRoutes'));
 
 // 404 Handler
 app.use('*', (req, res) => {
@@ -206,7 +207,8 @@ const server = app.listen(PORT, async () => {
   console.log(`📚 API Documentation: http://localhost:${PORT}/api/docs`);
   console.log(`🗺️ Sitemap: http://localhost:${PORT}/sitemap.xml`);
 
-  // Auto-seed page configurations on startup (production-safe)
+  // Auto-seed page configurations on startup disabled as per user request to prevent manual DB changes from being reset
+  /*
   try {
     const seedPageConfigs = require('./seedPageConfigs');
     const seedSEO = require('./seedSEO');
@@ -225,6 +227,7 @@ const server = app.listen(PORT, async () => {
   } catch (error) {
     console.error('⚠️ Seeding failed:', error.message);
   }
+  */
 });
 
 // Initialize WebSocket for real-time notifications

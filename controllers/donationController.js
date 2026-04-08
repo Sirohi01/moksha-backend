@@ -2,6 +2,7 @@ const Donation = require('../models/Donation');
 const { sendEmail } = require('../services/emailService');
 const { generateReceiptPDF } = require('../services/pdfService');
 const razorpayService = require('../services/razorpayService');
+const { sendWhatsAppMessage } = require('../services/whatsappService');
 const crypto = require('crypto');
 const initiateDonation = async (req, res) => {
   try {
@@ -68,16 +69,38 @@ const verifyDonation = async (req, res) => {
     donation.paymentDate = new Date();
     await donation.save();
 
-    // 3. Trigger receipt email logic (already in model pre-save, but let's be explicit if needed)
-    // Send donation confirmation email
-    await sendEmail(donation.email, 'donationConfirmation', {
+    // 3. Trigger receipt email logic instantly
+    console.log('📄 Generating PDF receipt for instant delivery...');
+    const pdfBuffer = await generateReceiptPDF(donation);
+
+    // Send receipt email with PDF attachment
+    await sendEmail(donation.email, 'donationReceiptWithPDF', {
       name: donation.name,
       donationId: donation.donationId,
-      amount: donation.amount,
+      receiptNumber: donation.receiptNumber,
+      amount: donation.amount.toLocaleString('en-IN'),
       currency: donation.currency,
-      paymentMethod: donation.paymentMethod,
-      receiptNumber: donation.receiptNumber
+      paymentMethod: donation.paymentMethod.toUpperCase(),
+      paymentStatus: donation.paymentStatus,
+      donationType: donation.donationType ? donation.donationType.replace('_', ' ').toUpperCase() : 'GENERAL',
+      purpose: donation.purpose ? donation.purpose.replace('_', ' ').toUpperCase() : 'GENERAL',
+      createdAt: new Date(donation.createdAt).toLocaleDateString('en-IN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    }, {
+      filename: `Receipt-${donation.receiptNumber}.pdf`,
+      content: pdfBuffer,
+      contentType: 'application/pdf'
     });
+
+    // Send WhatsApp confirmation with receipt link
+    const frontendUrl = process.env.FRONTEND_URL || 'https://mokshasewa.org';
+    const receiptLink = `${frontendUrl}/receipt/${donation.receiptNumber}`;
+    const whatsappMsg = `🙏 Pranam ${donation.name}. Moksha Sewa Foundation has received your donation of ₹${donation.amount.toLocaleString('en-IN')}. Case ID: ${donation.donationId}. Download your 80G Tax Receipt here: ${receiptLink}. Thank you for your kindness!`;
+    
+    await sendWhatsAppMessage(donation.phone, whatsappMsg);
 
     // Send admin notification
     await sendEmail(process.env.ADMIN_EMAIL, 'donationAdminNotification', {
@@ -99,7 +122,7 @@ const verifyDonation = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Payment verified and donation completed',
+      message: 'Payment verified and donation completed with receipt sent',
       receiptNumber: donation.receiptNumber
     });
   } catch (error) {
@@ -218,14 +241,37 @@ const updatePaymentStatus = async (req, res) => {
 
     // Send payment confirmation email if completed
     if (status === 'completed') {
-      await sendEmail(donation.email, 'paymentConfirmation', {
-        name: donation.donorName,
+      console.log('📄 Generating PDF receipt for instant delivery...');
+      const pdfBuffer = await generateReceiptPDF(donation);
+
+      // Send receipt email with PDF attachment
+      await sendEmail(donation.email, 'donationReceiptWithPDF', {
+        name: donation.name,
         donationId: donation.donationId,
-        amount: donation.amount,
+        receiptNumber: donation.receiptNumber,
+        amount: donation.amount.toLocaleString('en-IN'),
         currency: donation.currency,
-        paymentId: paymentId,
-        receiptNumber: donation.receiptNumber
+        paymentMethod: donation.paymentMethod.toUpperCase(),
+        paymentStatus: donation.paymentStatus,
+        donationType: donation.donationType ? donation.donationType.replace('_', ' ').toUpperCase() : 'GENERAL',
+        purpose: donation.purpose ? donation.purpose.replace('_', ' ').toUpperCase() : 'GENERAL',
+        createdAt: new Date(donation.createdAt).toLocaleDateString('en-IN', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      }, {
+        filename: `Receipt-${donation.receiptNumber}.pdf`,
+        content: pdfBuffer,
+        contentType: 'application/pdf'
       });
+
+      // Send WhatsApp confirmation with receipt link
+      const frontendUrl = process.env.FRONTEND_URL || 'https://mokshasewa.org';
+      const receiptLink = `${frontendUrl}/receipt/${donation.receiptNumber}`;
+      const whatsappMsg = `🙏 Pranam ${donation.name}. Moksha Sewa Foundation has received your donation of ₹${donation.amount.toLocaleString('en-IN')}. Case ID: ${donation.donationId}. Download your 80G Tax Receipt here: ${receiptLink}. Thank you for your kindness!`;
+      
+      await sendWhatsAppMessage(donation.phone, whatsappMsg);
     }
 
     res.status(200).json({
@@ -274,8 +320,8 @@ const emailReceipt = async (req, res) => {
       currency: donation.currency,
       paymentMethod: donation.paymentMethod.toUpperCase(),
       paymentStatus: donation.paymentStatus,
-      donationType: donation.donationType.replace('_', ' ').toUpperCase(),
-      purpose: donation.purpose.replace('_', ' ').toUpperCase(),
+      donationType: donation.donationType ? donation.donationType.replace('_', ' ').toUpperCase() : 'GENERAL',
+      purpose: donation.purpose ? donation.purpose.replace('_', ' ').toUpperCase() : 'GENERAL',
       createdAt: new Date(donation.createdAt).toLocaleDateString('en-IN', {
         year: 'numeric',
         month: 'long',
