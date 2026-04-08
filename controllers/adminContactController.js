@@ -192,9 +192,16 @@ exports.getContactHistory = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
     const cleanPhone = phone.replace(/[^0-9]/g, '');
-    const searchPhones = [cleanPhone];
-    if (cleanPhone.length === 10) searchPhones.push('91' + cleanPhone);
-    if (cleanPhone.startsWith('91')) searchPhones.push(cleanPhone.substring(2));
+    const searchPhones = [cleanPhone, '+' + cleanPhone];
+    if (cleanPhone.length === 10) {
+      searchPhones.push('91' + cleanPhone);
+      searchPhones.push('+91' + cleanPhone);
+    }
+    if (cleanPhone.startsWith('91')) {
+      const tenDigit = cleanPhone.substring(2);
+      searchPhones.push(tenDigit);
+      searchPhones.push('+91' + tenDigit); // Redundant but safe
+    }
 
     const query = { 
       recipient: { $in: searchPhones },

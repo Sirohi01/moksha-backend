@@ -7,9 +7,11 @@ const CommunicationLog = require('../models/CommunicationLog');
 const sendWhatsAppMessage = async (mobile, msg, options = {}) => {
   const { type = 'whatsapp' } = options;
 
+  const cleanMobileForLog = mobile.replace(/[^0-9]/g, '');
+  
   const log = await CommunicationLog.create({
     type,
-    recipient: mobile,
+    recipient: cleanMobileForLog,
     content: msg,
     status: 'pending',
     provider: 'WhatsAppCloudAPI',
