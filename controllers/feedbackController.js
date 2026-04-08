@@ -1,5 +1,6 @@
 const Feedback = require('../models/Feedback');
 const { sendEmail } = require('../services/emailService');
+const notificationService = require('../services/notificationService');
 
 // @desc    Create new feedback
 // @route   POST /api/feedback
@@ -26,6 +27,16 @@ const createFeedback = async (req, res) => {
       experienceRating: feedback.experienceRating,
       message: feedback.message,
       suggestions: feedback.suggestions
+    });
+
+    // 🚀 NEW: Send Real-time Admin System Notification
+    await notificationService.createAndNotify({
+      title: 'New Feedback Received ⭐️',
+      message: `From ${feedback.name}: ${feedback.feedbackType.toUpperCase()} - Rating: ${feedback.experienceRating}/5`,
+      type: 'form',
+      priority: feedback.experienceRating <= 2 ? 'high' : 'medium',
+      link: `/admin/feedback/${feedback._id}`,
+      sourceId: feedback._id.toString()
     });
 
     res.status(201).json({

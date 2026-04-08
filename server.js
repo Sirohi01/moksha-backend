@@ -47,6 +47,7 @@ const taskRoutes = require('./routes/taskRoutes');
 const pageConfigRoutes = require('./routes/pageConfigRoutes');
 const sopRoutes = require('./routes/sopRoutes');
 const liveRoutes = require('./routes/liveRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 if (process.env.NODE_ENV === 'production') {
@@ -185,6 +186,7 @@ app.use('/api/intelligence', intelligenceRoutes);
 app.use('/api/marketing', marketingRoutes);
 app.use('/api/sops', sopRoutes);
 app.use('/api/live', liveRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/api/email-templates', require('./routes/emailTemplateRoutes'));
 
 // 404 Handler

@@ -4,6 +4,7 @@ const { generateReceiptPDF } = require('../services/pdfService');
 const razorpayService = require('../services/razorpayService');
 const { sendWhatsAppMessage } = require('../services/whatsappService');
 const crypto = require('crypto');
+const notificationService = require('../services/notificationService');
 const initiateDonation = async (req, res) => {
   try {
     const { amount, currency = 'INR', ...donorInfo } = req.body;
@@ -102,22 +103,14 @@ const verifyDonation = async (req, res) => {
     
     await sendWhatsAppMessage(donation.phone, whatsappMsg);
 
-    // Send admin notification
-    await sendEmail(process.env.ADMIN_EMAIL, 'donationAdminNotification', {
-      donorName: donation.name,
-      donationId: donation.donationId,
-      amount: donation.amount,
-      paymentMethod: donation.paymentMethod,
-      phone: donation.phone,
-      email: donation.email,
-      address: donation.address,
-      city: donation.city,
-      state: donation.state,
-      pincode: donation.pincode,
-      panNumber: donation.panNumber,
-      purpose: donation.purpose,
-      message: donation.message,
-      needReceipt: donation.needReceipt
+    // 🚀 NEW: Send Real-time Admin System Notification
+    await notificationService.createAndNotify({
+      title: 'New Donation Received 💰',
+      message: `₹${donation.amount.toLocaleString('en-IN')} received from ${donation.name} for ${donation.purpose.replace('_', ' ').toUpperCase()}.`,
+      type: 'donation',
+      priority: 'critical',
+      link: `/admin/donations/${donation._id}`,
+      sourceId: donation._id.toString()
     });
 
     res.status(200).json({

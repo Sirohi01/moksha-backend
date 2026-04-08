@@ -1,5 +1,6 @@
 const Volunteer = require('../models/Volunteer');
 const { sendEmail } = require('../services/emailService');
+const notificationService = require('../services/notificationService');
 
 // @desc    Create new volunteer application
 // @route   POST /api/volunteers
@@ -46,6 +47,16 @@ const createVolunteer = async (req, res) => {
       skills: volunteer.skills,
       availability: volunteer.availability,
       languagesKnown: volunteer.languagesKnown
+    });
+
+    // 🚀 NEW: Send Real-time Admin System Notification
+    await notificationService.createAndNotify({
+      title: 'New Volunteer Application',
+      message: `${volunteer.name} (ID: ${volunteer.volunteerId}) from ${volunteer.city} has registered as a volunteer.`,
+      type: 'form',
+      priority: 'high',
+      link: `/admin/volunteers/${volunteer._id}`,
+      sourceId: volunteer._id.toString()
     });
 
     res.status(201).json({

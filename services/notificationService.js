@@ -4,6 +4,7 @@ const emailService = require('./emailService');
 const SupportChat = require('../models/SupportChat');
 const SupportMessage = require('../models/SupportMessage');
 const LiveChatMessage = require('../models/LiveChatMessage');
+const Notification = require('../models/Notification');
 
 class NotificationService {
   constructor() {
@@ -189,13 +190,15 @@ class NotificationService {
       this.broadcastToChat(chatId, payload);
       console.log(`[WS] Broadcast completed for chat ${chatId}`);
 
-      // 5. Notify all admins if user sends a message
+      // 5. Notify all admins if user sends a message (PERSISTENT)
       if (sender === 'user') {
-        this.notifyAdmins({
-          type: 'new_chat_message',
-          title: 'New Message',
+        await this.createAndNotify({
+          title: 'New Chat Message 💬',
           message: `From ${data.userName || 'User'}: ${content.substring(0, 30)}...`,
-          chatId
+          type: 'chat',
+          priority: 'high',
+          link: `/admin/messages?chatId=${chatId}`,
+          sourceId: chatId
         });
       }
     } catch (err) {
@@ -321,6 +324,39 @@ class NotificationService {
 
   async notifyAdminAlert(priority, title, message, data = {}) {
     this.broadcast({ type: 'admin_alert', priority, title, message, data });
+  }
+
+  /**
+   * CREATE AND NOTIFY (Master Function)
+   * 1. Saves to DB
+   * 2. Broadcasts via WebSocket
+   */
+  async createAndNotify(options) {
+    try {
+      const { title, message, type, priority, link, sourceId, recipientGroups } = options;
+
+      // 1. Save to Database for persistence
+      const newNotification = await Notification.create({
+        title,
+        message,
+        type,
+        priority: priority || 'medium',
+        link,
+        sourceId,
+        recipientGroups: recipientGroups || ['admin', 'superadmin']
+      });
+
+      // 2. Broadcast to all active admins via WebSocket
+      this.notifyAdmins({
+        type: 'new_signal',
+        notification: newNotification
+      });
+
+      console.log(`[Notification] Created and Broadcasted: ${title}`);
+      return newNotification;
+    } catch (error) {
+      console.error('[Notification] Error in createAndNotify:', error);
+    }
   }
 }
 

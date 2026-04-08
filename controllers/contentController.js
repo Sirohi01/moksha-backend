@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Admin = require('../models/Admin');
 const Content = require('../models/Content');
+const notificationService = require('../services/notificationService');
 
 // @desc    Get all content items
 // @route   GET /api/content
@@ -144,6 +145,7 @@ const createContentItem = async (req, res) => {
     }
 
     const newContentItem = await Content.create({
+      // ... same fields as before ...
       title,
       type,
       status,
@@ -176,6 +178,17 @@ const createContentItem = async (req, res) => {
         redirectionUrl: req.body.redirectionUrl || req.body.seoTechnical?.redirectionUrl
       },
       seoRanking: req.body.seoRanking || {}
+    });
+
+    // 🚀 NEW: Notification for Super Admins
+    const adminName = req.admin ? req.admin.name : 'System';
+    await notificationService.createAndNotify({
+      title: 'New Content Created ✍️',
+      message: `${adminName} created a new ${type}: "${title.substring(0, 30)}..."`,
+      type: 'activity',
+      priority: 'medium',
+      link: `/admin/${type === 'press' ? 'press' : type + 's'}/edit/${newContentItem._id}`,
+      sourceId: newContentItem._id.toString()
     });
 
     res.status(201).json({
@@ -283,6 +296,17 @@ const updateContentItem = async (req, res) => {
 
     await contentItem.save();
 
+    // 🚀 NEW: Notification for Super Admins
+    const adminName = req.admin ? req.admin.name : 'System';
+    await notificationService.createAndNotify({
+      title: 'Content Updated 📝',
+      message: `${adminName} updated ${contentItem.type}: "${contentItem.title.substring(0, 30)}..."`,
+      type: 'activity',
+      priority: 'low',
+      link: `/admin/${contentItem.type === 'press' ? 'press' : contentItem.type + 's'}/edit/${contentItem._id}`,
+      sourceId: contentItem._id.toString()
+    });
+
     res.status(200).json({
       success: true,
       message: 'Content item updated successfully',
@@ -315,6 +339,16 @@ const deleteContentItem = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Content item deleted successfully'
+    });
+
+    // 🚀 NEW: Notification for Super Admins
+    const adminName = req.admin ? req.admin.name : 'System';
+    await notificationService.createAndNotify({
+      title: 'Content Deleted 🗑️',
+      message: `${adminName} deleted ${contentItem.type}: "${contentItem.title.substring(0, 30)}..."`,
+      type: 'security',
+      priority: 'high',
+      sourceId: id
     });
   } catch (error) {
     console.error('❌ Delete content item failed:', error);

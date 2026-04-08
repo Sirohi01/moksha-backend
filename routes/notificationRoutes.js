@@ -1,0 +1,12 @@
+const express = require('express');
+const router = express.Router();
+const notificationController = require('../controllers/notificationController');
+const { protect, authorize } = require('../middleware/auth');
+router.use(protect);
+router.use(authorize('admin', 'superadmin', 'editor'));
+router.get('/', notificationController.getNotifications);
+router.patch('/read-all', notificationController.markAllAsRead);
+router.delete('/clear-all', notificationController.clearAll);
+router.patch('/:id/read', notificationController.markAsRead);
+router.delete('/:id', notificationController.deleteNotification);
+module.exports = router;

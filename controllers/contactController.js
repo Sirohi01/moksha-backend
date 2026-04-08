@@ -1,5 +1,6 @@
 const Contact = require('../models/Contact');
 const { sendEmail } = require('../services/emailService');
+const notificationService = require('../services/notificationService');
 
 // @desc    Create new contact inquiry
 // @route   POST /api/contact
@@ -22,7 +23,7 @@ const createContact = async (req, res) => {
       inquiryType: contact.inquiryType
     });
 
-    // Send admin notification
+    // Send admin email notification
     await sendEmail(process.env.ADMIN_EMAIL, 'contactAdminNotification', {
       name: contact.name,
       email: contact.email,
@@ -31,6 +32,16 @@ const createContact = async (req, res) => {
       subject: contact.subject,
       inquiryType: contact.inquiryType,
       message: contact.message
+    });
+
+    // 🚀 NEW: Send Real-time Admin System Notification
+    await notificationService.createAndNotify({
+      title: 'New Contact Inquiry',
+      message: `From ${contact.name}: ${contact.subject.substring(0, 50)}...`,
+      type: 'form',
+      priority: 'high',
+      link: `/admin/contacts/${contact._id}`,
+      sourceId: contact._id.toString()
     });
 
     res.status(201).json({
