@@ -262,10 +262,27 @@ const getGalleryStats = asyncHandler(async (req, res) => {
   });
 });
 
+const getCategories = asyncHandler(async (req, res) => {
+  const categories = await MediaAsset.distinct('category', { 
+    status: 'approved', 
+    isPublic: true,
+    category: { $in: ['gallery', 'events', 'services', 'community', 'volunteers'] }
+  });
+  
+  // Ensure "gallery" is always present if preferred, or just return distinct
+  const result = categories.map(c => c.charAt(0).toUpperCase() + c.slice(1));
+  
+  res.status(200).json({
+    success: true,
+    data: result
+  });
+});
+
 module.exports = {
   getGalleryImages,
   uploadImage,
   updateImage,
   deleteImage,
-  getGalleryStats
+  getGalleryStats,
+  getCategories
 };

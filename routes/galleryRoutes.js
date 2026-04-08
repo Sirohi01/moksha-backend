@@ -8,7 +8,8 @@ const {
   uploadImage,
   updateImage,
   deleteImage,
-  getGalleryStats
+  getGalleryStats,
+  getCategories
 } = require('../controllers/galleryController');
 const { logActivity } = require('../middleware/activityLogger');
 
@@ -42,6 +43,11 @@ router.get('/', getGalleryImages);
 // @desc    Get gallery statistics
 // @access  Private
 router.get('/stats', protect, authorize('super_admin', 'admin', 'manager', 'media_team', 'content_team', 'seo_team'), getGalleryStats);
+
+// @route   GET /api/gallery/categories
+// @desc    Get gallery categories
+// @access  Public
+router.get('/categories', getCategories);
 
 // @route   POST /api/gallery
 // @desc    Upload new image
