@@ -40,7 +40,7 @@ const createLiveStream = asyncHandler(async (req, res) => {
     muxPlaybackId: muxStreamData ? muxStreamData.playback_ids?.[0]?.id : null,
     muxStreamKey: muxStreamData ? muxStreamData.stream_key : null,
     status: 'scheduled',
-    createdBy: req.admin._id
+    admin: req.admin._id
   });
 
   res.status(201).json({
