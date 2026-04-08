@@ -3,6 +3,7 @@ const { generateEmail } = require('./emailTemplateService');
 const emailService = require('./emailService');
 const SupportChat = require('../models/SupportChat');
 const SupportMessage = require('../models/SupportMessage');
+const LiveChatMessage = require('../models/LiveChatMessage');
 
 class NotificationService {
   constructor() {
@@ -35,14 +36,14 @@ class NotificationService {
           }
 
           // New Chat Logic
-          if (data.type === 'chat_join' && data.chatId) {
-            console.log(`[WS] Client ${clientId} joining chat room: ${data.chatId}`);
+          if ((data.type === 'chat_join' || data.type === 'live_chat_join') && data.chatId) {
+            console.log(`[WS] Client ${clientId} joining room: ${data.chatId}`);
             if (!this.chatClients.has(data.chatId)) {
               this.chatClients.set(data.chatId, new Set());
             }
             this.chatClients.get(data.chatId).add(ws);
             // Confirm join
-            ws.send(JSON.stringify({ type: 'system', content: 'You have joined the secure chat session.' }));
+            ws.send(JSON.stringify({ type: 'system', content: 'You have joined the secure session.' }));
           }
 
           if (data.type === 'chat_message' && data.chatId) {
@@ -50,6 +51,11 @@ class NotificationService {
             await this.handleChatMessage(data, ws);
           }
 
+          if (data.type === 'live_chat_message' && data.chatId) {
+            console.log(`[WS] Processing live_chat_message in ${data.chatId}`);
+            await this.handleLiveChatMessage(data, ws);
+          }
+          
           if (data.type === 'chat_read' && data.chatId) {
             console.log(`[WS] Marking chat as read for ${data.chatId}`);
             // Reset unread count for the person who read it
@@ -194,6 +200,38 @@ class NotificationService {
       }
     } catch (err) {
       console.error('[WS] Error handling chat message:', err);
+    }
+  }
+
+  async handleLiveChatMessage(data, senderWs) {
+    try {
+      const { chatId, sender, content, message, userName, userId, userImage } = data;
+      console.log(`[WS] Live message from ${userName} in stream ${chatId}`);
+
+      const chatMessage = message || content;
+
+      // 1. Save to Database
+      const newMessage = await LiveChatMessage.create({
+        streamId: chatId,
+        sender: sender || 'user',
+        userId: userId || null,
+        userName: userName || 'Guest',
+        userImage: userImage || null,
+        message: chatMessage
+      });
+
+      // 2. Prepare payload
+      const payload = {
+        type: 'live_chat_message',
+        chatId,
+        message: newMessage,
+        timestamp: new Date().toISOString()
+      };
+
+      // 3. Broadcast to all participants in this live stream
+      this.broadcastToChat(chatId, payload);
+    } catch (err) {
+      console.error('[WS] Error handling live chat message:', err);
     }
   }
 

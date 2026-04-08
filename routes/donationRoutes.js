@@ -1,12 +1,13 @@
 const express = require('express');
 const { 
-  createDonation, 
   getDonations, 
   getDonation, 
   updatePaymentStatus,
   emailReceipt,
   refundDonation,
-  getDonationByReceipt
+  getDonationByReceipt,
+  initiateDonation,
+  verifyDonation
 } = require('../controllers/donationController');
 const { donationValidation } = require('../middleware/validation');
 const { protect } = require('../middleware/auth');
@@ -14,7 +15,8 @@ const { protect } = require('../middleware/auth');
 const router = express.Router();
 
 // Public routes
-router.post('/', donationValidation, createDonation);
+router.post('/initiate', initiateDonation);
+router.post('/verify', verifyDonation);
 router.put('/:id/payment', updatePaymentStatus);
 router.get('/receipt/:receiptNumber', getDonationByReceipt);
 
