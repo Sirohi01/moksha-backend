@@ -87,7 +87,8 @@ const uploadImage = asyncHandler(async (req, res) => {
     });
   }
 
-  const { title, description, category, alt, isPublic: isPublicBody } = req.body;
+  const { title, description, category, alt, altText, isPublic: isPublicBody } = req.body;
+  const finalAltText = altText || alt;
   let isPublic = isPublicBody === 'true' || isPublicBody === true;
   if (isPublicBody === undefined) {
     isPublic = category === 'gallery' || !category;
@@ -112,7 +113,7 @@ const uploadImage = asyncHandler(async (req, res) => {
     url: result.url,
     thumbnailUrl: result.url, // For now use same URL, Cloudinary handles scaling
     cloudinaryId: result.publicId,
-    altText: alt, // Removed fallbacks (altText is now required in model)
+    altText: finalAltText, // Use extracted altText or alt
     uploadedBy: req.admin._id,
     status: 'approved', // Auto-approve gallery uploads from admin
     isPublic: isPublic
@@ -144,7 +145,8 @@ const uploadImage = asyncHandler(async (req, res) => {
 // @access  Private
 const updateImage = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { title, description, category, alt, isPublic, status } = req.body;
+  const { title, description, category, alt, altText, isPublic, status } = req.body;
+  const finalAltText = altText || alt;
 
   const asset = await MediaAsset.findById(id);
 
@@ -159,7 +161,7 @@ const updateImage = asyncHandler(async (req, res) => {
   if (title) asset.title = title;
   if (description) asset.description = description;
   if (category) asset.category = category;
-  if (alt !== undefined) asset.altText = alt;
+  if (finalAltText !== undefined) asset.altText = finalAltText;
   if (isPublic !== undefined) asset.isPublic = isPublic;
   if (status) asset.status = status;
 
