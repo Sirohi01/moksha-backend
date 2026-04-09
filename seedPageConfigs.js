@@ -146,7 +146,7 @@ const sampleConfigs = {
       ],
       buttons: [
         {
-          text: "Learn More",
+          text: "Explore Our Legacy",
           href: "/about",
           variant: "primary"
         },
@@ -168,28 +168,32 @@ const sampleConfigs = {
           icon: "Heart",
           description: "Providing dignified transportation and sacred final rites for unclaimed souls with complete respect and traditional ceremonies.",
           image: "/gallery/image001.png",
-          href: "/services"
+          href: "/services",
+          linkText: "Explore Final Journey Services"
         },
         {
           title: "Compassionate Care",
           icon: "Heart",
           description: "Supporting families in need with emotional, logistical and financial assistance during their most difficult times.",
           image: "/gallery/image002.png",
-          href: "/services"
+          href: "/services",
+          linkText: "Discover Compassionate Care"
         },
         {
           title: "Community Outreach",
           icon: "Users",
           description: "Educating communities about dignity in death and building awareness for those who have no one to care.",
           image: "/gallery/image003.png",
-          href: "/services"
+          href: "/services",
+          linkText: "View Community Initiatives"
         },
         {
           title: "Sacred Documentation",
           icon: "FileText",
           description: "Maintaining proper records and ensuring legal compliance while honoring the memory of every soul we serve.",
           image: "/gallery/image004.png",
-          href: "/services"
+          href: "/services",
+          linkText: "Read About Documentation"
         }
       ]
     },
