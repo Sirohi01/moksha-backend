@@ -1,0 +1,44 @@
+{
+  "hero": {
+    "badge": {
+      "icon": "Heart",
+      "text": "Every Life Deserves Dignity"
+    },
+    "title": {
+      "line1": "Your",
+      "line2": "Compassion",
+      "line3": "Changes Lives"
+    },
+    "subtitle": "Just ₹500 provides a complete dignified cremation service. Your donation ensures no soul is forgotten, regardless of their circumstances.",
+    "impactStats": [
+      {
+        "value": "15,000+",
+        "label": "Lives Honored"
+      },
+      {
+        "value": "50+",
+        "label": "Cities Served"
+      },
+      {
+        "value": "100%",
+        "label": "Transparency"
+      }
+    ],
+    "ctaButtons": {
+      "primary": "Donate Now",
+      "secondary": "See Our Impact"
+    },
+    "startingAmount": "Starting ₹500"
+  },
+  "success": {
+    "title": "Thank You for Your Generosity",
+    "message": "Your donation of {amount} has been received. Thank you for helping us provide a dignified farewell to those in need.",
+    "receiptNote": "Your 80G Tax Receipt has been emailed to you.",
+    "fallbackAmount": "₹500"
+  },
+  "validation": {
+    "minAmount": "Please select or enter a donation amount (minimum ₹100)",
+    "requiredFields": "Please fill in all required fields",
+    "agreeTerms": "Please agree to the terms and conditions"
+  }
+}
