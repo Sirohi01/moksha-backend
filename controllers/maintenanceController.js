@@ -39,6 +39,12 @@ const ALLOWED_SCRIPTS = {
         label: 'Sync SOP to Navbar (IMP)',
         description: 'Patches the public-side navigation and footer manifold to include the mission-critical SOP Manuals link.'
     },
+    'seed_legal_pages': {
+        path: 'scripts/seed_legal_pages.js',
+        type: 'data',
+        label: 'Seed Legal Pages (Privacy/Terms)',
+        description: 'Initializes the dynamic configurations for Privacy Policy, Terms & Conditions, and Refund Policy.'
+    },
     'clean_activity_logs': {
         path: 'utils/cleanupLogs.js',
         type: 'security',

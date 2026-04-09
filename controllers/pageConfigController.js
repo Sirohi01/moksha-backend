@@ -82,6 +82,9 @@ const updatePageConfig = async (req, res) => {
         pageConfig.version = (pageConfig.version || 1) + 1;
       }
       pageConfig.content = configString;
+      if (!pageConfig.author) {
+        pageConfig.author = req.admin._id;
+      }
 
       if (req.body.seo) {
         if (!pageConfig.seoTechnical) pageConfig.seoTechnical = {};
