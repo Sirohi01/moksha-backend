@@ -1,4 +1,5 @@
 const htmlPdf = require('html-pdf-node');
+const { getConfig } = require('./configService');
 
 // Generate PDF from HTML content
 const generatePDF = async (htmlContent, options = {}) => {
@@ -30,6 +31,9 @@ const generatePDF = async (htmlContent, options = {}) => {
 // Generate PDF from HTML content
 const generateReceiptPDF = async (donation) => {
   try {
+    const config = await getConfig();
+    const inst = config.institutional || {};
+    
     const formatDate = (dateString) => {
       return new Date(dateString).toLocaleDateString('en-IN', {
         year: 'numeric',
@@ -384,7 +388,7 @@ const generateReceiptPDF = async (donation) => {
               <div class="logo-section">
                 <div class="logo-circle">🙏</div>
                 <div>
-                  <h1 class="org-name">Moksha Sewa</h1>
+                  <h1 class="org-name">${inst.organizationName || 'Moksha Sewa'}</h1>
                   <p class="tagline">Dignity in Departure</p>
                 </div>
               </div>
@@ -392,7 +396,7 @@ const generateReceiptPDF = async (donation) => {
               <div>
                 <h2 class="receipt-title">DONATION RECEIPT</h2>
                 <p class="subtitle">Tax Exemption under Section 80G of Income Tax Act, 1961</p>
-                <p class="subtitle">Registration No: [Your 80G Registration Number]</p>
+                <p class="subtitle">Registration No: ${inst.eightyGNo || '[Pending]'}</p>
               </div>
             </div>
 
@@ -493,19 +497,19 @@ const generateReceiptPDF = async (donation) => {
                 <div class="org-grid">
                   <div class="org-section">
                     <h4>Organization Details</h4>
-                    <p><strong>Moksha Sewa Foundation</strong></p>
-                    <p>Registered Address: [Your Organization Address]</p>
-                    <p>Phone: 9220147229</p>
-                    <p>Email: info@mokshasewa.org</p>
-                    <p>Website: www.mokshasewa.org</p>
+                    <p><strong>${inst.organizationName || 'Moksha Sewa Foundation'}</strong></p>
+                    <p>Registered Address: ${inst.address || '[Your Organization Address]'}</p>
+                    <p>Phone: ${inst.contactPhone || '9220147229'}</p>
+                    <p>Email: ${inst.contactEmail || 'info@mokshasewa.org'}</p>
+                    <p>Website: ${config.general?.siteUrl || 'www.mokshasewa.org'}</p>
                   </div>
                   
                   <div class="org-section">
                     <h4>Registration Details</h4>
-                    <p>PAN: [Organization PAN]</p>
-                    <p>80G Registration: [80G Number]</p>
-                    <p>12A Registration: [12A Number]</p>
-                    <p>FCRA Registration: [FCRA Number if applicable]</p>
+                    <p>PAN: ${inst.pan || '[Organization PAN]'}</p>
+                    <p>80G Registration: ${inst.eightyGNo || '[80G Number]'}</p>
+                    <p>12A Registration: ${inst.twelveANo || '[12A Number]'}</p>
+                    <p>FCRA Registration: ${inst.fcraNo || '[NC]'}</p>
                   </div>
                 </div>
               </div>
@@ -514,8 +518,8 @@ const generateReceiptPDF = async (donation) => {
               <div class="signature-section">
                 <p style="color: #6b7280; font-size: 14px; margin-bottom: 15px;">Authorized Signatory</p>
                 <div class="signature-line"></div>
-                <p class="signature-name">[Authorized Person Name]</p>
-                <p class="signature-designation">[Designation]</p>
+                <p class="signature-name">${inst.authorizedSignatory || '[Authorized Person Name]'}</p>
+                <p class="signature-designation">${inst.designation || '[Designation]'}</p>
                 
                 <div class="footer-note">
                   <p>This is a computer-generated receipt and does not require a physical signature.</p>

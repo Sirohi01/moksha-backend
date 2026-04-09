@@ -7,11 +7,49 @@ const getSettings = async (req, res) => {
         }
         const rawSettings = settings.toObject();
         const safeSettings = {
-            general: rawSettings.general || {},
-            security: rawSettings.security || {},
-            email: rawSettings.email || {},
-            razorpay: rawSettings.razorpay || {},
-            features: rawSettings.features || {},
+            general: {
+                siteName: rawSettings.general?.siteName || process.env.SITE_NAME || 'Moksha Sewa',
+                siteUrl: rawSettings.general?.siteUrl || process.env.SITE_URL || 'https://mokshasewa.org',
+                adminEmail: rawSettings.general?.adminEmail || process.env.ADMIN_EMAIL || 'admin@mokshasewa.org',
+                timezone: rawSettings.general?.timezone || 'Asia/Kolkata',
+                language: rawSettings.general?.language || 'en',
+                maintenanceMode: rawSettings.general?.maintenanceMode || false
+            },
+            security: {
+                sessionTimeout: rawSettings.security?.sessionTimeout || 24,
+                maxLoginAttempts: rawSettings.security?.maxLoginAttempts || 5,
+                passwordMinLength: rawSettings.security?.passwordMinLength || 8,
+                requireTwoFactor: rawSettings.security?.requireTwoFactor || false,
+                ipWhitelisting: rawSettings.security?.ipWhitelisting || false,
+                allowedIPs: rawSettings.security?.allowedIPs || []
+            },
+            email: {
+                smtpHost: rawSettings.email?.smtpHost || process.env.SMTP_HOST || '',
+                smtpPort: rawSettings.email?.smtpPort || parseInt(process.env.SMTP_PORT) || 587,
+                smtpUser: rawSettings.email?.smtpUser || process.env.SMTP_USER || '',
+                smtpPassword: rawSettings.email?.smtpPassword || process.env.SMTP_PASS || '',
+                fromEmail: rawSettings.email?.fromEmail || process.env.FROM_EMAIL || process.env.SMTP_USER || '',
+                fromName: rawSettings.email?.fromName || process.env.FROM_NAME || 'Moksha Sewa'
+            },
+            razorpay: {
+                keyId: rawSettings.razorpay?.keyId || process.env.RAZORPAY_KEY_ID || '',
+                keySecret: rawSettings.razorpay?.keySecret || process.env.RAZORPAY_KEY_SECRET || '',
+                webhookSecret: rawSettings.razorpay?.webhookSecret || process.env.RAZORPAY_WEBHOOK_SECRET || '',
+                enableTestMode: rawSettings.razorpay?.enableTestMode !== undefined ? rawSettings.razorpay.enableTestMode : (process.env.RAZORPAY_TEST_MODE !== 'false')
+            },
+            features: rawSettings.features || {
+                enableDonations: true,
+                enableVolunteers: true,
+                enableGallery: true,
+                enablePress: true,
+                enableAnalytics: true
+            },
+            institutional: rawSettings.institutional || {
+                organizationName: 'Moksha Sewa Foundation',
+                address: 'Varanasi, Uttar Pradesh, India',
+                contactPhone: '9220147229',
+                contactEmail: 'info@mokshasewa.org'
+            },
             updatedBy: rawSettings.updatedBy,
             lastUpdated: rawSettings.lastUpdated,
             _id: rawSettings._id
@@ -40,7 +78,7 @@ const updateSettings = async (req, res) => {
         if (!settings) {
             settings = new SystemSettings({});
         }
-        const sections = ['general', 'security', 'email', 'razorpay', 'features'];
+        const sections = ['general', 'security', 'email', 'razorpay', 'features', 'institutional'];
         sections.forEach(section => {
             if (updateData[section]) {
                 const updatedSection = { ...settings[section].toObject ? settings[section].toObject() : settings[section], ...updateData[section] };

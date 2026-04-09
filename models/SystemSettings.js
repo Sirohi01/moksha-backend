@@ -38,6 +38,20 @@ const SystemSettingsSchema = new mongoose.Schema({
     enablePress: { type: Boolean, default: true },
     enableAnalytics: { type: Boolean, default: true }
   },
+  institutional: {
+    organizationName: { type: String, default: 'Moksha Sewa Foundation' },
+    address: { type: String, default: 'Varanasi, Uttar Pradesh, India' },
+    pan: { type: String, default: '[ORG-PAN-NUMBER]' },
+    gstin: { type: String, default: '[ORG-GST-NUMBER]' },
+    registrationNo: { type: String, default: 'MSF-REG-2024-001' },
+    eightyGNo: { type: String, default: 'MSF-80G-2024-001' },
+    twelveANo: { type: String, default: 'MSF-12A-2024-001' },
+    fcraNo: { type: String, default: '[FCRA-NUMBER]' },
+    authorizedSignatory: { type: String, default: 'Vijay Sharma' },
+    designation: { type: String, default: 'General Secretary' },
+    contactPhone: { type: String, default: '9220147229' },
+    contactEmail: { type: String, default: 'info@mokshasewa.org' }
+  },
   updatedBy: { type: String },
   lastUpdated: { type: Date, default: Date.now }
 }, { timestamps: true });
