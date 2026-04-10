@@ -51,6 +51,12 @@ const ALLOWED_SCRIPTS = {
         label: 'Purge Security Logs',
         description: 'Optimizes database by deleting audit and activity logs older than 30 days.'
     },
+    'seed_email_templates': {
+        path: 'seedEmailTemplates.js',
+        type: 'data',
+        label: 'Seed Email Templates (IMP)',
+        description: 'Synchronizes and updates the entire transactional email template registry with the latest design system.'
+    },
 
     // DIAGNOSTICS & SYSTEM TESTS
     'run_all_tests': {
