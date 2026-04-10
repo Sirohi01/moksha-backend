@@ -280,11 +280,9 @@ adminSchema.methods.hasPermission = function (permission) {
   // Additional mapping for granular permissions
   if (permission === 'view_analytics' && this.permissions.includes('page_analytics')) return true;
   if (permission === 'view_logs' && this.permissions.includes('page_logs')) return true;
-
-  // Media management mappings
-  if (permission.startsWith('media_') && (this.permissions.includes('manage_media') || this.permissions.includes('page_galleryhub'))) return true;
+  if (permission.startsWith('media_') && (this.permissions.includes('manage_media') || this.permissions.includes('page_galleryhub') || this.permissions.includes('page_gallery'))) return true;
   if (permission.startsWith('seo_') && (this.permissions.includes('manage_seo') || this.permissions.includes('page_seo'))) return true;
-  if (permission.startsWith('content_') && (this.permissions.includes('manage_content') || this.permissions.includes('page_content'))) return true;
+  if (permission.startsWith('content_') && (this.permissions.includes('manage_content') || this.permissions.includes('page_content') || this.permissions.includes('page_pageconfig'))) return true;
   if (permission.startsWith('blog_') && (this.permissions.includes('manage_editorial') || this.permissions.includes('page_blogs'))) return true;
 
   return false;
