@@ -3,7 +3,7 @@ const router = express.Router();
 const notificationController = require('../controllers/notificationController');
 const { protect, authorize } = require('../middleware/auth');
 router.use(protect);
-router.use(authorize('admin', 'superadmin', 'editor'));
+router.use(authorize('super_admin', 'manager', 'seo_team', 'media_team', 'technical_support'));
 router.get('/', notificationController.getNotifications);
 router.patch('/read-all', notificationController.markAllAsRead);
 router.delete('/clear-all', notificationController.clearAll);

@@ -21,7 +21,7 @@ const adminSchema = new mongoose.Schema({
     required: [true, 'Phone is required'],
     trim: true
   },
-  
+
   // Authentication
   password: {
     type: String,
@@ -29,7 +29,7 @@ const adminSchema = new mongoose.Schema({
     minlength: 6,
     select: false // Don't include password in queries by default
   },
-  
+
   // Role & Permissions
   role: {
     type: String,
@@ -50,14 +50,14 @@ const adminSchema = new mongoose.Schema({
       'view_legacy_requests', 'manage_legacy_requests',
       'view_scheme_applications', 'manage_scheme_applications',
       'view_expansion_requests', 'manage_expansion_requests',
-      
+
       // Page Specific Permissions (Granular)
       'page_dashboard', 'page_support', 'page_tasks', 'page_users',
       'page_reports', 'page_board', 'page_feedback', 'page_schemes',
       'page_contacts', 'page_legacy', 'page_expansion', 'page_volunteers',
       'page_donations', 'page_newsletter', 'page_content', 'page_seo',
-      'page_media', 'page_compliance', 'page_analytics', 'page_logs',
-      'page_settings', 'page_blogs', 'page_editorial', 'page_gallery', 
+      'page_media', 'page_compliance', 'page_sops', 'page_analytics', 'page_logs',
+      'page_settings', 'page_blogs', 'page_editorial', 'page_gallery',
       'page_galleryhub', 'page_documentaries', 'page_press', 'page_whatsapp',
       'page_banners', 'page_pageconfig', 'page_system', 'page_email_logs',
       'page_comm_logs', 'page_maintenance',
@@ -65,18 +65,18 @@ const adminSchema = new mongoose.Schema({
       // Content Management
       'manage_content', 'manage_seo', 'manage_media',
       'media_read', 'media_write', 'media_delete', 'media_approve', 'media_publish',
-      
+
       // User Management
       'view_users', 'manage_users', 'manage_roles',
-      
+
       // System Management
       'view_analytics', 'manage_system', 'view_logs',
-      
+
       // Super Admin
       'super_admin'
     ]
   }],
-  
+
   // Security
   isActive: {
     type: Boolean,
@@ -85,7 +85,7 @@ const adminSchema = new mongoose.Schema({
   allowedIPs: [{
     type: String,
     validate: {
-      validator: function(ip) {
+      validator: function (ip) {
         // Basic IP validation (IPv4 and IPv6)
         const ipv4Regex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
         // More comprehensive IPv6 regex
@@ -101,7 +101,7 @@ const adminSchema = new mongoose.Schema({
     default: 0
   },
   lockUntil: Date,
-  
+
   // Profile
   avatar: String, // Cloudinary URL
   department: String,
@@ -109,7 +109,7 @@ const adminSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  
+
   // Tokens
   refreshTokens: [{
     token: String,
@@ -119,11 +119,11 @@ const adminSchema = new mongoose.Schema({
       expires: 604800 // 7 days
     }
   }],
-  
+
   // Password Reset
   resetPasswordToken: String,
   resetPasswordExpire: Date,
-  
+
   // Two Factor Authentication
   twoFactorSecret: String,
   twoFactorEnabled: {
@@ -135,23 +135,29 @@ const adminSchema = new mongoose.Schema({
 });
 
 // Virtual for account locked
-adminSchema.virtual('isLocked').get(function() {
+adminSchema.virtual('isLocked').get(function () {
   return !!(this.lockUntil && this.lockUntil > Date.now());
 });
 
 // Pre-save middleware to hash password
-adminSchema.pre('save', async function(next) {
+adminSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  
+
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
 // Pre-save middleware to set default permissions based on role
-adminSchema.pre('save', function(next) {
+adminSchema.pre('save', function (next) {
+  // If role is not modified, skip
   if (!this.isModified('role')) return next();
-  
+
+  // If permissions are already provided (especially during creation), don't overwrite them
+  if (this.permissions && this.permissions.length > 0 && this.isModified('permissions')) {
+    return next();
+  }
+
   // Set default permissions based on role
   switch (this.role) {
     case 'technical_support':
@@ -167,7 +173,7 @@ adminSchema.pre('save', function(next) {
         'view_expansion_requests', 'manage_expansion_requests'
       ];
       break;
-      
+
     case 'seo_team':
       this.permissions = [
         'view_reports', 'view_feedback', 'view_volunteers',
@@ -175,14 +181,14 @@ adminSchema.pre('save', function(next) {
         'manage_content', 'manage_seo'
       ];
       break;
-      
+
     case 'media_team':
       this.permissions = [
         'view_reports', 'view_feedback', 'view_volunteers',
         'manage_media', 'manage_content'
       ];
       break;
-      
+
     case 'manager':
       this.permissions = [
         'view_reports', 'manage_reports',
@@ -199,24 +205,24 @@ adminSchema.pre('save', function(next) {
         'manage_content', 'manage_seo', 'manage_media'
       ];
       break;
-      
+
     case 'super_admin':
       this.permissions = ['super_admin'];
       break;
   }
-  
+
   next();
 });
 
 // Method to compare password
-adminSchema.methods.comparePassword = async function(candidatePassword) {
+adminSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
 // Method to generate JWT token
-adminSchema.methods.generateAuthToken = function() {
+adminSchema.methods.generateAuthToken = function () {
   return jwt.sign(
-    { 
+    {
       id: this._id,
       email: this.email,
       role: this.role,
@@ -228,19 +234,19 @@ adminSchema.methods.generateAuthToken = function() {
 };
 
 // Method to generate refresh token
-adminSchema.methods.generateRefreshToken = function() {
+adminSchema.methods.generateRefreshToken = function () {
   const refreshToken = jwt.sign(
     { id: this._id },
     process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
     { expiresIn: '7d' }
   );
-  
+
   this.refreshTokens.push({ token: refreshToken });
   return refreshToken;
 };
 
 // Method to handle failed login attempts
-adminSchema.methods.incLoginAttempts = function() {
+adminSchema.methods.incLoginAttempts = function () {
   // If we have a previous lock that has expired, restart at 1
   if (this.lockUntil && this.lockUntil < Date.now()) {
     return this.updateOne({
@@ -248,49 +254,60 @@ adminSchema.methods.incLoginAttempts = function() {
       $set: { loginAttempts: 1 }
     });
   }
-  
+
   const updates = { $inc: { loginAttempts: 1 } };
-  
+
   // Lock account after 5 failed attempts for 2 hours
   if (this.loginAttempts + 1 >= 5 && !this.isLocked) {
     updates.$set = { lockUntil: Date.now() + 2 * 60 * 60 * 1000 }; // 2 hours
   }
-  
+
   return this.updateOne(updates);
 };
 
 // Method to reset login attempts
-adminSchema.methods.resetLoginAttempts = function() {
+adminSchema.methods.resetLoginAttempts = function () {
   return this.updateOne({
     $unset: { loginAttempts: 1, lockUntil: 1 }
   });
 };
 
 // Method to check if user has permission
-adminSchema.methods.hasPermission = function(permission) {
+adminSchema.methods.hasPermission = function (permission) {
   if (this.permissions.includes('super_admin')) return true;
-  return this.permissions.includes(permission);
+  if (this.permissions.includes(permission)) return true;
+
+  // Additional mapping for granular permissions
+  if (permission === 'view_analytics' && this.permissions.includes('page_analytics')) return true;
+  if (permission === 'view_logs' && this.permissions.includes('page_logs')) return true;
+
+  // Media management mappings
+  if (permission.startsWith('media_') && this.permissions.includes('manage_media')) return true;
+  if (permission.startsWith('seo_') && this.permissions.includes('manage_seo')) return true;
+  if (permission.startsWith('content_') && this.permissions.includes('manage_content')) return true;
+
+  return false;
 };
 
 // Method to check if IP is allowed
-adminSchema.methods.isIPAllowed = function(ip) {
+adminSchema.methods.isIPAllowed = function (ip) {
   // If no IPs are specified, allow all IPs (this is normal for development)
   if (!this.allowedIPs || this.allowedIPs.length === 0) {
     return true;
   }
-  
+
   // If IP is not provided or is unknown, allow it in development
   if (!ip || ip === 'unknown' || ip === '::ffff:127.0.0.1' || ip === '127.0.0.1' || ip === '::1') {
     return true;
   }
-  
+
   // Check if IP is in allowed list
   const isAllowed = this.allowedIPs.includes(ip);
   return isAllowed;
 };
 
 // Static method to get reasons for account lock
-adminSchema.statics.getFailedLoginReasons = function() {
+adminSchema.statics.getFailedLoginReasons = function () {
   return {
     NOT_FOUND: 0,
     PASSWORD_INCORRECT: 1,

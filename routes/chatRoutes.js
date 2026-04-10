@@ -7,8 +7,8 @@ const { upload } = require('../services/cloudinaryService');
 router.post('/initiate', chatController.initiateChat);
 router.post('/upload-audio', upload.single('audio'), chatController.uploadAudio);
 router.get('/history/:chatId', chatController.getChatHistory);
-router.get('/admin/all', protect, authorize('admin', 'superadmin', 'technical_support'), chatController.getAllChats);
-router.put('/admin/read/:chatId', protect, authorize('admin', 'superadmin', 'technical_support'), chatController.markAsRead);
+router.get('/admin/all', protect, authorize('super_admin', 'manager', 'technical_support'), chatController.getAllChats);
+router.put('/admin/read/:chatId', protect, authorize('super_admin', 'manager', 'technical_support'), chatController.markAsRead);
 router.put('/close/:chatId', chatController.closeChat);
 
 module.exports = router;
