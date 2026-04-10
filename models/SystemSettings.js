@@ -4,13 +4,13 @@ const SystemSettingsSchema = new mongoose.Schema({
   general: {
     siteName: { type: String, default: 'Moksha Sewa' },
     siteUrl: { type: String, default: 'https://mokshasewa.org' },
-    adminEmail: { type: String, default: 'admin@mokshasewa.org' },
+    adminEmail: { type: String, default: 'info@mokshasewa.org' },
     timezone: { type: String, default: 'Asia/Kolkata' },
     language: { type: String, default: 'en' },
     maintenanceMode: { type: Boolean, default: false }
   },
   security: {
-    sessionTimeout: { type: Number, default: 24 }, // hours
+    sessionTimeout: { type: Number, default: 24 },
     maxLoginAttempts: { type: Number, default: 5 },
     passwordMinLength: { type: Number, default: 8 },
     requireTwoFactor: { type: Boolean, default: false },

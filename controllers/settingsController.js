@@ -44,12 +44,7 @@ const getSettings = async (req, res) => {
                 enablePress: true,
                 enableAnalytics: true
             },
-            institutional: rawSettings.institutional || {
-                organizationName: 'Moksha Sewa Foundation',
-                address: 'Varanasi, Uttar Pradesh, India',
-                contactPhone: '9220147229',
-                contactEmail: 'info@mokshasewa.org'
-            },
+            institutional: rawSettings.institutional || {},
             updatedBy: rawSettings.updatedBy,
             lastUpdated: rawSettings.lastUpdated,
             _id: rawSettings._id
@@ -71,6 +66,40 @@ const getSettings = async (req, res) => {
         });
     }
 };
+
+const getPublicSettings = async (req, res) => {
+    try {
+        const settings = await SystemSettings.findOne();
+        if (!settings) {
+            return res.status(200).json({
+                success: true,
+                data: {
+                    general: { siteName: 'Moksha Sewa' },
+                    institutional: { organizationName: 'Moksha Sewa Foundation' }
+                }
+            });
+        }
+
+        const data = {
+            general: {
+                siteName: settings.general?.siteName,
+                siteUrl: settings.general?.siteUrl,
+            },
+            institutional: settings.institutional || {}
+        };
+
+        res.status(200).json({
+            success: true,
+            data
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch public settings'
+        });
+    }
+};
+
 const updateSettings = async (req, res) => {
     try {
         const updateData = req.body;
@@ -186,6 +215,7 @@ const testEmailConfig = async (req, res) => {
 module.exports = {
     getSettings,
     updateSettings,
+    getPublicSettings,
     getSettingsSection,
     updateSettingsSection,
     resetSettings,
