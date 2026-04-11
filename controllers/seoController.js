@@ -513,11 +513,11 @@ const getRealTimeAnalytics = async (req, res) => {
               'Direct',
               {
                 $cond: [
-                  { $regexMatch: { input: '$referer', pattern: /google|bing|yahoo|duckduckgo/i } },
+                  { $regexMatch: { input: '$referer', regex: 'google|bing|yahoo|duckduckgo', options: 'i' } },
                   'Organic Search',
                   {
                     $cond: [
-                      { $regexMatch: { input: '$referer', pattern: /facebook|twitter|instagram|linkedin|t\.co|lnkd\.in/i } },
+                      { $regexMatch: { input: '$referer', regex: 'facebook|twitter|instagram|linkedin|t\\.co|lnkd\\.in', options: 'i' } },
                       'Social Media',
                       'Referral'
                     ]
@@ -610,8 +610,8 @@ const getRealTimeAnalytics = async (req, res) => {
           avgEngagement: Math.round(p.avgTime || 0)
         })),
         geoIntensity: {
-          countries: geoStats[0].countries.map(g => ({ name: g._id, count: g.count })),
-          cities: geoStats[0].cities.map(g => ({ name: `${g._id.city}, ${g._id.country}`, count: g.count }))
+          countries: (geoStats[0]?.countries || []).map(g => ({ name: g._id, count: g.count })),
+          cities: (geoStats[0]?.cities || []).map(g => ({ name: `${g._id.city}, ${g._id.country}`, count: g.count }))
         },
         technicalStats
       }
